@@ -17,7 +17,7 @@ from pyYGONetwork.enums import CtosMessage, StocMessage, GameMessage
 
 class GameClient:
     SERVER_HANDSHAKE: int = 4043399681
-    MAX_MATCH: int = 1000
+    MAX_MATCH: int = 500
     def __init__(self, info: LaunchInfo) -> None:
         self.info: LaunchInfo = info
         self.connection = YGOConnection(info.host, info.port)
@@ -109,7 +109,7 @@ class GameClient:
 
     def on_select_tp(self, packet: Packet) -> None:
         select_first: bool = True
-        reply = Packet(CtosMessage.TP_RESULT)
+        reply: Packet = Packet(CtosMessage.TP_RESULT)
         reply.write(select_first)
         self.connection.send(reply)
 
@@ -310,7 +310,7 @@ class GameClient:
         self.duel.second = Player.OPPONENT if Packet.first_is_me else Player.ME
 
         for player in self.duel.players:
-            self.duel.field[player].life = packet.read_int(4)
+            self.duel.life[player] = packet.read_int(4)
         
         for player in self.duel.players:
             num_of_main: int = packet.read_int(2)
@@ -873,12 +873,12 @@ class GameClient:
 
     def on_damage(self, packet: Packet) -> None:
         player: Player = packet.read_player()
-        self.duel.field[player].life = max(self.duel.field[player].life - packet.read_int(4), 0)
+        self.duel.life[player] = max(self.duel.life[player] - packet.read_int(4), 0)
 
 
     def on_recover(self, packet: Packet) -> None:
         player: Player = packet.read_player()
-        self.duel.field[player].life += packet.read_int(4)
+        self.duel.life[player] += packet.read_int(4)
 
 
     def on_equip(self, packet: Packet) -> None:
@@ -901,7 +901,7 @@ class GameClient:
 
     def on_lp_update(self, packet: Packet) -> None:
         player: Player = packet.read_player()
-        self.duel.field[player].life = packet.read_int(4)
+        self.duel.life[player] = packet.read_int(4)
 
 
     def on_card_target(self, packet: Packet) -> None:

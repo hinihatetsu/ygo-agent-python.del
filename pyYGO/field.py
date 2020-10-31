@@ -31,7 +31,6 @@ class HalfField(Dict[CardLocation, List]):
         self[CardLocation.FSPELL_ZONE] = self.Fspell_zone
         self[CardLocation.PENDULUM_ZONE] = self.pendulum_zones
         
-        self.life: int = 8000
         self.battling_monster: Card = None
         self.under_attack: bool = False
 

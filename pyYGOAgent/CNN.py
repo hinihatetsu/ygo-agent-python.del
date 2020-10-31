@@ -1,6 +1,7 @@
 from typing import List, TypeVar
 import numpy as np
 ndarray = TypeVar('ndarray')
+
 from pyYGO.duel import Duel
 from pyYGO.enums import Player
 from pyYGOAgent.deck import Deck

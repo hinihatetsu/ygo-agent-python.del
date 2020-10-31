@@ -31,6 +31,7 @@ class Duel:
         self.turn_player: Player = None
         self.turn: int = 0
         self.phase: Phase = None
+        self.life: List[int] = [8000, 8000]
 
         self.mainphase_end: bool = False
         self.summoning: List[Card] = []

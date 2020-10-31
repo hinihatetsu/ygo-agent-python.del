@@ -152,10 +152,10 @@ class AgentBrain:
                 elif dc.action == Action.REPOSITION:
                     self.reposition_network.train(dc.card_id, dc.duel, dc.usedflag, expected)
 
-                elif dc.action == (Action.SET_MONSTER or Action.SET_SPELL):
+                elif dc.action == Action.SET_MONSTER or dc.action == Action.SET_SPELL:
                     self.set_network.train(dc.card_id, dc.duel, dc.usedflag, expected)
 
-                elif dc.action == (Action.ACTIVATE or Action.ACTIVATE_IN_BATTLE):
+                elif dc.action == Action.ACTIVATE or dc.action == Action.ACTIVATE_IN_BATTLE:
                     self.activate_network.train(dc.card_id, dc.option, dc.duel, dc.usedflag, expected)
 
                 elif dc.action == Action.CHAIN:
@@ -167,7 +167,7 @@ class AgentBrain:
                 elif dc.action == Action.ATTACK:
                     self.attack_network.train(dc.card_id, dc.duel, dc.usedflag, expected)
 
-                elif dc.action == (Action.BATTLE or Action.END or Action.MAIN2):
+                elif dc.action == Action.BATTLE or dc.action == Action.END or dc.action == Action.MAIN2:
                     self.phase_network.train(dc.duel, dc.usedflag, expected)
 
         

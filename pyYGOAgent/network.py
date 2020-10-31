@@ -29,7 +29,7 @@ class DuelNetwork(Network):
     def outputs(self, duel: Duel) -> ndarray:
         turn_player: ndarray = np.array([int(duel.turn_player)], dtype='float64')
         phase: ndarray = np.array([(duel.phase >> i) & 1 for i in range(10)], dtype='float64')
-        life: ndarray = np.array([duel.field[Player.ME].life, duel.field[Player.OPPONENT].life], dtype='float64') / 8000
+        life: ndarray = np.array([duel.life[Player.ME], duel.life[Player.OPPONENT]], dtype='float64') / 8000
         inputs: ndarray = np.concatenate((turn_player, phase, life), axis=0)
         return self._outputs(inputs)
 
@@ -52,7 +52,7 @@ class LocationNetwork(Network):
         self.deck_list.sort()
 
         inputs_size: int = len(self.deck_list) * self.LOCATION_BIT
-        layer_structure = [inputs_size, 250, 100, 60, 4]
+        layer_structure = [inputs_size, 720, 450, 130, 40, 4]
         super().__init__(layer_structure)
 
     
@@ -131,7 +131,7 @@ class LocationNetwork(Network):
 
 class FlagNetwork(Network):
     def __init__(self, flag: UsedFlag) -> None:
-        layer_structure = [flag.count, 24, 10, 4]
+        layer_structure = [flag.count, 65, 45, 12, 4]
         super().__init__(layer_structure)
 
     
@@ -145,7 +145,7 @@ class FlagNetwork(Network):
 class OpponentNetwork(Network):
     def __init__(self) -> None:
         self.inputs_size: int = 5 + 36 * 13
-        structure: List[int] = [self.inputs_size, 500, 300, 50, 4]    
+        structure: List[int] = [self.inputs_size, 500, 180, 50, 4]    
         super().__init__(structure)
 
     

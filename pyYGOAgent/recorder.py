@@ -20,6 +20,9 @@ class Dicision(NamedTuple):
     value: float = 0
     option: Any = None
 
+    def __repr__(self) -> str:
+        return f'Action:{self.action}; value:{self.value}'
+
 
 
 class DicisionRecorder:
@@ -50,10 +53,10 @@ class DicisionRecorder:
             hand = (self.duel.field[p].hand_count - self.hand_cache[p]) 
             field = (self.duel.field[p].field_count - self.field_cache[p]) / 2
             deck = (self.deck_cache[p] - self.duel.field[p].deck_count) / 4
-            life = (self.life_cache[p^1] - self.duel.field[p^1].life) / 2000
+            life = (self.life_cache[p^1] - self.duel.life[p^1]) / 500
             scores[p] = 1 / (1 + math.exp(-(hand + field + deck + life))) # sigmoid
             self.deck_cache[p] = self.duel.field[p].deck_count
-            self.life_cache[p^1] = self.duel.field[p^1].life
+            self.life_cache[p^1] = self.duel.life[p^1]
         score: float = scores[Player.ME] - scores[Player.OPPONENT]
 
         for dc in self.dicisions:
