@@ -357,30 +357,31 @@ class GameClient:
         player_msg_sent_to: Player = packet.read_player() 
 
         main: MainPhase = MainPhase()
-        for i, card_list in enumerate(main):
-            if i == 5: # activatable, later
-                continue
-            for _ in range(packet.read_int(4)):
-                card_id: int = packet.read_id()
-                controller: Player = packet.read_player()
-                location: Location = packet.read_location()
-                index: int = packet.read_int(4) if i != 2 else packet.read_int(1)
+        for card_list in main:
+            if card_list is main.activatable: 
+                for _ in range(packet.read_int(4)):
+                    card_id: int = packet.read_id()
+                    controller: Player = packet.read_player()
+                    location: Location = packet.read_location()
+                    index: int = packet.read_int(4)
+                    description: int = packet.read_int(8)
+                    operation_type: int = packet.read_int(1)
 
-                card: Card = self.duel.get_card(controller, location, index)
-                card_list.append(card)
+                    card: Card = self.duel.get_card(controller, location, index)
+                    card.id = card_id
+                    main.activatable.append(card)
+                    main.activation_descs.append(description)
 
-        # activatable cards
-        for _ in range(packet.read_int(4)):
-            card_id: int = packet.read_id()
-            controller: Player = packet.read_player()
-            location: Location = packet.read_location()
-            index: int = packet.read_int(4)
-            description: int = packet.read_int(8)
-            operation_type: int = packet.read_int(1)
+            else:
+                for _ in range(packet.read_int(4)):
+                    card_id: int = packet.read_id()
+                    controller: Player = packet.read_player()
+                    location: Location = packet.read_location()
+                    index: int = packet.read_int(4) if card_list is not main.repositionable else packet.read_int(1)
 
-            card: Card = self.duel.get_card(controller, location, index)
-            main.activatable.append(card)
-            main.activation_descs.append(description)
+                    card: Card = self.duel.get_card(controller, location, index)
+                    card.id = card_id
+                    card_list.append(card)
 
         main.can_battle = packet.read_bool()
         main.can_end = packet.read_bool()
@@ -407,7 +408,6 @@ class GameClient:
 
             card: Card = self.duel.get_card(controller, location, index)
             card.id = card_id
-
             battle.activatable.append(card)
             battle.activation_descs.append(description)
 
@@ -423,7 +423,6 @@ class GameClient:
             card.id = card_id
             card.can_direct_attack = direct_attackable
             card.attacked = False
-
             battle.attackable.append(card)
 
         battle.can_main2 = packet.read_bool()
@@ -451,10 +450,10 @@ class GameClient:
 
 
     def on_select_yesno(self, packet: Packet) -> None:
+        REPLAY_BATTLE = 30
         player_msg_sent_to: int = packet.read_player()
         desc: int = packet.read_int(8)
         reply: Packet = Packet(CtosMessage.RESPONSE)
-        REPLAY_BATTLE = 30
         if desc == REPLAY_BATTLE:
             ans: bool = self.agent.select_battle_replay()
         else:
