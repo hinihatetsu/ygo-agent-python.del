@@ -5,11 +5,11 @@ from pyYGO.duel import Duel
 from pyYGO.card import Card
 from pyYGO.zone import Zone
 from pyYGO.phase import MainPhase, BattlePhase
-from pyYGO.enums import CardPosition, Player, CardLocation
+from pyYGO.enums import CardPosition, Player, CardLocation, Attribute, Race
 from pyYGOAgent.deck import Deck
 from pyYGOAgent.action import Action, ChainAction, MainAction, BattleAction, SelectAction
 from pyYGOAgent.brain import AgentBrain
-from pyYGOAgent.recoder import DicisionRecorder
+from pyYGOAgent.recorder import DicisionRecorder
 from pyYGOAgent.flags import UsedFlag
 
 
@@ -192,5 +192,24 @@ class DuelAgent:
     def select_unselect(self, choices: List[Card], min: int, max: int, cancelable: bool, hint: int):
         return self.select_card(choices, min, max, cancelable, hint)
 
+
+    def select_counter(self, counter_type: int, quantity: int, cards: List[int], counters: List[int]) -> List[int]:
+        raise Exception('not complete coding')
+
+
+    def select_number(self, choices: List[int]) -> int:
+        raise Exception('not complete coding')
+
+    
+    def sort_card(self, cards: List[Card]) -> List[int]:
+        raise Exception('not complete coding')
+
+
+    def announce_attr(self, choices: List[Attribute], count: int) -> List[int]:
+        raise Exception('not complete coding')
+
+
+    def announce_race(self, choices: List[Race], count: int) -> List[int]:
+        raise Exception('not complete coding')
 
     

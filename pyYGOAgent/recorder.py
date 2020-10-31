@@ -21,6 +21,7 @@ class Dicision(NamedTuple):
     option: Any = None
 
 
+
 class DicisionRecorder:
     def __init__(self, deck: Deck, duel: Duel, usedflag: UsedFlag) -> None:
         self.deck: Deck = deck

@@ -11,8 +11,8 @@ from pyYGO.enums import Player, CardLocation, CardPosition, Attribute, Race
 from pyYGO.alias import Location, LocationInfo, Position 
 from pyYGOAgent.agent import DuelAgent
 from pyYGONetwork.network import YGOConnection
-from pyYGONetwork.enums import CtosMessage, StocMessage, GameMessage
 from pyYGONetwork.packet import Packet
+from pyYGONetwork.enums import CtosMessage, StocMessage, GameMessage
 
 
 class GameClient:
@@ -521,8 +521,8 @@ class GameClient:
         if len(cards) == 0:
             reply.write(-1)
         else:
-            ans: int = self.agent.select_chain(cards, descriptions, forced)
-            reply.write(ans)
+            selected: int = self.agent.select_chain(cards, descriptions, forced)
+            reply.write(selected)
         self.connection.send(reply)
 
 
@@ -717,7 +717,7 @@ class GameClient:
 
     
     def on_sort_card(self, packet: Packet) -> None:
-        player: Player = packet.read_player()
+        player_msg_sent_to: Player = packet.read_player()
         cards: List[Card] = []
         for _ in range(packet.read_int(4)):
             card_id = packet.read_id()

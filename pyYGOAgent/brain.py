@@ -12,7 +12,7 @@ from pyYGOAgent.action import Action
 from pyYGOAgent.flags import UsedFlag
 from pyYGOAgent.CNN import ActionNetwork, SummonNetwork, SpecialSummonNetwork, RepositionNetwork, SetNetwork
 from pyYGOAgent.CNN import ActivateNetwork, AttackNetwork, ChainNetwork, SelectNetwork
-from pyYGOAgent.recoder import Dicision
+from pyYGOAgent.recorder import Dicision
 
 
 
