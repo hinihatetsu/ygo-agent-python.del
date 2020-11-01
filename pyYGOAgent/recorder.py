@@ -17,8 +17,8 @@ class Dicision(NamedTuple):
     card_id: int
     duel: Duel
     usedflag: UsedFlag
-    value: float = 0
     option: Any = None
+    value: float = 0
 
     def __repr__(self) -> str:
         return f'Action:{self.action}; value:{self.value}'
@@ -26,6 +26,7 @@ class Dicision(NamedTuple):
 
 
 class DicisionRecorder:
+    DISCOUNT_RATE = 0.95
     def __init__(self, deck: Deck, duel: Duel, usedflag: UsedFlag) -> None:
         self.deck: Deck = deck
         self.duel: Duel = duel
@@ -44,7 +45,8 @@ class DicisionRecorder:
 
     
     def save_dicision(self, action: Action, card_id: int, option: Any) -> None:
-        self.dicisions.append(Dicision(action, card_id, copy.deepcopy(self.duel), copy.deepcopy(self.usedflag), option=option))
+        dc = Dicision(action, card_id, copy.deepcopy(self.duel), copy.deepcopy(self.usedflag), option)
+        self.dicisions.append(dc)
 
 
     def evaluate(self) -> None:
@@ -59,8 +61,9 @@ class DicisionRecorder:
             self.life_cache[p^1] = self.duel.life[p^1]
         score: float = scores[Player.ME] - scores[Player.OPPONENT]
 
-        for dc in self.dicisions:
-            self.evaluated_dicisions.append(Dicision(dc.action, dc.card_id, dc.duel, dc.usedflag, score, dc.option))
+        for i, dc in enumerate(reversed(self.dicisions)):
+            dc = Dicision(dc.action, dc.card_id, dc.duel, dc.usedflag, dc.option, score * self.DISCOUNT_RATE**i)
+            self.evaluated_dicisions.append(dc)
         
         self.dicisions.clear()
         self.dump()
