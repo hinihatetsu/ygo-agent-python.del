@@ -17,7 +17,7 @@ from pyYGOAgent.recorder import Dicision
 
 
 class AgentBrain:
-    TRAIN_TIMES: int = 10
+    EPOCH: int = 30
     def __init__(self, deck: Deck, duel: Duel, usedflag: UsedFlag) -> None:
         self.deck: Deck = deck
         self.duel: Duel = duel
@@ -139,7 +139,7 @@ class AgentBrain:
             with open(path, mode='rb') as f:
                 dicisions.append(pickle.load(f))
 
-        for _ in range(self.TRAIN_TIMES):
+        for _ in range(self.EPOCH):
             random.shuffle(dicisions)
             for dc in dicisions:
                 expected: ndarray = np.array([dc.value], dtype='float64')
