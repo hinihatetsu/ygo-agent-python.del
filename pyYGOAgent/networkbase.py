@@ -58,17 +58,17 @@ class Network:
         return reduce(activate, self._layers, inputs)
 
 
-    def _calculate_deltas_for_output_layer(self, expected: ndarray, num_of_batch: int) -> None:
+    def _calculate_deltas_for_output_layer(self, expected: ndarray) -> None:
         layer: Layer = self._output_layer
-        layer.delta = layer.derivative_activation_func(layer.input_cache) * (expected - layer.output_cache) / num_of_batch
+        layer.delta = layer.derivative_activation_func(layer.input_cache) * (expected - layer.output_cache) 
 
 
     def _calculate_deltas_for_hidden_layer(self, layer: Layer, next_layer: Layer) -> None:
         layer.delta = layer.derivative_activation_func(layer.input_cache) * (next_layer.delta @ next_layer.weight)
 
 
-    def _backpropagate(self, expected: ndarray, num_of_batch: int=1) -> None:
-        self._calculate_deltas_for_output_layer(expected, num_of_batch)
+    def _backpropagate(self, expected: ndarray) -> None:
+        self._calculate_deltas_for_output_layer(expected)
         for i in range(self._layer_size-2, 0, -1):
             self._calculate_deltas_for_hidden_layer(self._layers[i], self._layers[i+1])
 
