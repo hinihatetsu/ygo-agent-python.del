@@ -1,6 +1,6 @@
 from functools import reduce
 from typing import List, Callable, TypeVar
-from pyYGOAgent.util import linear, derivative_liner, sigmoid, derivative_sigmoid, ReLU, derivative_ReLU, softmax, derivative_softmax, tanh, derivative_tanh
+from pyYGOAgent.util import linear, derivative_linear, sigmoid, derivative_sigmoid, ReLU, derivative_ReLU, softmax, derivative_softmax, tanh, derivative_tanh
 import numpy as np
 ndarray = TypeVar('ndarray')
 

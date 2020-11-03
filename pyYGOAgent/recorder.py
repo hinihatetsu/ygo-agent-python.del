@@ -26,7 +26,7 @@ class Dicision(NamedTuple):
 
 
 class DicisionRecorder:
-    DISCOUNT_RATE = 0.95
+    DISCOUNT_RATE = 0.6
     def __init__(self, deck: Deck, duel: Duel, usedflag: UsedFlag) -> None:
         self.deck: Deck = deck
         self.duel: Duel = duel
@@ -52,10 +52,10 @@ class DicisionRecorder:
     def evaluate(self) -> None:
         scores: List[float] = [0, 0]
         for p in (Player.ME, Player.OPPONENT):
-            hand = (self.duel.field[p].hand_count - self.hand_cache[p]) 
-            field = (self.duel.field[p].field_count - self.field_cache[p]) / 2
-            deck = (self.deck_cache[p] - self.duel.field[p].deck_count) / 4
-            life = (self.life_cache[p^1] - self.duel.life[p^1]) / 500
+            hand = (self.duel.field[p].hand_count - self.hand_cache[p]) / 2
+            field = (self.duel.field[p].field_count - self.field_cache[p]) 
+            deck = (self.deck_cache[p] - self.duel.field[p].deck_count) / 8
+            life = (self.life_cache[p^1] - self.duel.life[p^1]) / 1000
             scores[p] = 1 / (1 + math.exp(-(hand + field + deck + life))) # sigmoid
             self.deck_cache[p] = self.duel.field[p].deck_count
             self.life_cache[p^1] = self.duel.life[p^1]
