@@ -11,10 +11,10 @@ def derivative_sigmoid(x: ndarray[float]) -> ndarray[float]:
     return sig * (1 - sig)
 
 
-def liner(x: ndarray[float]) -> ndarray[float]:
+def linear(x: ndarray[float]) -> ndarray[float]:
     return x
 
-def derivative_liner(x: ndarray[float]) -> float:
+def derivative_linear(x: ndarray[float]) -> float:
     return 1
 
 

@@ -1,11 +1,11 @@
 from functools import reduce
 from typing import List, Callable, TypeVar
-from pyYGOAgent.util import liner, derivative_liner, sigmoid, derivative_sigmoid, ReLU, derivative_ReLU, softmax, derivative_softmax, tanh, derivative_tanh
+from pyYGOAgent.util import linear, derivative_liner, sigmoid, derivative_sigmoid, ReLU, derivative_ReLU, softmax, derivative_softmax, tanh, derivative_tanh
 import numpy as np
 ndarray = TypeVar('ndarray')
 
 der_act_funcs = {sigmoid: derivative_sigmoid,
-                 liner: derivative_liner,
+                 linear: derivative_linear,
                  ReLU: derivative_ReLU,
                  softmax: derivative_softmax,
                  tanh: derivative_tanh}
