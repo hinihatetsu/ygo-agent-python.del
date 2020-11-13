@@ -6,12 +6,7 @@ class Location(int):
     """
     Location is logical sum of CardLocation
     """
-    LIST = CardLocation.DECK | CardLocation.HAND | CardLocation.GRAVE | CardLocation.BANISHED | CardLocation.EXTRADECK
     ZONE = CardLocation.MONSTER_ZONE | CardLocation.SPELL_ZONE
-    @property
-    def is_list(self) -> bool:
-        return bool(self & self.LIST)
-
     @property
     def is_zone(self) -> bool:
         return bool(self & self.ZONE)
