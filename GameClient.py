@@ -29,10 +29,6 @@ class GameClient:
         self.register_responds()
         self.register_processes()
 
-        # set callbacks
-        self.connection.recieve_callback = self.on_recieved
-        self.connection.connect_callback = self.on_connected
-
         self.select_hint: int = 0
         self.match_count: int = 0
 
@@ -43,6 +39,7 @@ class GameClient:
 
     async def main(self) -> None:
         await self.connection.connect()
+        self.on_connected()
         # concurrent tasks
         response_task: asyncio.Task = asyncio.create_task(self.main_loop())
         listen_task: asyncio.Task = asyncio.create_task(self.connection.listen())
@@ -53,8 +50,9 @@ class GameClient:
 
     async def main_loop(self) -> None:
         while self.connection.is_connected:
-            await self.connection.receive_pending_packet()
-            await asyncio.sleep(0.3)
+            packet: Packet = await self.connection.receive_pending_packet()
+            self.on_recieved(packet)
+            await self.connection.drain()
 
 
     def on_connected(self) -> None:
@@ -73,9 +71,9 @@ class GameClient:
 
     def on_recieved(self, packet: Packet) -> None:
         if packet.msg_id == StocMessage.GAME_MSG:
-            msg: GameMessage = packet.read_int(1)
-            if msg in self.processes:
-                self.processes[msg](packet)
+            id: int = packet.read_int(1)
+            if id in self.processes:
+                self.processes[id](packet)
 
         if packet.msg_id in self.responds:
             self.responds[packet.msg_id](packet)
