@@ -8,7 +8,7 @@ from pyYGO.card import Card
 from pyYGO.zone import Zone
 from pyYGO.phase import MainPhase, BattlePhase
 from pyYGO.enums import Player, CardLocation, CardPosition, Attribute, Race
-from pyYGO.alias import Location, LocationInfo, Position 
+from pyYGO.wrapper import Location, Position 
 from pyYGOAgent.agent import DuelAgent
 from pyYGONetwork.network import YGOConnection
 from pyYGONetwork.packet import Packet
@@ -33,6 +33,7 @@ class GameClient:
         self.connection.recieve_callback = self.on_recieved
         self.connection.connect_callback = self.on_connected
 
+        self.select_hint: int = 0
         self.match_count: int = 0
 
 
@@ -326,14 +327,14 @@ class GameClient:
 
     def on_update_data(self, packet: Packet) -> None:
         player: Player = packet.read_player()
-        location: Location = Location(packet.read_location() & (~CardLocation.EXTRAINFO))
+        location: Location = packet.read_location()
 
         cards: List[Card] = []
-        if location & CardLocation.LIST:
-            cards = self.duel.field[player][location]
+        if location.is_list:
+            cards = self.duel.field[player].where(location)
 
-        elif location & CardLocation.ZONE:
-            zones: List[Zone] = self.duel.field[player][location]
+        elif location.is_zone:
+            zones: List[Zone] = self.duel.field[player].where(location)
             cards = [zone.card for zone in zones]
 
         size: int = packet.read_int(4)
@@ -349,7 +350,7 @@ class GameClient:
         location: Location = packet.read_location()
         index: int = packet.read_int(1)
 
-        card: Card = self.duel.get_card(player, location, index)
+        card: Card = self.duel.field[player].get_card(location, index)
         card.update(packet)
 
 
@@ -367,7 +368,7 @@ class GameClient:
                     description: int = packet.read_int(8)
                     operation_type: int = packet.read_int(1)
 
-                    card: Card = self.duel.get_card(controller, location, index)
+                    card: Card = self.duel.field[controller].get_card(location, index)
                     card.id = card_id
                     main.activatable.append(card)
                     main.activation_descs.append(description)
@@ -379,7 +380,7 @@ class GameClient:
                     location: Location = packet.read_location()
                     index: int = packet.read_int(4) if card_list is not main.repositionable else packet.read_int(1)
 
-                    card: Card = self.duel.get_card(controller, location, index)
+                    card: Card = self.duel.field[controller].get_card(location, index)
                     card.id = card_id
                     card_list.append(card)
 
@@ -406,7 +407,7 @@ class GameClient:
             description: int = packet.read_int(8)
             operation_type: bytes = packet.read_bytes(1)
 
-            card: Card = self.duel.get_card(controller, location, index)
+            card: Card = self.duel.field[controller].get_card(location, index)
             card.id = card_id
             battle.activatable.append(card)
             battle.activation_descs.append(description)
@@ -419,7 +420,7 @@ class GameClient:
             index: int = packet.read_int(1)
             direct_attackable: bool = packet.read_bool()
 
-            card: Card = self.duel.get_card(controller, location, index)
+            card: Card = self.duel.field[controller].get_card(location, index)
             card.id = card_id
             card.can_direct_attack = direct_attackable
             card.attacked = False
@@ -437,10 +438,13 @@ class GameClient:
     def on_select_effect_yn(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         card_id: int = packet.read_id()
-        info: LocationInfo = packet.read_location_info()
+        controller: Player = packet.read_player()
+        location: Location = packet.read_location()
+        index: int = packet.read_int(4)
+        position: Position = packet.read_position()
         description: int = packet.read_int(8)
 
-        card: Card = self.duel.get_card(*info)
+        card: Card = self.duel.field[controller].get_card(location, index)
         card.id = card_id
         ans: bool = self.agent.select_effect_yn(card, description)
 
@@ -453,11 +457,11 @@ class GameClient:
         REPLAY_BATTLE = 30
         player_msg_sent_to: int = packet.read_player()
         desc: int = packet.read_int(8)
-        reply: Packet = Packet(CtosMessage.RESPONSE)
         if desc == REPLAY_BATTLE:
             ans: bool = self.agent.select_battle_replay()
         else:
             ans: bool = self.agent.select_yn()
+        reply: Packet = Packet(CtosMessage.RESPONSE)
         reply.write(ans)
         self.connection.send(reply)
 
@@ -482,8 +486,11 @@ class GameClient:
         choices: List[Card] = []
         for _ in range(packet.read_int(4)):
             card_id: int = packet.read_id()
-            info: LocationInfo = packet.read_location_info()
-            card: Card = self.duel.get_card(*info)
+            controller: Player = packet.read_player()
+            location: Location = packet.read_location()
+            index: int = packet.read_int(4)
+            position: Position = packet.read_position()
+            card: Card = self.duel.field[controller].get_card(location, index)
             card.id = card_id
             choices.append(card)
 
@@ -510,9 +517,15 @@ class GameClient:
 
         for _ in range(packet.read_int(4)):
             card_id = packet.read_int(4)
-            info: LocationInfo = packet.read_location_info()
+            controller: Player = packet.read_player()
+            location: Location = packet.read_location()
+            index: int = packet.read_int(4)
+            position: Position = packet.read_position()
             description: int = packet.read_int(8)
-            cards.append(self.duel.get_card(*info))
+            card: Card = self.duel.field[controller].get_card(location, index)
+            card.id = card_id
+            card.position = position
+            cards.append(card)
             descriptions.append(description)
             operation_type: bytes = packet.read_bytes(1)
 
@@ -591,7 +604,7 @@ class GameClient:
             location: Location = packet.read_location()
             index: int = packet.read_int(4)
             packet.read_bytes(1)
-            card: Card = self.duel.get_card(controller, location, index)
+            card: Card = self.duel.field[controller].get_card(location, index)
             card.id = card_id
             choices.append(card)
 
@@ -620,7 +633,7 @@ class GameClient:
             index: int = packet.read_int(1)
             num_of_counter: int = packet.read_int(2)
 
-            card: Card = self.duel.get_card(controller, location, index)
+            card: Card = self.duel.field[controller].get_card(location, index)
             card.id = card_id
             cards.append(card)
             counters.append(num_of_counter)
@@ -641,6 +654,15 @@ class GameClient:
         min: int = packet.read_int(4)
         max: int = packet.read_int(4)
 
+        for _ in range(packet.read_int(4)):
+            card_id: int = packet.read_int(4)
+            controller: Player = packet.read_player()
+            location: Location = packet.read_location()
+            index: int = packet.read_int(4)
+            card: Card = self.duel.field[controller].get_card(location, index)
+            card.id = card_id
+            
+
         raise Exception('not complete coding')
 
 
@@ -655,16 +677,23 @@ class GameClient:
 
         for _ in range(packet.read_int(4)):
             card_id: int = packet.read_id()
-            info: LocationInfo = packet.read_location_info()
+            controller: Player = packet.read_player()
+            location: Location = packet.read_location()
+            index: int = packet.read_int(4)
+            position: Position = packet.read_position()
 
-            card: Card = self.duel.get_card(*info)
+            card: Card = self.duel.field[controller].get_card(location, index)
             card.id = card_id
+            card.position = position
             cards.append(card)
 
         # unknown  
         for _ in range(packet.read_int(4)):
             card_id: int = packet.read_id()
-            info: LocationInfo = packet.read_location_info()
+            controller: Player = packet.read_player()
+            location: Location = packet.read_location()
+            index: int = packet.read_int(4)
+            position: Position = packet.read_position()
 
         max = 1
         selected: List[int] = self.agent.select_unselect(cards, int(not finishable), max, cancelable, self.select_hint)
@@ -705,14 +734,21 @@ class GameClient:
 
         old: List[Card] = []
         for _ in range(packet.read_int(4)):
-            old_info: LocationInfo = packet.read_location_info()
-            card: Card = self.duel.get_card(*old_info)
+            controller: Player = packet.read_player()
+            location: Location = packet.read_location()
+            index: int = packet.read_int(4)
+            position: Position = packet.read_position()
+            card: Card = self.duel.field[controller].get_card(location, index)
             card.id = 0
+            card.position = position
             old.append(card)
 
         for i in range(packet.read_int(4)):
-            new_info: LocationInfo = packet.read_location_info()
-            self.duel.add_card(old[i], *new_info)
+            controller: Player = packet.read_player()
+            location: Location = packet.read_location()
+            index: int = packet.read_int(4)
+            position: Position = packet.read_position()
+            self.duel.field[controller].add_card(old[i], location, index)
 
     
     def on_sort_card(self, packet: Packet) -> None:
@@ -720,8 +756,10 @@ class GameClient:
         cards: List[Card] = []
         for _ in range(packet.read_int(4)):
             card_id = packet.read_id()
-            info: LocationInfo = packet.read_location_info(include_pos=False)
-            card: Card = self.duel.get_card(*info)
+            controller: Player = packet.read_player()
+            location: Location = packet.read_location()
+            index: int = packet.read_int(4)
+            card: Card = self.duel.field[controller].get_card(location, index)
             card.id = card_id
             cards.append(card)
         
@@ -759,27 +797,37 @@ class GameClient:
 
     def on_move(self, packet: Packet) -> None:
         card_id: int = packet.read_id()
-        previous: LocationInfo = packet.read_location_info()
-        current: LocationInfo = packet.read_location_info()
+        # p means previous, c means current
+        p_controller: Player = packet.read_player()
+        p_location: Location = packet.read_location()
+        p_index: int = packet.read_int(4)
+        p_position: Position = packet.read_position()
+        c_controller: Player = packet.read_player()
+        c_location: Location = packet.read_location()
+        c_index: int = packet.read_int(4)
+        c_position: Position = packet.read_position()
         reason: int = packet.read_int(4)
 
-        card: Card = self.duel.get_card(*previous)
+        card: Card = self.duel.field[p_controller].get_card(p_location, p_index)
+        self.duel.field[p_controller].remove_card(card, p_location, p_index)
         card.id = card_id
-
-        self.duel.remove_card(card, *previous)
-        self.duel.add_card(card, *current)
+        card.controller = c_controller
+        card.location = c_location
+        card.position = c_position
+        self.duel.field[c_controller].add_card(card, c_location, c_index)
 
 
     def on_poschange(self, packet: Packet) -> None:
         card_id: int = packet.read_id()
-        previous_controller: Player = packet.read_player()
-        previous_location: Location = packet.read_location()
-        previous_index: int = packet.read_int(1)
-        previous_position: int = packet.read_int(1)
-        current_position: int = packet.read_int(1)
+        # p means previous, c means current
+        p_controller: Player = packet.read_player()
+        p_location: Location = packet.read_location()
+        p_index: int = packet.read_int(1)
+        p_position: int = packet.read_int(1)
+        c_position: int = packet.read_int(1)
 
-        card: Card = self.duel.get_card(previous_controller, previous_location, previous_index, previous_position)
-        card.position = current_position
+        card: Card = self.duel.field[p_controller].get_card(p_location, p_index)
+        card.position = c_position
 
 
     def on_set(self, packet: Packet) -> None:
@@ -787,30 +835,40 @@ class GameClient:
 
 
     def on_swap(self, packet: Packet) -> None:
+        # p means previous, c means current
         card_id_1: int = packet.read_id()
-        info_1: LocationInfo = packet.read_location_info()
+        controller_1: Player = packet.read_player()
+        location_1: Location = packet.read_location()
+        index_1: int = packet.read_int(4)
+        position_1: Position = packet.read_position()
         card_id_2: int = packet.read_id()
-        info_2: LocationInfo = packet.read_location_info()
+        controller_2: Player = packet.read_player()
+        location_2: Location = packet.read_location()
+        index_2: int = packet.read_int(4)
+        position_2: Position = packet.read_position()
 
-        card_1: Card = self.duel.get_card(*info_1)
+        card_1: Card = self.duel.field[controller_1].get_card(location_1, index_1)
         card_1.id = card_id_1
-        card_2: Card = self.duel.get_card(*info_2)
+        card_2: Card = self.duel.field[controller_2].get_card(location_2, index_2)
         card_2.id = card_id_2
 
-        self.duel.remove_card(card_1, *info_1)
-        self.duel.remove_card(card_2, *info_2)
-        self.duel.add_card(card_1, *info_2)
-        self.duel.add_card(card_2, *info_1)
+        self.duel.field[controller_1].remove_card(card_1, location_1, index_1)
+        self.duel.field[controller_2].remove_card(card_2, location_2, index_2)
+        self.duel.field[controller_1].add_card(card_1, location_2, index_2)
+        self.duel.field[controller_2].add_card(card_2, location_1, index_1)
 
 
     def on_summoning(self, packet: Packet) -> None:
         self.duel.summoning.clear()
         card_id: int = packet.read_id()
-        info: LocationInfo = packet.read_location_info()
-        card: Card = self.duel.get_card(*info)
+        controller: Player = packet.read_player()
+        location: Location = packet.read_location()
+        index: int = packet.read_int(4)
+        position: Position = packet.read_position()
+        card: Card = self.duel.field[controller].get_card(location, index)
         card.id = card_id
         self.duel.summoning.append(card)
-        self.duel.last_summon_player = info.controller
+        self.duel.last_summon_player = controller
 
 
     def on_summoned(self, packet: Packet) -> None:
@@ -821,11 +879,14 @@ class GameClient:
     def on_spsummoning(self, packet: Packet) -> None:
         self.duel.last_summoned.clear()
         card_id: int = packet.read_id()
-        info: LocationInfo = packet.read_location_info()
-        card: Card = self.duel.get_card(*info)
+        controller: Player = packet.read_player()
+        location: Location = packet.read_location()
+        index: int = packet.read_int(4)
+        position: Position = packet.read_position()
+        card: Card = self.duel.field[controller].get_card(location, index)
         card.id = card_id
         self.duel.summoning.append(card)
-        self.duel.last_summon_player = info.controller
+        self.duel.last_summon_player = controller
 
 
     def on_spsummoned(self, packet: Packet) -> None:
@@ -837,8 +898,11 @@ class GameClient:
 
     def on_chaining(self, packet: Packet) -> None:
         card_id: int = packet.read_id()
-        info: LocationInfo = packet.read_location_info()
-        card: Card = self.duel.get_card(*info)
+        controller: Player = packet.read_player()
+        location: Location = packet.read_location()
+        index: int = packet.read_int(4)
+        position: Position = packet.read_position()
+        card: Card = self.duel.field[controller].get_card(location, index)
         card.id = card_id
         self.duel.last_chain_player = packet.read_player()
         self.duel.last_summon_player = None
@@ -856,8 +920,11 @@ class GameClient:
 
     def on_become_target(self, packet: Packet) -> None:
         for _ in range(packet.read_int(4)):
-            info: LocationInfo = packet.read_location_info()
-            card: Card = self.duel.get_card(*info)
+            controller: Player = packet.read_player()
+            location: Location = packet.read_location()
+            index: int = packet.read_int(4)
+            position: Position = packet.read_position()
+            card: Card = self.duel.field[controller].get_card(location, index)
             self.duel.chain_targets.append(card)
             self.duel.current_chain_target.append(card)
 
@@ -882,19 +949,28 @@ class GameClient:
 
 
     def on_equip(self, packet: Packet) -> None:
-        info_1: LaunchInfo = packet.read_location_info()
-        info_2: LocationInfo = packet.read_location_info()
+        controller_1: Player = packet.read_player()
+        location_1: Location = packet.read_location()
+        index_1: int = packet.read_int(4)
+        position_1: Position = packet.read_position()
+        controller_2: Player = packet.read_player()
+        location_2: Location = packet.read_location()
+        index_2: int = packet.read_int(4)
+        position_2: Position = packet.read_position()
 
-        equip: Card = self.duel.get_card(*info_1)
-        equipped: Card = self.duel.get_card(*info_2)
+        equip: Card = self.duel.field[controller_1].get_card(location_1, index_1)
+        equipped: Card = self.duel.field[controller_2].get_card(location_2, index_2)
 
         equip.equip_target = equipped
         equipped.equip_cards.append(equip)
 
 
     def on_unequip(self, packet: Packet) -> None:
-        info: LocationInfo = packet.read_location_info()
-        equip: Card = self.duel.get_card(*info)
+        controller: Player = packet.read_player()
+        location: Location = packet.read_location()
+        index: int = packet.read_int(4)
+        position: Position = packet.read_position()
+        equip: Card = self.duel.field[controller].get_card(location, index)
         equip.equip_target.equip_cards.remove(equip)
         equip.equip_target = None
 
@@ -905,28 +981,46 @@ class GameClient:
 
 
     def on_card_target(self, packet: Packet) -> None:
-        info_1: LocationInfo = packet.read_location_info()
-        info_2: LocationInfo = packet.read_location_info()
-        targeting: Card = self.duel.get_card(*info_1)
-        targeted: Card = self.duel.get_card(*info_2)
+        controller_1: Player = packet.read_player()
+        location_1: Location = packet.read_location()
+        index_1: int = packet.read_int(4)
+        position_1: Position = packet.read_position()
+        controller_2: Player = packet.read_player()
+        location_2: Location = packet.read_location()
+        index_2: int = packet.read_int(4)
+        position_2: Position = packet.read_position()
+        targeting: Card = self.duel.field[controller_1].get_card(location_1, index_1)
+        targeted: Card = self.duel.field[controller_2].get_card(location_2, index_2)
         targeting.target_cards.append(targeted)
         targeted.targeted_by.append(targeting)
 
 
     def on_cancel_target(self, packet: Packet) -> None:
-        info_1: LocationInfo = packet.read_location_info()
-        info_2: LocationInfo = packet.read_location_info()
-        targeting: Card = self.duel.get_card(*info_1)
-        targeted: Card = self.duel.get_card(*info_2)
+        controller_1: Player = packet.read_player()
+        location_1: Location = packet.read_location()
+        index_1: int = packet.read_int(4)
+        position_1: Position = packet.read_position()
+        controller_2: Player = packet.read_player()
+        location_2: Location = packet.read_location()
+        index_2: int = packet.read_int(4)
+        position_2: Position = packet.read_position()
+        targeting: Card = self.duel.field[controller_1].get_card(location_1, index_1)
+        targeted: Card = self.duel.field[controller_2].get_card(location_2, index_2)
         targeting.target_cards.remove(targeted)
         targeted.targeted_by.remove(targeting)
 
 
     def on_attack(self, packet: Packet) -> None:
-        info_attack: LocationInfo = packet.read_location_info()
-        info_defence: LocationInfo = packet.read_location_info()
-        attack: Card = self.duel.get_card(*info_attack)
-        attacked: Card = self.duel.get_card(*info_defence)
+        controller_1: Player = packet.read_player()
+        location_1: Location = packet.read_location()
+        index_1: int = packet.read_int(4)
+        position_1: Position = packet.read_position()
+        controller_2: Player = packet.read_player()
+        location_2: Location = packet.read_location()
+        index_2: int = packet.read_int(4)
+        position_2: Position = packet.read_position()
+        attack: Card = self.duel.field[controller_1].get_card(location_1, index_1)
+        attacked: Card = self.duel.field[controller_2].get_card(location_2, index_2)
         self.duel.field[attack.controller].battling_monster = attack
         self.duel.field[attack.controller ^ 1].battling_monster = attacked
         self.duel.field[attack.controller ^ 1].under_attack = True
@@ -971,9 +1065,9 @@ class GameClient:
         count: int = packet.read_int(1)
         available: int = packet.read_int(4)
         choices: List[Attribute] = []
-        for race in Attribute:
-            if available & race:
-                choices.append(race)
+        for attr in Attribute:
+            if available & attr:
+                choices.append(attr)
 
         selected: List[int] = self.agent.announce_attr(choices, count)
 

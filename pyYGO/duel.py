@@ -4,7 +4,7 @@ from pyYGO.field import HalfField
 from pyYGO.card import Card
 from pyYGO.zone import Zone
 from pyYGO.enums import CardLocation, Phase, Player
-from pyYGO.alias import Location, Position
+from pyYGO.wrapper import Location, Position
 
 
 
@@ -51,59 +51,3 @@ class Duel:
         return (self.first, self.second)
 
 
-    def get_card(self, controller: Player, location: Location, index: int, position: Position=None) -> Card:
-        if location & CardLocation.OVERRAY:
-            return Card(location=location)
-
-        location = location & (~CardLocation.EXTRAINFO)
-        card: Card = Card()
-        try:
-            if location & CardLocation.LIST:
-                card: Card = self.field[controller][location][index]
-
-            elif location & CardLocation.ZONE:
-                zone: Zone = self.field[controller][location][index]
-                card: Card = zone.card
-
-        except Exception:
-            pass
-
-        return card
-    
-
-    def add_card(self, card: Card, controller: Player, location: Location, index: int, position: Position, *, id: int=None):
-        is_overlay: bool = bool(location & CardLocation.OVERRAY)
-        location = Location(location & (~CardLocation.EXTRAINFO))
-
-        card.controller = controller
-        card.location = location
-        card.position = Position(position)
-        if id is not None:
-            card.id = id
-
-        if location & CardLocation.LIST:
-            cards: List[Card] = self.field[controller][location]
-            cards.append(card)
-
-        elif location & CardLocation.ZONE:
-            zone: Zone = self.field[controller][location][index]
-            if is_overlay:
-                zone.card.overlays.append(card.id)
-            else:
-                zone.card = card
-
-
-    def remove_card(self, card: Card, controller: Player, location: Location, index: int, position: Position=None) -> None:
-        is_overlay: bool = bool(location & CardLocation.OVERRAY)
-        location = Location(location & (~CardLocation.EXTRAINFO))
-
-        if location & CardLocation.LIST:
-            cards: List[Card] = self.field[controller][location]
-            cards.remove(card)
-
-        elif location & CardLocation.ZONE:
-            zone: Zone = self.field[controller][location][index]
-            if is_overlay:
-                zone.card.overlays.remove(card.id)
-            else:
-                zone.card = None

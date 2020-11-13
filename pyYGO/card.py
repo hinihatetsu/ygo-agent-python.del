@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 from pyYGO.enums import Player, CardPosition, CardType, Attribute, Race, Query
-from pyYGO.alias import Location
+from pyYGO.wrapper import Location
 from pyYGONetwork.packet import Packet
 
 

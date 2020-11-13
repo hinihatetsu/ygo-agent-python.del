@@ -1,3 +1,4 @@
+from pyYGO.wrapper import Location
 from typing import Dict, List
 
 from pyYGO.card import Card
@@ -6,7 +7,7 @@ from pyYGO.enums import CardLocation, CardType
 
 
 
-class HalfField(Dict[CardLocation, List]):
+class HalfField():
     def __init__(self) -> None:
         self.hand: List[Card] = []
         self.deck: List[Card] = []
@@ -20,16 +21,6 @@ class HalfField(Dict[CardLocation, List]):
         self.spell_zones: List[SpellZone] = [SpellZone() for _ in range(6)]
         self.Fspell_zone: SpellZone = self.spell_zones[5]
         self.pendulum_zones: List[SpellZone] = [self.spell_zones[0], self.spell_zones[4]]
-
-        self[CardLocation.HAND] = self.hand
-        self[CardLocation.DECK] = self.deck
-        self[CardLocation.EXTRADECK] = self.extradeck
-        self[CardLocation.GRAVE] = self.graveyard
-        self[CardLocation.BANISHED] = self.banished
-        self[CardLocation.MONSTER_ZONE] = self.monster_zones
-        self[CardLocation.SPELL_ZONE] = self.spell_zones
-        self[CardLocation.FSPELL_ZONE] = self.Fspell_zone
-        self[CardLocation.PENDULUM_ZONE] = self.pendulum_zones
         
         self.battling_monster: Card = None
         self.under_attack: bool = False
@@ -83,13 +74,82 @@ class HalfField(Dict[CardLocation, List]):
     def is_field_empty(self) -> bool:
         return self.field_count == 0
 
+    
+    def get_card(self, location: Location, index: int) -> Card:
+        if location.is_overlay:
+            return Card(location=location)
+
+        where: List = self.where(location)
+        card: Card = Card()
+        if location.is_list:
+            card: Card = where[index]
+
+        elif location.is_zone:
+            zone: Zone = where[index]
+            card: Card = zone.card
+
+        return card
+
+    
+    def add_card(self, card: Card, location: Location, index: int) -> None:
+        where: List = self.where(location)
+
+        if location.is_list:
+            where.insert(index, card)
+        
+        if location.is_zone:
+            zone: Zone = where[index]
+            if location.is_overlay:
+                zone.card.overlays.append(card.id)
+            else:
+                zone.card = card
+
+    
+    def remove_card(self, card: Card, location: Location, index: int) -> None:
+        where: List = self.where(location)
+
+        if location.is_list:
+            where.remove(card)
+        
+        if location.is_zone:
+            zone: Zone = where[index]
+            if location.is_overlay:
+                zone.card.overlays.remove(card.id)
+            else:
+                zone.card = None
+
+
+    def where(self, location: Location) -> List:
+        if location & CardLocation.DECK:
+            return self.deck
+
+        elif location & CardLocation.HAND:
+            return self.hand
+
+        elif location & CardLocation.MONSTER_ZONE:
+            return self.monster_zones
+
+        elif location & CardLocation.SPELL_ZONE:
+            return self.spell_zones
+
+        elif location & CardLocation.GRAVE:
+            return self.graveyard
+
+        elif location & CardLocation.BANISHED:
+            return self.banished
+
+        elif location & CardLocation.EXTRADECK:
+            return self.extradeck
+
+        else:
+            return None
+            raise ValueError('Unknown Location {}'.format(location))
+    
 
     def set_deck(self, num_of_main: int, num_of_extra: int) -> None:
         self.deck = [Card() for _ in range(num_of_main)]
         self.extradeck = [Card() for _ in range(num_of_extra)]
-        self[CardLocation.DECK] = self.deck
-        self[CardLocation.EXTRADECK] = self.extradeck
-
+        
 
     def get_mainzone_monsters(self) -> List[Card]:
         return [zone.card for zone in self.mainmonster_zones if zone.has_card]

@@ -1,14 +1,12 @@
 from typing import Dict, TypeVar
 
-from pyYGO.enums import Player, CardLocation, CardPosition, Phase
-from pyYGO.alias import Location, LocationInfo, Position
+from pyYGO.enums import Player, Phase
+from pyYGO.wrapper import Location, Position
 
 Message = TypeVar('Message', Player, str, int, bytes, bytearray, bool)
 
 class Packet:
     first_is_me: bool
-    LOCATION: Dict[int, CardLocation] = {int(loc): loc for loc in CardLocation}
-    POSITION: Dict[int, CardPosition] = {int(pos): pos for pos in CardPosition}
     PHASE: Dict[int, Phase] = {int(phase): phase for phase in Phase}
     
     def __init__(self, msg_id: int=None):
@@ -95,20 +93,12 @@ class Packet:
 
     def read_location(self) -> Location:
         loc: int = self.read_int(1)
-        return self.LOCATION[loc] if loc in self.LOCATION else loc
+        return Location(loc)
 
 
     def read_position(self) -> Position:
         pos: int = self.read_int(4)
-        return self.POSITION[pos] if pos in self.POSITION else pos
-
-
-    def read_location_info(self, *, include_pos: bool=True) -> LocationInfo:
-        controler = self.read_player()
-        location = self.read_location()
-        index = self.read_int(4)
-        position = self.read_position() if include_pos else 0
-        return LocationInfo(controler, location, index, position)
+        return Position(pos)
 
 
     def read_phase(self) -> Phase:

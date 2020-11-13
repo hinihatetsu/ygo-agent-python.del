@@ -168,7 +168,7 @@ class DuelAgent:
 
 
     def select_place(self, player: Player, location: CardLocation, selectable: int, is_pzone: bool) -> int:
-        zones: List[Zone] = self.duel.field[player][location]
+        zones: List[Zone] = self.duel.field[player].where(location)
         choices: List[int] = [i for i, zone in enumerate(zones) if bool(selectable & zone.id)]
         ans: int = random.choice(choices)
         

@@ -4,7 +4,7 @@ import numpy as np
 from pyYGO.duel import Duel
 from pyYGO.field import HalfField
 from pyYGO.enums import CardPosition, Player
-from pyYGO.alias import Position
+from pyYGO.wrapper import Position
 from pyYGOAgent.deck import Deck
 from pyYGOAgent.flags import UsedFlag
 from pyYGOAgent.networkbase import Network
