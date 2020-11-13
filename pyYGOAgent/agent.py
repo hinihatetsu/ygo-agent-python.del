@@ -20,7 +20,7 @@ class DuelAgent:
         self.duel: Duel = duel
         self.usedflag: UsedFlag = UsedFlag(self.deck)
         self.recorder: DicisionRecorder = DicisionRecorder(self.deck, self.duel, self.usedflag)
-        self.brain: AgentBrain = AgentBrain(self.deck, self.duel, self.usedflag)
+        self.brain: AgentBrain = AgentBrain(self.deck)
 
     
     def start_new_game(self) -> None:

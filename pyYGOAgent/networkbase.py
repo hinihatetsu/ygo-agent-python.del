@@ -11,7 +11,7 @@ der_act_funcs = {sigmoid: derivative_sigmoid,
                  tanh: derivative_tanh}
 
 class Layer:
-    def __init__(self, prev_layer, num_neurons: int, learning_rate: float, act_func: Callable[[float], float]) -> None:
+    def __init__(self, prev_layer, num_neurons: int, learning_rate: float, act_func: Callable[[ndarray], ndarray]) -> None:
         self.prev_layer: Layer = prev_layer
         self.num_neurons: int = num_neurons
         self.learning_rate: float = learning_rate
@@ -22,8 +22,21 @@ class Layer:
         self.delta: ndarray[float] = np.zeros(num_neurons, dtype='float64')
         self.input_cache: ndarray[float] = np.zeros(num_neurons)
         self.output_cache: ndarray[float] = np.zeros(num_neurons)
-        self.activation_func: Callable[[float], float] = act_func
-        self.derivative_activation_func: Callable[[float], float] = der_act_funcs[act_func]
+        self.activation_func = act_func
+
+
+    @property
+    def activation_func(self) -> Callable[[ndarray], ndarray]:
+        return self._activation_func
+    
+    @activation_func.setter
+    def activation_func(self, func: Callable[[ndarray], ndarray]) -> None:
+        self._activation_func = func
+        self._derivative_activation_func = der_act_funcs[func]
+
+    @property
+    def derivative_activation_func(self) -> Callable[[ndarray], ndarray]:
+        return self._derivative_activation_func 
 
 
     def outputs(self, inputs: ndarray) -> ndarray:    
@@ -38,7 +51,7 @@ class Layer:
 
 
 class Network:
-    def __init__(self, layer_structure: List[int], learning_rate: float=0.01, act_func: Callable[[float], float]=tanh) -> None:      
+    def __init__(self, layer_structure: List[int], learning_rate: float=0.01, act_func: Callable[[ndarray], ndarray]=tanh) -> None:      
         self._layer_structure: List[int] = layer_structure
         self._layers: List[Layer] = [Layer(None, layer_structure[0], learning_rate, act_func)]
         self.learning_rate: float = learning_rate
@@ -53,14 +66,13 @@ class Network:
 
 
     def _outputs(self, inputs: ndarray) -> ndarray:
-        inputs = np.array(inputs)
         activate = lambda inputs, layer: layer.outputs(inputs)
         return reduce(activate, self._layers, inputs)
 
 
     def _calculate_deltas_for_output_layer(self, expected: ndarray) -> None:
         layer: Layer = self._output_layer
-        layer.delta = layer.derivative_activation_func(layer.input_cache) * (expected - layer.output_cache) 
+        layer.delta = layer.derivative_activation_func(layer.input_cache) * (layer.output_cache - expected) 
 
 
     def _calculate_deltas_for_hidden_layer(self, layer: Layer, next_layer: Layer) -> None:
@@ -75,8 +87,8 @@ class Network:
 
     def _update(self) -> None:
         for layer in self._layers[1:]:
-            layer.weight += layer.delta.reshape((layer.num_neurons,1)) * layer.prev_layer.output_cache * layer.learning_rate
-            layer.bias += layer.delta * layer.learning_rate
+            layer.weight += -np.outer(layer.delta, layer.prev_layer.output_cache) * layer.learning_rate
+            layer.bias += -layer.delta * layer.learning_rate
 
     
     def train(self, inputs: List[ndarray], expecteds: List[ndarray]) -> None:
@@ -84,15 +96,6 @@ class Network:
             self._outputs(_input)
             self._backpropagate(expected)
             self._update()
-
-
-    def validate(self, inputs: List[ndarray], expecteds: List[ndarray]) -> float:
-        correct: int = 0
-        for _input, expected in zip(inputs, expecteds):
-            result: ndarray[float] = self._outputs(_input)
-            if result.argmax() == expected.argmax():
-                correct += 1
-        return correct / len(inputs)
 
 
     def load_weights(self, weights: List[ndarray]) -> None:

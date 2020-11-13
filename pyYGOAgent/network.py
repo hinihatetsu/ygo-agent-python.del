@@ -13,9 +13,9 @@ ndarray = TypeVar('ndarray')
 
 
 class Network(Network):
-    def backpropagate(self, delta_factor: ndarray) -> None:
+    def backpropagate(self, factor: ndarray) -> None:
         der: ndarray = self._output_layer.derivative_activation_func(self._output_layer.input_cache)
-        self._output_layer.delta =  der * delta_factor
+        self._output_layer.delta =  der * factor
         for i in range(len(self._layer_structure)-2, 0, -1):
             self._calculate_deltas_for_hidden_layer(self._layers[i], self._layers[i+1])
 
@@ -23,7 +23,7 @@ class Network(Network):
 
 class DuelNetwork(Network):
     def __init__(self) -> None:
-        super().__init__([13, 10, 6, 4])
+        super().__init__([13, 8, 4])
 
 
     def outputs(self, duel: Duel) -> ndarray:
@@ -43,7 +43,7 @@ class LocationNetwork(Network):
     in_GY: ndarray       = np.array([0, 0, 0, 1, 0, 0, 0, 0, 0, 0], dtype='float64')
     in_banished: ndarray = np.array([0, 0, 0, 0, 1, 0, 0, 0, 0, 0], dtype='float64')
     in_side: ndarray     = np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0], dtype='float64')
-    not_in_deck: ndarray = np.array([0, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype='float64')
+    not_in_deck: ndarray = np.array([0, 1, 1, 1, 1, 1, 0, 0, 0, 0], dtype='float64')
     inputs: ndarray
 
     def __init__(self, deck: Deck) -> None:
@@ -52,7 +52,7 @@ class LocationNetwork(Network):
         self.deck_list.sort()
 
         inputs_size: int = len(self.deck_list) * self.LOCATION_BIT
-        layer_structure = [inputs_size, 720, 450, 130, 40, 4]
+        layer_structure = [inputs_size, 720, 130, 4]
         super().__init__(layer_structure)
 
     
@@ -131,7 +131,7 @@ class LocationNetwork(Network):
 
 class FlagNetwork(Network):
     def __init__(self, flag: UsedFlag) -> None:
-        layer_structure = [flag.count, 65, 45, 12, 4]
+        layer_structure = [flag.count, 65, 24, 4]
         super().__init__(layer_structure)
 
     
@@ -145,7 +145,7 @@ class FlagNetwork(Network):
 class OpponentNetwork(Network):
     def __init__(self) -> None:
         self.inputs_size: int = 5 + 36 * 13
-        structure: List[int] = [self.inputs_size, 500, 180, 50, 4]    
+        structure: List[int] = [self.inputs_size, 500, 150, 4]    
         super().__init__(structure)
 
     

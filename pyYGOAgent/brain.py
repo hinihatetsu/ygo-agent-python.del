@@ -18,13 +18,9 @@ from pyYGOAgent.recorder import Dicision
 
 class AgentBrain:
     EPOCH: int = 30
-    def __init__(self, deck: Deck, duel: Duel, usedflag: UsedFlag) -> None:
-        self.deck: Deck = deck
-        self.duel: Duel = duel
-        self.usedflag: UsedFlag = usedflag
-
-        self.brain_path: Path = Path.cwd() / 'Decks' / self.deck.name / (self.deck.name + '.brain')
-        self.record_dir: Path = Path.cwd() / 'Decks' / self.deck.name / 'Records'
+    def __init__(self, deck: Deck) -> None:
+        self.duel: Duel = None
+        self.usedflag: UsedFlag = None
 
         self.summon_network: SummonNetwork = None
         self.special_summon_network: SpecialSummonNetwork = None
@@ -36,7 +32,25 @@ class AgentBrain:
         self.attack_network: AttackNetwork = None
         self.phase_network: ActionNetwork = None
 
+        self.deck: Deck = deck
+
+    
+    @property
+    def deck(self) ->Deck:
+        return self._deck
+
+    @deck.setter
+    def deck(self, deck: Deck) -> None:
+        self._deck = deck
         self.load_networks()
+
+    @property
+    def brain_path(self) -> Path:
+        return Path.cwd() / 'Decks' / self.deck.name / (self.deck.name + '.brain')
+
+    @property
+    def record_dir(self) -> Path:
+        return Path.cwd() / 'Decks' / self.deck.name / 'Records'
 
 
     def load_networks(self) -> None:
@@ -76,15 +90,16 @@ class AgentBrain:
 
     
     def create_networks(self) -> None:
-        self.summon_network = SummonNetwork(self.deck, self.usedflag)
-        self.special_summon_network = SpecialSummonNetwork(self.deck, self.usedflag)
-        self.reposition_network = RepositionNetwork(self.deck, self.usedflag)
-        self.set_network = SetNetwork(self.deck, self.usedflag)
-        self.activate_network = ActivateNetwork(self.deck, self.usedflag)
-        self.chain_network = ChainNetwork(self.deck, self.usedflag)
-        self.select_network = SelectNetwork(self.deck, self.usedflag)
-        self.attack_network = AttackNetwork(self.deck, self.usedflag)
-        self.phase_network = ActionNetwork(self.deck, self.usedflag)
+        usedflag: UsedFlag = UsedFlag(self.deck)
+        self.summon_network = SummonNetwork(self.deck, usedflag)
+        self.special_summon_network = SpecialSummonNetwork(self.deck, usedflag)
+        self.reposition_network = RepositionNetwork(self.deck, usedflag)
+        self.set_network = SetNetwork(self.deck, usedflag)
+        self.activate_network = ActivateNetwork(self.deck, usedflag)
+        self.chain_network = ChainNetwork(self.deck, usedflag)
+        self.select_network = SelectNetwork(self.deck, usedflag)
+        self.attack_network = AttackNetwork(self.deck, usedflag)
+        self.phase_network = ActionNetwork(self.deck, usedflag)
         self.save_networks()
 
 
