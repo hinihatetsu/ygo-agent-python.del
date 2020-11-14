@@ -1,6 +1,6 @@
 import asyncio
 import asyncio.streams
-from typing import Callable, Coroutine, Deque
+from typing import Callable, Deque
 
 from pyYGONetwork.packet import Packet
 
@@ -63,7 +63,8 @@ class YGOConnection:
 
 
     async def drain(self) -> None:
-        await self.socket.writer.drain()
+        if self.is_connected:
+            await self.socket.writer.drain()
             
 
     def close(self) -> None:
@@ -102,7 +103,6 @@ class YGOSocket:
 
     def close(self) -> None:
         self.writer.close()
-
 
 
 

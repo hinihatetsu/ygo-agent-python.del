@@ -768,8 +768,8 @@ class GameClient:
 
 
     def on_new_turn(self, packet: Packet) -> None:
-        self.duel.turn += 1
-        self.duel.turn_player = packet.read_player()
+        turn_player: Player = packet.read_player()
+        self.duel.on_new_turn(turn_player)
         self.agent.on_new_turn()
 
 
