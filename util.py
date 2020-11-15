@@ -1,8 +1,32 @@
 from pathlib import Path
 import sqlite3
-from typing import NamedTuple, List, Set, Dict
+from typing import NamedTuple, List, Dict, Any
 from pyYGONetwork.enums import CtosMessage, GameMessage, StocMessage
-        
+
+
+class LaunchInfo(NamedTuple):
+    name: str = 'AI'
+    deck: str = ''
+    host: str = '127.0.0.1'
+    port: int = 7911
+    version: int = 38 | 1<<8 | 8<<16
+
+
+def load_args(args: List[str]) -> LaunchInfo:
+    info: Dict[str, Any] = dict()
+    for arg in args:
+        equal_index: int = arg.find('=')
+        if equal_index == (-1 or len(arg)-1):
+            continue
+
+        key: str = arg[:equal_index].lower()
+        if key in {'name', 'deck', 'host'}:
+            info[key] = arg[equal_index+1:]
+        elif key in {'port', 'version'}:
+            info[key] = int(arg[equal_index+1:])
+    
+    return LaunchInfo(**info)
+
 
 def print_message(msg_id: bytes, data: bytes, send: bool=False) -> None:
     ctsmsgs = {int(cts): cts for cts in CtosMessage}
