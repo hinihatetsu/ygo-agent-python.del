@@ -73,10 +73,10 @@ class Card:
                 self.arias = packet.read_int(4)
 
             elif query == Query.TYPE:
-                _type = packet.read_int(4)
+                type_ = packet.read_int(4)
                 self.type.clear()
                 for t in CardType:
-                    if _type & t:
+                    if type_ & t:
                         self.type.append(t)
 
             elif query == Query.LEVEL:

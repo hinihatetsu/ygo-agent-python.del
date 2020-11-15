@@ -50,11 +50,6 @@ class Duel:
     def players(self) -> Tuple[Player]:
         return (self.first, self.second)
 
-    
-    def on_start(self, first_player: Player) -> None:
-        self.__init__()
-        self.first = first_player
-        self.second = Player.OPPONENT if first_player == Player.ME else Player.ME
 
     def set_deck(self, player: Player, num_of_main: int, num_of_extra: int) -> None:
         self.field[player].set_deck(num_of_main, num_of_extra)
@@ -81,7 +76,18 @@ class Duel:
             cards: List[Card] = self.field[controller].where(location)
 
         return cards 
-            
+    
+
+    def on_start(self, first_player: Player) -> None:
+        self.__init__()
+        self.first = first_player
+        self.second = Player.OPPONENT if first_player == Player.ME else Player.ME
+
+
+    def on_new_turn(self, turn_player: Player) -> None:
+        self.turn_player = turn_player
+        self.turn += 1
+
 
     def on_new_phase(self, phase: Phase) -> None:
         self.phase = phase
