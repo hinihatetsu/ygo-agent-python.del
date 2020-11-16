@@ -24,17 +24,18 @@ class Packet:
     def msg_id(self, msg_id: int) -> None:
         self._msg_id = msg_id.to_bytes(1, byteorder='little')
 
+
     def __repr__(self) -> str:
         return f'<msg_id: {self.msg_id}>' + self.content.hex(' ')
 
 
     def write(self, content: Message, * , byte_size: int=4) -> None:
-        _type: type = type(content)
+        type_: type = type(content)
 
-        if _type == Player:
+        if type_ == Player:
             self.write(int(content) if self.first_is_me else int(content ^ 1), byte_size=1)
 
-        elif _type == str:
+        elif type_ == str:
             content = str(content)
             encoded = content.encode(encoding='utf-16-le')
             max_size = byte_size - 2
@@ -43,19 +44,19 @@ class Packet:
             else:
                 self.content += encoded[:max_size] + bytes(2)
         
-        elif _type == int:
+        elif type_ == int:
             content = int(content)
             if content < 0:
                 content += 1 << (byte_size * 8)
             self.content += content.to_bytes(byte_size, byteorder='little')
 
-        elif _type == bytes:
+        elif type_ == bytes:
             self.content += content
         
-        elif _type == bytearray:
+        elif type_ == bytearray:
             self.content += bytes(content)
 
-        elif _type == bool:
+        elif type_ == bool:
             self.content += int(content).to_bytes(1, byteorder='little')
             
     

@@ -1,6 +1,6 @@
 import asyncio
 import random
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Tuple
 
 from util import LaunchInfo, print_message
 from pyYGO.duel import Duel
@@ -470,8 +470,8 @@ class GameClient:
     def on_select_card(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         cancelable: bool = packet.read_bool()
-        min: int = packet.read_int(4) # min number of cards to select
-        max: int = packet.read_int(4) # max number of cards to select
+        min_: int = packet.read_int(4) # min number of cards to select
+        max_: int = packet.read_int(4) # max number of cards to select
 
         choices: List[Card] = []
         for _ in range(packet.read_int(4)):
@@ -484,8 +484,7 @@ class GameClient:
             card.id = card_id
             choices.append(card)
 
-        selected: List[int] = self.agent.select_card(choices, min, max, cancelable, self.select_hint)
-        self.select_hint = 0
+        selected: List[int] = self.agent.select_card(choices, min_, max_, cancelable, self.select_hint)
 
         reply: Packet = Packet(CtosMessage.RESPONSE)
         reply.write(0)
@@ -530,7 +529,7 @@ class GameClient:
 
     def on_select_place(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
-        min: int = packet.read_int(1)
+        min_: int = packet.read_int(1)
         selectable: int = 0xffffffff - packet.read_int(4)
 
         player: Player = None
@@ -584,8 +583,8 @@ class GameClient:
     def on_select_tribute(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         cancelable: bool = packet.read_bool()
-        min: int = packet.read_int(4) # min number of cards to select
-        max: int = packet.read_int(4) # max number of cards to select
+        min_: int = packet.read_int(4) # min number of cards to select
+        max_: int = packet.read_int(4) # max number of cards to select
 
         choices: List[Card] = []
         for _ in range(packet.read_int(4)):
@@ -598,7 +597,7 @@ class GameClient:
             card.id = card_id
             choices.append(card)
 
-        selected: List[int] = self.agent.select_tribute(choices, min, max, cancelable, self.select_hint)
+        selected: List[int] = self.agent.select_tribute(choices, min_, max_, cancelable, self.select_hint)
 
         reply: Packet = Packet(CtosMessage.RESPONSE)
         reply.write(0)
@@ -632,28 +631,51 @@ class GameClient:
 
         reply: Packet = Packet(CtosMessage.RESPONSE)
         for i in used:
-            reply.write(i & 0xff, byte_size=1)
-            reply.write((i >> 8) & 0xff, byte_size=1)
+            reply.write(i, byte_size=2)
         self.connection.send(reply)
 
 
     def on_select_sum(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
-        mode: bool = packet.read_bool()
+        must_just: bool = not packet.read_bool()
         sum_value: int = packet.read_int(4)
-        min: int = packet.read_int(4)
-        max: int = packet.read_int(4)
+        min_: int = packet.read_int(4)
+        max_: int = packet.read_int(4)
+
+        must_selected: List[Card] = []
+        choices: List[Card] = []
 
         for _ in range(packet.read_int(4)):
-            card_id: int = packet.read_int(4)
+            card_id: int = packet.read_id()
             controller: Player = packet.read_player()
             location: Location = packet.read_location()
             index: int = packet.read_int(4)
             card: Card = self.duel.get_card(controller, location, index)
             card.id = card_id
-            
+            values: Tuple(int, int) = (packet.read_int(2), packet.read_int(2))
+            must_selected.append(card)
+            sum_value -= max(values)
 
-        raise Exception('not complete coding')
+        for _ in range(packet.read_int(4)):
+            card_id: int = packet.read_id()
+            controller: Player = packet.read_player()
+            location: Location = packet.read_location()
+            index: int = packet.read_int(4)
+            card: Card = self.duel.get_card(controller, location, index)
+            card.id = card_id
+            values: Tuple(int, int) = (packet.read_int(2), packet.read_int(2))
+            choices.append((card, values))
+
+        selected: List[int] = self.agent.select_sum(choices, sum_value, min_, max_, must_just, self.select_hint)
+
+        reply: Packet = Packet(CtosMessage.RESPONSE)
+        reply.write(b'\x00\x01\x00\x00')
+        reply.write(len(must_selected)+len(selected), byte_size=4)
+        for _ in must_selected:
+            packet.write(0, byte_size=1)
+        for i in selected:
+            packet.write(i, byte_size=1)
+        self.connection.send(reply)
 
 
     def on_select_unselect(self, packet: Packet) -> None:
