@@ -751,7 +751,6 @@ class GameClient:
             position: Position = packet.read_position()
             card: Card = self.duel.get_card(controller, location, index)
             card.id = 0
-            card.position = position
             old.append(card)
 
         for i in range(packet.read_int(4)):
@@ -1029,10 +1028,7 @@ class GameClient:
         player_msg_sent_to: Player = packet.read_player()
         count: int = packet.read_int(1)
         available: int = packet.read_int(4)
-        choices: List[Race] = []
-        for race in Race:
-            if available & race:
-                choices.append(race)
+        choices: List[Race] = [race for race in Race if available & race]
 
         selected: List[int] = self.agent.announce_race(choices, count)
 
@@ -1049,10 +1045,7 @@ class GameClient:
         player_msg_sent_to: Player = packet.read_player()
         count: int = packet.read_int(1)
         available: int = packet.read_int(4)
-        choices: List[Attribute] = []
-        for attr in Attribute:
-            if available & attr:
-                choices.append(attr)
+        choices: List[Attribute] = [attr for attr in Attribute if available & attr]
 
         selected: List[int] = self.agent.announce_attr(choices, count)
 
