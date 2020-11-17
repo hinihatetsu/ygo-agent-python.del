@@ -177,7 +177,7 @@ class GameClient:
             reply.write(content, byte_size=2*len(content))
             reply.write(0)
             self.connection.send(reply)
-            self.agent.brain.train()
+            self.agent.train()
 
 
     def on_timelimit(self, packet: Packet) -> None:
