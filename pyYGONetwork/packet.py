@@ -24,9 +24,9 @@ class Packet:
     def msg_id(self, msg_id: int) -> None:
         self._msg_id = msg_id.to_bytes(1, byteorder='little')
 
-
-    def __repr__(self) -> str:
-        return f'<msg_id: {self.msg_id}>' + self.content.hex(' ')
+    @property
+    def data(self) -> bytes:
+        return self._msg_id + self.content
 
 
     def write(self, content: Message, * , byte_size: int=4) -> None:
@@ -105,6 +105,10 @@ class Packet:
     def read_phase(self) -> Phase:
         phase: int = self.read_int(4)
         return self.PHASE[phase]
+
+
+    def __repr__(self) -> str:
+        return f'<msg_id: {self.msg_id}>' + self.content.hex(' ')
 
 
     
