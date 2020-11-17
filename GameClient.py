@@ -501,7 +501,7 @@ class GameClient:
         hint1: int = packet.read_int(4)
         hint2: int = packet.read_int(4)
 
-        cards: List[Card] = [] # activatable cards
+        choices: List[Card] = []
         descriptions: List[int] = []
 
         for _ in range(packet.read_int(4)):
@@ -513,15 +513,15 @@ class GameClient:
             description: int = packet.read_int(8)
             card: Card = self.duel.get_card(controller, location, index)
             card.id = card_id
-            cards.append(card)
+            choices.append(card)
             descriptions.append(description)
             operation_type: bytes = packet.read_bytes(1)
 
         reply: Packet = Packet(CtosMessage.RESPONSE)
-        if len(cards) == 0:
+        if len(choices) == 0:
             reply.write(-1)
         else:
-            selected: int = self.agent.select_chain(cards, descriptions, forced)
+            selected: int = self.agent.select_chain(choices, descriptions, forced)
             reply.write(selected)
         self.connection.send(reply)
 
