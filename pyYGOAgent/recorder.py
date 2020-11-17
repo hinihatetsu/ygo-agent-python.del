@@ -34,10 +34,10 @@ class DicisionRecorder:
 
         self.dicisions: List[Dicision] = []
         self.evaluated_dicisions: List[Dicision] = []
-        self.hand_cache: List[int] = [5, 5]
-        self.field_cache: List[int] = [0, 0]
-        self.deck_cache: List[int] = [35, 35]
-        self.life_cache: List[int] = [8000, 8000]
+        self.hand_cache: List[int] = None
+        self.field_cache: List[int] = None
+        self.deck_cache: List[int] = None
+        self.life_cache: List[int] = None
 
         self.record_dir: Path = Path.cwd() / 'Decks' / self.deck.name / 'Records'
         if not self.record_dir.exists():
