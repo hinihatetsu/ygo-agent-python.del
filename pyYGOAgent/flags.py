@@ -6,7 +6,7 @@ from pyYGOAgent.deck import Deck
 class UsedFlag:
     def __init__(self, deck: Deck) -> None:
         self.deck: Deck = deck
-        self.flag: Dict[int, bool] = Dict()
+        self.flag: Dict[int, bool] = dict()
         self.load()
 
 
