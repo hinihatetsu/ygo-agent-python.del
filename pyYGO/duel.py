@@ -4,7 +4,7 @@ from pyYGO.field import HalfField
 from pyYGO.card import Card
 from pyYGO.zone import Zone
 from pyYGO.enums import CardLocation, Phase, Player
-from pyYGO.wrapper import Location, Position
+from pyYGO.wrapper import Location
 
 
 

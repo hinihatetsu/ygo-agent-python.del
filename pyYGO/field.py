@@ -16,15 +16,36 @@ class HalfField():
         self.banished: List[Card] = []
         # left first
         self.monster_zones: List[MonsterZone] = [MonsterZone() for _ in range(7)]
-        self.mainmonster_zones: List[MonsterZone] = self.monster_zones[0:5]
-        self.exmonster_zones: List[MonsterZone] = self.monster_zones[5:7]
         self.spell_zones: List[SpellZone] = [SpellZone() for _ in range(6)]
-        self.Fspell_zone: SpellZone = self.spell_zones[5]
-        self.pendulum_zones: List[SpellZone] = [self.spell_zones[0], self.spell_zones[4]]
         
         self.battling_monster: Card = None
         self.under_attack: bool = False
+    
+    @property
+    def mainmonster_zones(self) -> List[MonsterZone]:
+        return self.monster_zones[0:5]
 
+    @property
+    def exmonster_zones(self) -> List[MonsterZone]:
+        return self.monster_zones[5:7]
+
+    @property
+    def Fspell_zone(self) -> SpellZone:
+        return self.spell_zones[5]
+
+    @property
+    def pendulum_zones(self) -> List[SpellZone]:
+        return [self.spell_zones[0], self.spell_zones[4]]
+
+    @property
+    def column_zones(self) -> List[List[Zone]]:
+        return [
+            [self.spell_zones[0], self.mainmonster_zones[0]],
+            [self.spell_zones[1], self.mainmonster_zones[1], self.exmonster_zones[0]],
+            [self.spell_zones[2], self.mainmonster_zones[2]],
+            [self.spell_zones[3], self.mainmonster_zones[3], self.exmonster_zones[1]],
+            [self.spell_zones[4], self.mainmonster_zones[4]]
+        ]
 
     @property
     def exzonemonster_count(self) -> int:
@@ -51,16 +72,8 @@ class HalfField():
         return len(self.deck)
 
     @property
-    def columncard_count(self, column: int, include_exzone: bool=True) -> None:
-        column_zones: Dict[int, List[Zone]] = {
-
-            0: [self.spell_zones[0], self.mainmonster_zones[0]],
-            1: [self.spell_zones[1], self.mainmonster_zones[1], self.exmonster_zones[0]] if include_exzone else  [self.spell_zones[1], self.mainmonster_zones[1]],
-            2: [self.spell_zones[2], self.mainmonster_zones[2]],
-            3: [self.spell_zones[3], self.mainmonster_zones[3], self.exmonster_zones[1]] if include_exzone else [self.spell_zones[3], self.mainmonster_zones[3]],
-            4: [self.spell_zones[4], self.mainmonster_zones[4]]
-        }
-        return sum(int(zone.has_card for zone in column_zones[column]))
+    def columncard_count(self, column: int) -> None:
+        return sum(int(zone.has_card) for zone in self.column_zones[column])
 
     @property
     def field_count(self) -> int:
@@ -144,7 +157,6 @@ class HalfField():
 
         else:
             return None
-            raise ValueError('Unknown Location {}'.format(location))
     
 
     def set_deck(self, num_of_main: int, num_of_extra: int) -> None:
