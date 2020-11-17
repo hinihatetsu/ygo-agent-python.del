@@ -1,5 +1,5 @@
 import random
-from typing import List
+from typing import List, Tuple
 
 from pyYGO.duel import Duel
 from pyYGO.card import Card
@@ -44,39 +44,46 @@ class DuelAgent:
         
 
     def select_mainphase_action(self, main: MainPhase) -> int:
+        value: float = 0
         evaluated: List[MainAction] = []
 
         for index, card in enumerate(main.summonable):
-            value: float = self.brain.evaluate_summon(card)
+            value = self.brain.evaluate_summon(card)
             evaluated.append(MainAction(value, Action.SUMMON, index, card.id))
         
         for index, card in enumerate(main.special_summonable):
-            value: float = self.brain.evaluate_special_summon(card)
+            value = self.brain.evaluate_special_summon(card)
             evaluated.append(MainAction(value, Action.SP_SUMMON, index, card.id))
 
         for index, card in enumerate(main.repositionable):
-            value: float = self.brain.evaluate_reposition(card)
+            value = -1
+            if card.position & CardPosition.ATTACK:
+                if card.attack * 2 < card.defence:
+                    value = 1
+            elif card.position & CardPosition.DEFENCE:
+                if card.attack >= self.duel.life[Player.OPPONENT]:
+                    value = 1
             evaluated.append(MainAction(value, Action.REPOSITION, index, card.id))
 
         for index, card in enumerate(main.moster_settable):
-            value: float = self.brain.evaluate_set(card)
+            value = self.brain.evaluate_set(card)
             evaluated.append(MainAction(value, Action.SET_MONSTER, index, card.id))
 
         for index, card in enumerate(main.spell_settable):
-            value: float = self.brain.evaluate_set(card)
+            value = self.brain.evaluate_set(card)
             evaluated.append(MainAction(value, Action.SET_SPELL, index, card.id))
 
         for index, card in enumerate(main.activatable):
             desc: int = main.activation_descs[index]
-            value: float = self.brain.evaluate_activate(card, desc)
+            value = self.brain.evaluate_activate(card, desc)
             evaluated.append(MainAction(value, Action.ACTIVATE, index, card.id, desc))
 
         if main.can_battle:
-            value: float = self.brain.evaluate_phase()
+            value = self.brain.evaluate_phase()
             evaluated.append(MainAction(value, Action.BATTLE))
 
         if main.can_end:
-            value: float = self.brain.evaluate_phase()
+            value = self.brain.evaluate_phase()
             evaluated.append(MainAction(value, Action.END))
 
         evaluated.sort(key=lambda x:x.value, reverse=True)
@@ -91,19 +98,20 @@ class DuelAgent:
 
 
     def select_battle_action(self, battle: BattlePhase) -> int:
+        value: float = 0
         evaluated: List[BattleAction] = []
 
         for index, card in enumerate(battle.attackable):
-            value: float = self.brain.evaluate_attack(card)
+            value = self.brain.evaluate_attack(card)
             evaluated.append(BattleAction(value, Action.ATTACK, index, card.id))
 
         for index, card in enumerate(battle.activatable):
             desc: int = battle.activation_descs[index]
-            value: float = self.brain.evaluate_activate(card, desc)
+            value = self.brain.evaluate_activate(card, desc)
             evaluated.append(BattleAction(value, Action.ACTIVATE_IN_BATTLE, index, card.id, option=desc))
 
         if battle.can_main2:
-            value: float = self.brain.evaluate_phase()
+            value = self.brain.evaluate_phase()
             evaluated.append(BattleAction(value, Action.MAIN2))
 
         evaluated.sort(key=lambda x:x.value, reverse=True)
@@ -133,25 +141,27 @@ class DuelAgent:
         return random.choice(list(range(len(options))))
 
 
-    def select_card(self, choices: List[Card], min: int, max: int, cancelable: bool, hint: int) -> List[int]:
+    def select_card(self, choices: List[Card], min_: int, max_: int, cancelable: bool, hint: int) -> List[int]:
+        value: float = 0
         evaluated: List[SelectAction] = []
         for index, card in enumerate(choices):
-            value: float = self.brain.evaluate_selection(card, hint)
+            value = self.brain.evaluate_selection(card, hint)
             evaluated.append(SelectAction(value, index, card.id, hint))
 
         evaluated.sort(key=lambda x:x.value, reverse=True)
-        for selected in evaluated[:max]:
+        for selected in evaluated[:max_]:
             self.recorder.save_dicision(selected.action, selected.card_id, selected.hint)
 
-        return [selected.index for selected in evaluated][:max]
+        return [selected.index for selected in evaluated][:max_]
 
 
     def select_chain(self, choices: List[Card], descriptions: List[int], forced: bool) -> int:
+        value: float = 0
         evaluated: List[ChainAction] = []
 
         for index, card in enumerate(choices):
             desc: int = descriptions[index]
-            value: float = self.brain.evaluate_chain(card, desc)
+            value = self.brain.evaluate_chain(card, desc)
             evaluated.append(ChainAction(value, index, card.id, desc))
 
         if not forced:
@@ -182,15 +192,19 @@ class DuelAgent:
         return int(choices[0])
 
 
-    def select_tribute(self, choices: List[Card], min: int, max: int, cancelable: bool, hint: int) -> int:
+    def select_tribute(self, choices: List[Card], min_: int, max_: int, cancelable: bool, hint: int) -> int:
         my_card: List[Card] = sorted([card for card in choices if card.controller == Player.ME], key=lambda x:x.attack)
         op_card: List[Card] = sorted([card for card in choices if card.controller == Player.OPPONENT], key=lambda x:-x.attack)
-        choosed: List[Card] = (op_card + my_card)[0:max]
+        choosed: List[Card] = (op_card + my_card)[0:max_]
         return [choices.index(card) for card in choosed]
+    
+
+    def select_sum(self, choices: List[Tuple[Card, Tuple[int, int]]], min_: int, max_: int, must_just: bool, hint: int) -> List[int]:
+        raise Exception('not complete coding')
 
 
-    def select_unselect(self, choices: List[Card], min: int, max: int, cancelable: bool, hint: int):
-        return self.select_card(choices, min, max, cancelable, hint)
+    def select_unselect(self, choices: List[Card], min_: int, max_: int, cancelable: bool, hint: int):
+        return self.select_card(choices, min_, max_, cancelable, hint)
 
 
     def select_counter(self, counter_type: int, quantity: int, cards: List[int], counters: List[int]) -> List[int]:
@@ -213,3 +227,5 @@ class DuelAgent:
         raise Exception('not complete coding')
 
     
+    def train(self) -> None:
+        self.brain.train()
