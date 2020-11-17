@@ -107,7 +107,7 @@ class GameClient:
 
 
     def on_select_tp(self, packet: Packet) -> None:
-        select_first: bool = True
+        select_first: bool = False
         reply: Packet = Packet(CtosMessage.TP_RESULT)
         reply.write(select_first)
         self.connection.send(reply)
@@ -513,7 +513,6 @@ class GameClient:
             description: int = packet.read_int(8)
             card: Card = self.duel.get_card(controller, location, index)
             card.id = card_id
-            card.position = position
             cards.append(card)
             descriptions.append(description)
             operation_type: bytes = packet.read_bytes(1)
