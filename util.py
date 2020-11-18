@@ -15,9 +15,9 @@ class LaunchInfo(NamedTuple):
 
 def load_args() -> LaunchInfo:
     parser = argparse.ArgumentParser()
-    parser.set_defaults(name='AI', deck='', host='127.0.0.1', port=7911, version=VERSION)
+    parser.set_defaults(name='AI', host='127.0.0.1', port=7911, version=VERSION)
     parser.add_argument('-name', type=str, help="AI's name")
-    parser.add_argument('-deck', type=str, help='deck name')
+    parser.add_argument('-deck', type=str, help='deck name', required=True)
     parser.add_argument('-host', type=str, help='host adress')
     parser.add_argument('-port', type=int, help='port')
     parser.add_argument('-version', type=int, help='version')
