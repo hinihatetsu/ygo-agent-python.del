@@ -1,7 +1,8 @@
 import argparse
+from argparse import Namespace
 from pathlib import Path
 import sqlite3
-from typing import NamedTuple, List, Dict, Any
+from typing import NamedTuple
 from pyYGONetwork.enums import CtosMessage, GameMessage, StocMessage
 
 VERSION: int = 38 | 1<<8 | 8<<16
@@ -21,7 +22,7 @@ def load_args() -> LaunchInfo:
     parser.add_argument('-host', type=str, help='host adress (default: %(default)s)')
     parser.add_argument('-port', type=int, help='port (default: %(default)s)')
     parser.add_argument('-version', type=int, help='version (default: %(default)s)')
-    args = parser.parse_args()
+    args: Namespace = parser.parse_args()
     return LaunchInfo(args.name, args.deck, args.host, args.port, args.version)
 
 
