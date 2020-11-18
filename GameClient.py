@@ -314,7 +314,7 @@ class GameClient:
             num_of_extra: int = packet.read_int(2)
             self.duel.set_deck(player, num_of_main, num_of_extra)
 
-        self.agent.start_new_game()
+        self.agent.on_start()
         
 
     def on_win(self, packet: Packet) -> None:

@@ -1,31 +1,28 @@
+import argparse
 from pathlib import Path
 import sqlite3
 from typing import NamedTuple, List, Dict, Any
 from pyYGONetwork.enums import CtosMessage, GameMessage, StocMessage
 
-
+VERSION: int = 38 | 1<<8 | 8<<16
 class LaunchInfo(NamedTuple):
-    name: str = 'AI'
-    deck: str = ''
-    host: str = '127.0.0.1'
-    port: int = 7911
-    version: int = 38 | 1<<8 | 8<<16
+    name: str
+    deck: str
+    host: str
+    port: int
+    version: int
 
 
-def load_args(args: List[str]) -> LaunchInfo:
-    info: Dict[str, Any] = dict()
-    for arg in args:
-        equal_index: int = arg.find('=')
-        if equal_index == (-1 or len(arg)-1):
-            continue
-
-        key: str = arg[:equal_index].lower()
-        if key in {'name', 'deck', 'host'}:
-            info[key] = arg[equal_index+1:]
-        elif key in {'port', 'version'}:
-            info[key] = int(arg[equal_index+1:])
-    
-    return LaunchInfo(**info)
+def load_args() -> LaunchInfo:
+    parser = argparse.ArgumentParser()
+    parser.set_defaults(name='AI', deck='', host='127.0.0.1', port=7911, version=VERSION)
+    parser.add_argument('-name', type=str, help="AI's name")
+    parser.add_argument('-deck', type=str, help='deck name')
+    parser.add_argument('-host', type=str, help='host adress')
+    parser.add_argument('-port', type=int, help='port')
+    parser.add_argument('-version', type=int, help='version')
+    args = parser.parse_args()
+    return LaunchInfo(args.name, args.deck, args.host, args.port, args.version)
 
 
 def print_message(msg_id: bytes, data: bytes, send: bool=False) -> None:
