@@ -3,7 +3,7 @@ import copy
 import datetime
 import pickle
 from pathlib import Path
-from typing import Any, NamedTuple, NoReturn
+from typing import Any, NamedTuple
 
 from pyYGO.duel import Duel
 from pyYGO.enums import Player
@@ -27,7 +27,7 @@ class Dicision(NamedTuple):
 
 class DicisionRecorder:
     DISCOUNT_RATE = 0.6
-    def __init__(self, deck: Deck, duel: Duel, usedflag: UsedFlag) -> NoReturn:
+    def __init__(self, deck: Deck, duel: Duel, usedflag: UsedFlag) -> None:
         self.deck: Deck = deck
         self.duel: Duel = duel
         self.usedflag: UsedFlag = usedflag
@@ -44,12 +44,12 @@ class DicisionRecorder:
             self.record_dir.mkdir()
 
     
-    def save_dicision(self, action: Action, card_id: int, option: Any) -> NoReturn:
+    def save_dicision(self, action: Action, card_id: int, option: Any) -> None:
         dc = Dicision(action, card_id, copy.deepcopy(self.duel), copy.deepcopy(self.usedflag), option)
         self.dicisions.append(dc)
 
 
-    def evaluate(self) -> NoReturn:
+    def evaluate(self) -> None:
         scores: list[float] = [0, 0]
         for p in (Player.ME, Player.OPPONENT):
             hand = (self.duel.field[p].hand_count - self.hand_cache[p]) / 2
@@ -69,7 +69,7 @@ class DicisionRecorder:
         self.dump()
 
 
-    def dump(self) -> NoReturn:
+    def dump(self) -> None:
         now = datetime.datetime.now()
         for index, dc in enumerate(self.evaluated_dicisions):
             save_path = self.record_dir / (now.isoformat(sep='-', timespec='seconds').replace(':', '-') + f'_{index}.dicision')
@@ -79,7 +79,7 @@ class DicisionRecorder:
         self.evaluated_dicisions.clear()
 
 
-    def reset_cache(self) -> NoReturn:
+    def reset_cache(self) -> None:
         self.hand_cache: list[int] = [5, 5]
         self.field_cache: list[int] = [0, 0]
         self.deck_cache: list[int] = [35, 35]

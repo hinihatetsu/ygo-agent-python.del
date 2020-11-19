@@ -1,5 +1,5 @@
 import enum
-from typing import NoReturn
+
 from pyYGO.card import Card
 
 class Zone:
@@ -25,7 +25,7 @@ class Zone:
 
         OPPONENT = 16
 
-    def __init__(self) -> NoReturn:
+    def __init__(self) -> None:
         self.card: Card = None
         self.id: self.ID = None # used to select place
 
@@ -39,11 +39,11 @@ class Zone:
 
 
 class MonsterZone(Zone):
-    def __init__(self) -> NoReturn:
+    def __init__(self) -> None:
         super().__init__()
 
 
 
 class SpellZone(Zone):
-    def __init__(self) -> NoReturn:
+    def __init__(self) -> None:
         super().__init__()

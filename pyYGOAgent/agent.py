@@ -1,5 +1,4 @@
 import random
-from typing import NoReturn
 
 from pyYGO.duel import Duel
 from pyYGO.card import Card
@@ -15,7 +14,7 @@ from pyYGOAgent.flags import UsedFlag
 
 class DuelAgent:
     TRAINING_INTERVAL: int = 3
-    def __init__(self, deck_name: str, duel: Duel) -> NoReturn:
+    def __init__(self, deck_name: str, duel: Duel) -> None:
         self.deck: Deck = Deck(deck_name)
         self.duel: Duel = duel
         self.usedflag: UsedFlag = UsedFlag(self.deck)
@@ -23,22 +22,22 @@ class DuelAgent:
         self.brain: AgentBrain = AgentBrain(self.deck)
 
     
-    def on_start(self) -> NoReturn:
+    def on_start(self) -> None:
         self.brain.on_start(self.duel, self.usedflag)
         self.recorder.reset_cache()
 
     
-    def on_new_turn(self) -> NoReturn:
+    def on_new_turn(self) -> None:
         self.usedflag.reset()
         if self.duel.turn_player == Player.ME:
             self.recorder.evaluate()
 
 
-    def on_win(self) -> NoReturn:
+    def on_win(self) -> None:
         self.recorder.evaluate()
 
     
-    def update_usedflag(self, card_id: int) -> NoReturn:
+    def update_usedflag(self, card_id: int) -> None:
         self.usedflag.used(card_id)
         
 
@@ -226,5 +225,5 @@ class DuelAgent:
         raise Exception('not complete coding')
 
     
-    def train(self) -> NoReturn:
+    def train(self) -> None:
         self.brain.train()

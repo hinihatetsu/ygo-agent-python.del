@@ -1,4 +1,4 @@
-from typing import TypeVar, NoReturn
+from typing import TypeVar
 import numpy as np
 
 from pyYGO.duel import Duel
@@ -13,7 +13,7 @@ ndarray = TypeVar('ndarray')
 
 
 class Network(Network):
-    def backpropagate(self, factor: ndarray) -> NoReturn:
+    def backpropagate(self, factor: ndarray) -> None:
         der: ndarray = self._output_layer.derivative_activation_func(self._output_layer.input_cache)
         self._output_layer.delta =  der * factor
         for i in range(len(self._layer_structure)-2, 0, -1):
@@ -22,7 +22,7 @@ class Network(Network):
 
 
 class DuelNetwork(Network):
-    def __init__(self) -> NoReturn:
+    def __init__(self) -> None:
         super().__init__([13, 8, 4])
 
 
@@ -46,7 +46,7 @@ class LocationNetwork(Network):
     not_in_deck: ndarray = np.array([0, 1, 1, 1, 1, 1, 0, 0, 0, 0], dtype='float64')
     inputs: ndarray
 
-    def __init__(self, deck: Deck) -> NoReturn:
+    def __init__(self, deck: Deck) -> None:
         self.deck: Deck = deck
         self.deck_list: list[int] = self.deck.main + self.deck.extra # ToDo: include side deck
         self.deck_list.sort()
@@ -130,7 +130,7 @@ class LocationNetwork(Network):
 
 
 class FlagNetwork(Network):
-    def __init__(self, flag: UsedFlag) -> NoReturn:
+    def __init__(self, flag: UsedFlag) -> None:
         layer_structure = [flag.count, 65, 24, 4]
         super().__init__(layer_structure)
 
@@ -143,7 +143,7 @@ class FlagNetwork(Network):
 
 
 class OpponentNetwork(Network):
-    def __init__(self) -> NoReturn:
+    def __init__(self) -> None:
         self.inputs_size: int = 5 + 36 * 13
         structure: list[int] = [self.inputs_size, 500, 150, 4]    
         super().__init__(structure)

@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import Callable, TypeVar, NoReturn
+from typing import Callable, TypeVar
 from pyYGOAgent.util import linear, derivative_linear, sigmoid, derivative_sigmoid, ReLU, derivative_ReLU, softmax, derivative_softmax, tanh, derivative_tanh
 import numpy as np
 ndarray = TypeVar('ndarray')
@@ -11,7 +11,7 @@ der_act_funcs = {sigmoid: derivative_sigmoid,
                  tanh: derivative_tanh}
 
 class Layer:
-    def __init__(self, prev_layer, num_neurons: int, learning_rate: float, act_func: Callable[[ndarray], ndarray]) -> NoReturn:
+    def __init__(self, prev_layer, num_neurons: int, learning_rate: float, act_func: Callable[[ndarray], ndarray]) -> None:
         self.prev_layer: Layer = prev_layer
         self.num_neurons: int = num_neurons
         self.learning_rate: float = learning_rate
@@ -30,7 +30,7 @@ class Layer:
         return self._activation_func
     
     @activation_func.setter
-    def activation_func(self, func: Callable[[ndarray], ndarray]) -> NoReturn:
+    def activation_func(self, func: Callable[[ndarray], ndarray]) -> None:
         self._activation_func = func
         self._derivative_activation_func = der_act_funcs[func]
 
@@ -51,7 +51,7 @@ class Layer:
 
 
 class Network:
-    def __init__(self, layer_structure: list[int], learning_rate: float=0.01, act_func: Callable[[ndarray], ndarray]=tanh) -> NoReturn:      
+    def __init__(self, layer_structure: list[int], learning_rate: float=0.01, act_func: Callable[[ndarray], ndarray]=tanh) -> None:      
         self._layer_structure: list[int] = layer_structure
         self._layers: list[Layer] = [Layer(None, layer_structure[0], learning_rate, act_func)]
         self.learning_rate: float = learning_rate
@@ -70,35 +70,35 @@ class Network:
         return reduce(activate, self._layers, inputs)
 
 
-    def _calculate_deltas_for_output_layer(self, expected: ndarray) -> NoReturn:
+    def _calculate_deltas_for_output_layer(self, expected: ndarray) -> None:
         layer: Layer = self._output_layer
         layer.delta = layer.derivative_activation_func(layer.input_cache) * (layer.output_cache - expected) 
 
 
-    def _calculate_deltas_for_hidden_layer(self, layer: Layer, next_layer: Layer) -> NoReturn:
+    def _calculate_deltas_for_hidden_layer(self, layer: Layer, next_layer: Layer) -> None:
         layer.delta = layer.derivative_activation_func(layer.input_cache) * (next_layer.delta @ next_layer.weight)
 
 
-    def _backpropagate(self, expected: ndarray) -> NoReturn:
+    def _backpropagate(self, expected: ndarray) -> None:
         self._calculate_deltas_for_output_layer(expected)
         for i in range(self._layer_size-2, 0, -1):
             self._calculate_deltas_for_hidden_layer(self._layers[i], self._layers[i+1])
 
 
-    def _update(self) -> NoReturn:
+    def _update(self) -> None:
         for layer in self._layers[1:]:
             layer.weight += -np.outer(layer.delta, layer.prev_layer.output_cache) * layer.learning_rate
             layer.bias += -layer.delta * layer.learning_rate
 
     
-    def train(self, inputs: list[ndarray], expecteds: list[ndarray]) -> NoReturn:
+    def train(self, inputs: list[ndarray], expecteds: list[ndarray]) -> None:
         for _input, expected in zip(inputs, expecteds):
             self._outputs(_input)
             self._backpropagate(expected)
             self._update()
 
 
-    def load_weights(self, weights: list[ndarray]) -> NoReturn:
+    def load_weights(self, weights: list[ndarray]) -> None:
         for layer, weight in zip(self._layers, weights):
             layer.weight = weight
     

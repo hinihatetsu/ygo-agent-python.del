@@ -1,5 +1,3 @@
-from typing import Dict
-
 from pyYGO.enums import CardLocation, CardPosition
 
 class Location(int):

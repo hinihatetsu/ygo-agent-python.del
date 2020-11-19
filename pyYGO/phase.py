@@ -1,5 +1,3 @@
-from typing import NoReturn
-
 from pyYGO.card import Card
 
 class MainPhase:
@@ -34,7 +32,7 @@ class MainPhase:
 
 
 class BattlePhase:
-    def __init__(self) -> NoReturn:
+    def __init__(self) -> None:
         self.attackable: list[Card] = []
         self.activatable: list[Card] = []
         self.activation_descs: list[int] = []

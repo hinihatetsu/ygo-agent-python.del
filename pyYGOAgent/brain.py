@@ -1,7 +1,7 @@
 import random
 import pickle
 from pathlib import Path
-from typing import TypeVar, NoReturn
+from typing import TypeVar
 import numpy as np
 ndarray = TypeVar('ndarray')
 
@@ -18,7 +18,7 @@ from pyYGOAgent.recorder import Dicision
 
 class AgentBrain:
     EPOCH: int = 30
-    def __init__(self, deck: Deck) -> NoReturn:
+    def __init__(self, deck: Deck) -> None:
         self.duel: Duel = None
         self.usedflag: UsedFlag = None
 
@@ -40,7 +40,7 @@ class AgentBrain:
         return self._deck
 
     @deck.setter
-    def deck(self, deck: Deck) -> NoReturn:
+    def deck(self, deck: Deck) -> None:
         self._deck = deck
         self.load_networks()
 
@@ -53,7 +53,7 @@ class AgentBrain:
         return Path.cwd() / 'Decks' / self.deck.name / 'Records'
 
 
-    def load_networks(self) -> NoReturn:
+    def load_networks(self) -> None:
         if not self.brain_path.exists():
             self.create_networks()
             return
@@ -72,7 +72,7 @@ class AgentBrain:
         self.phase_network = networks[8]
 
 
-    def save_networks(self) -> NoReturn:
+    def save_networks(self) -> None:
         info: list[ActionNetwork] = [
             self.summon_network,
             self.special_summon_network,
@@ -89,7 +89,7 @@ class AgentBrain:
             pickle.dump(info, f)
 
     
-    def create_networks(self) -> NoReturn:
+    def create_networks(self) -> None:
         usedflag: UsedFlag = UsedFlag(self.deck)
         self.summon_network = SummonNetwork(self.deck, usedflag)
         self.special_summon_network = SpecialSummonNetwork(self.deck, usedflag)
@@ -103,7 +103,7 @@ class AgentBrain:
         self.save_networks()
 
 
-    def on_start(self, duel: Duel, usedflag: UsedFlag) -> NoReturn:
+    def on_start(self, duel: Duel, usedflag: UsedFlag) -> None:
         self.duel = duel
         self.usedflag = usedflag
 
@@ -153,7 +153,7 @@ class AgentBrain:
         return value
     
 
-    def train(self) -> NoReturn:
+    def train(self) -> None:
         dicisions: list[Dicision] = []
         for path in self.record_dir.glob('*.dicision'):
             with open(path, mode='rb') as f:

@@ -1,7 +1,7 @@
 import asyncio
 import random
 from collections.abc import Coroutine
-from typing import Callable, Tuple, NoReturn
+from typing import Callable, Tuple
 
 from util import LaunchInfo, print_message
 from pyYGO.duel import Duel
@@ -19,7 +19,7 @@ from pyYGONetwork.enums import CtosMessage, StocMessage, GameMessage
 class GameClient:
     SERVER_HANDSHAKE: int = 4043399681
     MAX_MATCH: int = 500
-    def __init__(self, info: LaunchInfo) -> NoReturn:
+    def __init__(self, info: LaunchInfo) -> None:
         self.info: LaunchInfo = info
         self.connection = YGOConnection(info.host, info.port)
         self.duel: Duel = Duel()
@@ -34,11 +34,11 @@ class GameClient:
         self.match_count: int = 0
 
 
-    def start(self) -> NoReturn:
+    def start(self) -> None:
         asyncio.run(self.main())
 
 
-    async def main(self) -> Coroutine[None, None, NoReturn]:
+    async def main(self) -> Coroutine[None, None, None]:
         await self.connection.connect()
         self.on_connected()
         # concurrent tasks
@@ -56,7 +56,7 @@ class GameClient:
             await self.connection.drain()
 
 
-    def on_connected(self) -> NoReturn:
+    def on_connected(self) -> None:
         packet: Packet = Packet(CtosMessage.PLAYER_INFO)
         packet.write(self.info.name, byte_size=40)
         self.connection.send(packet)
@@ -70,7 +70,7 @@ class GameClient:
         self.connection.send(packet)
 
 
-    def on_recieved(self, packet: Packet) -> NoReturn:
+    def on_recieved(self, packet: Packet) -> None:
         if packet.msg_id == StocMessage.GAME_MSG:
             id: int = packet.read_int(1)
             if id in self.processes:
@@ -80,7 +80,7 @@ class GameClient:
             self.responds[packet.msg_id](packet)
         
 
-    def register_responds(self) -> NoReturn:
+    def register_responds(self) -> None:
         self.responds[StocMessage.ERROR_MSG] = self.on_error_msg
         self.responds[StocMessage.SELECT_HAND] = self.on_select_hand
         self.responds[StocMessage.SETECT_TP] = self.on_select_tp
@@ -96,25 +96,25 @@ class GameClient:
         self.responds[StocMessage.REMATCH] = self.on_rematch
 
 
-    def on_error_msg(self, packet: Packet) -> NoReturn:
+    def on_error_msg(self, packet: Packet) -> None:
         pass
 
 
-    def on_select_hand(self, packet: Packet) -> NoReturn:
+    def on_select_hand(self, packet: Packet) -> None:
         hand: int = random.randint(1, 3)
         reply: Packet = Packet(CtosMessage.HAND_RESULT)
         reply.write(hand, byte_size=1)
         self.connection.send(reply)
 
 
-    def on_select_tp(self, packet: Packet) -> NoReturn:
+    def on_select_tp(self, packet: Packet) -> None:
         select_first: bool = False
         reply: Packet = Packet(CtosMessage.TP_RESULT)
         reply.write(select_first)
         self.connection.send(reply)
 
 
-    def on_change_side(self, packet: Packet) -> NoReturn:
+    def on_change_side(self, packet: Packet) -> None:
         reply: Packet = Packet(CtosMessage.UPDATE_DECK)
         reply.write(self.agent.deck.count_main + self.agent.deck.count_extra)
         reply.write(self.agent.deck.count_side)
@@ -123,7 +123,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_joined_game(self, packet: Packet) -> NoReturn:
+    def on_joined_game(self, packet: Packet) -> None:
         lflist: int = packet.read_int(4)
         rule: int = packet.read_int(1)
         mode: int = packet.read_int(1)
@@ -168,11 +168,11 @@ class GameClient:
         return
 
 
-    def on_duel_end(self, packet: Packet) -> NoReturn:
+    def on_duel_end(self, packet: Packet) -> None:
         self.connection.close()
 
 
-    def on_replay(self, packet: Packet) -> NoReturn:
+    def on_replay(self, packet: Packet) -> None:
         if self.match_count % self.agent.TRAINING_INTERVAL == 0:
             reply: Packet = Packet(CtosMessage.CHAT)
             content: str = "I'm training now. Please wait for a while."
@@ -182,25 +182,25 @@ class GameClient:
             self.agent.train()
 
 
-    def on_timelimit(self, packet: Packet) -> NoReturn:
+    def on_timelimit(self, packet: Packet) -> None:
         player: Player = packet.read_player()
         if player == Player.ME:  
             self.connection.send(Packet(CtosMessage.TIME_CONFIRM))
 
 
-    def on_chat(self, packet: Packet) -> NoReturn:
+    def on_chat(self, packet: Packet) -> None:
         pass
 
 
-    def on_player_enter(self, packet: Packet) -> NoReturn:
+    def on_player_enter(self, packet: Packet) -> None:
         name: str = packet.read_str(40)
 
 
-    def on_player_change(self, packet: Packet) -> NoReturn:
+    def on_player_change(self, packet: Packet) -> None:
         pass
 
 
-    def on_rematch(self, packet: Packet) -> NoReturn:
+    def on_rematch(self, packet: Packet) -> None:
         ans: bool = None
         if self.match_count < self.MAX_MATCH:
             ans = True
@@ -213,7 +213,7 @@ class GameClient:
         self.connection.send(reply)
 
     
-    def register_processes(self) -> NoReturn:
+    def register_processes(self) -> None:
         self.processes[GameMessage.RETRY] = self.on_retry
         self.processes[GameMessage.HINT] = self.on_hint
         self.processes[GameMessage.START] = self.on_start
@@ -275,14 +275,14 @@ class GameClient:
         self.processes[GameMessage.TAG_SWAP] = self.on_tag_swap
 
     
-    def on_retry(self, packet: Packet) -> NoReturn:
+    def on_retry(self, packet: Packet) -> None:
         # retry means we send an invalid message
         print_message(self.connection.last_recieved.msg_id, self.connection.last_recieved.content)
         print_message(self.connection.last_send.msg_id, self.connection.last_send.content, send=True)
         raise Exception('sent invalid message')
 
 
-    def on_hint(self, packet: Packet) -> NoReturn:
+    def on_hint(self, packet: Packet) -> None:
         HINT_EVENT = 1
         HINT_MESSAGE = 2
         HINT_SELECT = 3
@@ -303,7 +303,7 @@ class GameClient:
             self.select_hint = data
 
     
-    def on_start(self, packet: Packet) -> NoReturn:
+    def on_start(self, packet: Packet) -> None:
         Packet.first_is_me = not packet.read_bool()
         first_player: Player = Player.ME if Packet.first_is_me else Player.OPPONENT
         self.duel.on_start(first_player)
@@ -319,13 +319,13 @@ class GameClient:
         self.agent.on_start()
         
 
-    def on_win(self, packet: Packet) -> NoReturn:
+    def on_win(self, packet: Packet) -> None:
         print(f'Match {self.match_count}:', end='')
         print('win' if packet.read_player() == Player.ME else 'lose')
         self.agent.on_win()
         
 
-    def on_update_data(self, packet: Packet) -> NoReturn:
+    def on_update_data(self, packet: Packet) -> None:
         player: Player = packet.read_player()
         location: Location = packet.read_location()
         cards: list[Card] = self.duel.get_cards(player, location)
@@ -337,7 +337,7 @@ class GameClient:
                 packet.read_bytes(2) # read \x00\x00, which means no card
         
 
-    def on_update_card(self, packet: Packet) -> NoReturn:
+    def on_update_card(self, packet: Packet) -> None:
         player: int = packet.read_player()
         location: Location = packet.read_location()
         index: int = packet.read_int(1)
@@ -346,7 +346,7 @@ class GameClient:
         card.update(packet)
 
 
-    def on_select_idle_cmd(self, packet: Packet) -> NoReturn:
+    def on_select_idle_cmd(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player() 
 
         main: MainPhase = MainPhase()
@@ -386,7 +386,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_battle_cmd(self, packet:Packet) -> NoReturn:
+    def on_select_battle_cmd(self, packet:Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         battle: BattlePhase = BattlePhase()
 
@@ -427,7 +427,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_effect_yn(self, packet: Packet) -> NoReturn:
+    def on_select_effect_yn(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         card_id: int = packet.read_id()
         controller: Player = packet.read_player()
@@ -445,7 +445,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_yesno(self, packet: Packet) -> NoReturn:
+    def on_select_yesno(self, packet: Packet) -> None:
         REPLAY_BATTLE = 30
         player_msg_sent_to: int = packet.read_player()
         desc: int = packet.read_int(8)
@@ -458,7 +458,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_option(self, packet: Packet) -> NoReturn:
+    def on_select_option(self, packet: Packet) -> None:
         player_msg_sent_to: int = packet.read_int(1)
         num_of_options: int = packet.read_int(1)
         options: list[int] = [packet.read_int(8) for _ in range(num_of_options)]
@@ -469,7 +469,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_card(self, packet: Packet) -> NoReturn:
+    def on_select_card(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         cancelable: bool = packet.read_bool()
         min_: int = packet.read_int(4) # min number of cards to select
@@ -496,7 +496,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_chain(self, packet: Packet) -> NoReturn:
+    def on_select_chain(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         specount: int = packet.read_int(1)
         forced: bool = packet.read_bool()
@@ -528,7 +528,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_place(self, packet: Packet) -> NoReturn:
+    def on_select_place(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         min_: int = packet.read_int(1)
         selectable: int = 0xffffffff - packet.read_int(4)
@@ -561,7 +561,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_position(self, packet: Packet) -> NoReturn:
+    def on_select_position(self, packet: Packet) -> None:
         player_msg_sent_to: int = packet.read_player()
         card_id: int = packet.read_id()
         selectable_position: Position = packet.read_int(1)
@@ -581,7 +581,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_tribute(self, packet: Packet) -> NoReturn:
+    def on_select_tribute(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         cancelable: bool = packet.read_bool()
         min_: int = packet.read_int(4) # min number of cards to select
@@ -608,7 +608,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_counter(self, packet: Packet) -> NoReturn:
+    def on_select_counter(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         counter_type: int = packet.read_int(2)
         quantity: int = packet.read_int(4)
@@ -636,7 +636,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_sum(self, packet: Packet) -> NoReturn:
+    def on_select_sum(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         must_just: bool = not packet.read_bool()
         sum_value: int = packet.read_int(4)
@@ -679,7 +679,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_unselect(self, packet: Packet) -> NoReturn:
+    def on_select_unselect(self, packet: Packet) -> None:
         player_msg_snt_to: Player = packet.read_player()
         finishable: bool = packet.read_bool()
         cancelable: bool = packet.read_bool() or finishable
@@ -721,20 +721,20 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_shuffle_deck(self, packet: Packet) -> NoReturn:
+    def on_shuffle_deck(self, packet: Packet) -> None:
         player: Player = packet.read_player()
         for card in self.duel.field[player].deck:
             card.id = 0
 
 
-    def on_shuffle_hand(self, packet: Packet) -> NoReturn:
+    def on_shuffle_hand(self, packet: Packet) -> None:
         player: Player = packet.read_player()
         num_of_hand: int = packet.read_int(4)
         for card in self.duel.field[player].hand:
             card.id = packet.read_int(4)
 
     
-    def on_shuffle_extra(self, packet: Packet) -> NoReturn:
+    def on_shuffle_extra(self, packet: Packet) -> None:
         player: Player = packet.read_player()
         num_of_extra: int = packet.read_int(4)
         for card in self.duel.field[player].extradeck:
@@ -742,7 +742,7 @@ class GameClient:
                 card.id = packet.read_int(4)
 
 
-    def on_shuffle_setcard(self, packet: Packet) -> NoReturn:
+    def on_shuffle_setcard(self, packet: Packet) -> None:
         location: Location = packet.read_location()
 
         old: list[Card] = []
@@ -763,7 +763,7 @@ class GameClient:
             self.duel.add_card(old[i], controller, location, index)
 
     
-    def on_sort_card(self, packet: Packet) -> NoReturn:
+    def on_sort_card(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         cards: list[Card] = []
         for _ in range(packet.read_int(4)):
@@ -783,24 +783,24 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_sort_chain(self, packet: Packet) -> NoReturn:
+    def on_sort_chain(self, packet: Packet) -> None:
         reply: Packet = Packet(CtosMessage.RESPONSE)
         reply.write(-1)
         self.connection.send(reply)
 
 
-    def on_new_turn(self, packet: Packet) -> NoReturn:
+    def on_new_turn(self, packet: Packet) -> None:
         turn_player: Player = packet.read_player()
         self.duel.on_new_turn(turn_player)
         self.agent.on_new_turn()
 
 
-    def on_new_phase(self, packet: Packet) -> NoReturn:
+    def on_new_phase(self, packet: Packet) -> None:
         phase: Phase = packet.read_phase()
         self.duel.on_new_phase(phase)
 
 
-    def on_move(self, packet: Packet) -> NoReturn:
+    def on_move(self, packet: Packet) -> None:
         card_id: int = packet.read_id()
         # p means previous, c means current
         p_controller: Player = packet.read_player()
@@ -822,7 +822,7 @@ class GameClient:
         self.duel.add_card(card, c_controller, c_location, c_index)
 
 
-    def on_poschange(self, packet: Packet) -> NoReturn:
+    def on_poschange(self, packet: Packet) -> None:
         card_id: int = packet.read_id()
         # p means previous, c means current
         p_controller: Player = packet.read_player()
@@ -835,11 +835,11 @@ class GameClient:
         card.position = c_position
 
 
-    def on_set(self, packet: Packet) -> NoReturn:
+    def on_set(self, packet: Packet) -> None:
         pass
 
 
-    def on_swap(self, packet: Packet) -> NoReturn:
+    def on_swap(self, packet: Packet) -> None:
         # p means previous, c means current
         card_id_1: int = packet.read_id()
         controller_1: Player = packet.read_player()
@@ -863,7 +863,7 @@ class GameClient:
         self.duel.add_card(card_2, controller_1, location_1, index_1)
 
 
-    def on_summoning(self, packet: Packet) -> NoReturn:
+    def on_summoning(self, packet: Packet) -> None:
         card_id: int = packet.read_id()
         controller: Player = packet.read_player()
         location: Location = packet.read_location()
@@ -874,11 +874,11 @@ class GameClient:
         self.duel.on_summoning(controller, card)
 
 
-    def on_summoned(self, packet: Packet) -> NoReturn:
+    def on_summoned(self, packet: Packet) -> None:
         self.duel.on_summoned()
 
 
-    def on_spsummoning(self, packet: Packet) -> NoReturn:
+    def on_spsummoning(self, packet: Packet) -> None:
         card_id: int = packet.read_id()
         controller: Player = packet.read_player()
         location: Location = packet.read_location()
@@ -889,11 +889,11 @@ class GameClient:
         self.duel.on_summoning(controller, card)
 
 
-    def on_spsummoned(self, packet: Packet) -> NoReturn:
+    def on_spsummoned(self, packet: Packet) -> None:
         self.duel.on_spsummoned()
 
 
-    def on_chaining(self, packet: Packet) -> NoReturn:
+    def on_chaining(self, packet: Packet) -> None:
         card_id: int = packet.read_id()
         controller: Player = packet.read_player()
         location: Location = packet.read_location()
@@ -905,11 +905,11 @@ class GameClient:
         self.duel.on_chaining(last_chain_player, card)
 
 
-    def on_chain_end(self, packet: Packet) -> NoReturn:
+    def on_chain_end(self, packet: Packet) -> None:
         self.duel.on_chain_end()
 
 
-    def on_become_target(self, packet: Packet) -> NoReturn:
+    def on_become_target(self, packet: Packet) -> None:
         for _ in range(packet.read_int(4)):
             controller: Player = packet.read_player()
             location: Location = packet.read_location()
@@ -919,25 +919,25 @@ class GameClient:
             self.duel.on_become_target(card)
 
 
-    def on_draw(self, packet: Packet) -> NoReturn:
+    def on_draw(self, packet: Packet) -> None:
         player: Player = packet.read_player()
         for _ in range(packet.read_int(4)):
             self.duel.on_draw(player)
 
 
-    def on_damage(self, packet: Packet) -> NoReturn:
+    def on_damage(self, packet: Packet) -> None:
         player: Player = packet.read_player()
         damage: int = packet.read_int(4)
         self.duel.on_damage(player, damage)
 
 
-    def on_recover(self, packet: Packet) -> NoReturn:
+    def on_recover(self, packet: Packet) -> None:
         player: Player = packet.read_player()
         recover: int = packet.read_int(4)
         self.duel.on_recover(player, recover)
 
 
-    def on_equip(self, packet: Packet) -> NoReturn:
+    def on_equip(self, packet: Packet) -> None:
         controller_1: Player = packet.read_player()
         location_1: Location = packet.read_location()
         index_1: int = packet.read_int(4)
@@ -954,7 +954,7 @@ class GameClient:
         equipped.equip_cards.append(equip)
 
 
-    def on_unequip(self, packet: Packet) -> NoReturn:
+    def on_unequip(self, packet: Packet) -> None:
         controller: Player = packet.read_player()
         location: Location = packet.read_location()
         index: int = packet.read_int(4)
@@ -964,13 +964,13 @@ class GameClient:
         equip.equip_target = None
 
 
-    def on_lp_update(self, packet: Packet) -> NoReturn:
+    def on_lp_update(self, packet: Packet) -> None:
         player: Player = packet.read_player()
         lp: int = packet.read_int(4)
         self.duel.on_lp_update(player, lp)
 
 
-    def on_card_target(self, packet: Packet) -> NoReturn:
+    def on_card_target(self, packet: Packet) -> None:
         controller_1: Player = packet.read_player()
         location_1: Location = packet.read_location()
         index_1: int = packet.read_int(4)
@@ -985,7 +985,7 @@ class GameClient:
         targeted.targeted_by.append(targeting)
 
 
-    def on_cancel_target(self, packet: Packet) -> NoReturn:
+    def on_cancel_target(self, packet: Packet) -> None:
         controller_1: Player = packet.read_player()
         location_1: Location = packet.read_location()
         index_1: int = packet.read_int(4)
@@ -1000,7 +1000,7 @@ class GameClient:
         targeted.targeted_by.remove(targeting)
 
 
-    def on_attack(self, packet: Packet) -> NoReturn:
+    def on_attack(self, packet: Packet) -> None:
         controller_1: Player = packet.read_player()
         location_1: Location = packet.read_location()
         index_1: int = packet.read_int(4)
@@ -1014,19 +1014,19 @@ class GameClient:
         self.duel.on_attack(attacking, attacked)
         
 
-    def on_battle(self, packet: Packet) -> NoReturn:
+    def on_battle(self, packet: Packet) -> None:
         self.duel.on_battle()
     
 
-    def on_attack_disabled(self, packet: Packet) -> NoReturn:
+    def on_attack_disabled(self, packet: Packet) -> None:
         self.duel.on_battle()
 
 
-    def on_rock_paper_scissors(self, packet: Packet) -> NoReturn:
+    def on_rock_paper_scissors(self, packet: Packet) -> None:
         pass
 
 
-    def on_announce_race(self, packet: Packet) -> NoReturn:
+    def on_announce_race(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         count: int = packet.read_int(1)
         available: int = packet.read_int(4)
@@ -1039,11 +1039,11 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_announce_card(self, packet: Packet) -> NoReturn:
+    def on_announce_card(self, packet: Packet) -> None:
         raise Exception('not complete coding')
 
 
-    def on_announce_attr(self, packet: Packet) -> NoReturn:
+    def on_announce_attr(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         count: int = packet.read_int(1)
         available: int = packet.read_int(4)
@@ -1056,7 +1056,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_announce_number(self, packet: Packet) -> NoReturn:
+    def on_announce_number(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         count: int = packet.read_int(1)
         choices: list[int] = [packet.read_int(4) for _ in range(count)]
@@ -1067,7 +1067,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_tag_swap(self, packet: Packet) -> NoReturn:
+    def on_tag_swap(self, packet: Packet) -> None:
         pass
 
     

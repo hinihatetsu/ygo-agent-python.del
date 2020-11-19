@@ -1,6 +1,4 @@
 from pyYGO.wrapper import Location
-from typing import NoReturn
-
 from pyYGO.card import Card
 from pyYGO.zone import Zone, MonsterZone, SpellZone
 from pyYGO.enums import CardLocation, CardType
@@ -8,7 +6,7 @@ from pyYGO.enums import CardLocation, CardType
 
 
 class HalfField():
-    def __init__(self) -> NoReturn:
+    def __init__(self) -> None:
         self.hand: list[Card] = []
         self.deck: list[Card] = []
         self.extradeck: list[Card] = []
@@ -72,7 +70,7 @@ class HalfField():
         return len(self.deck)
 
     @property
-    def columncard_count(self, column: int) -> NoReturn:
+    def columncard_count(self, column: int) -> None:
         return sum(int(zone.has_card) for zone in self.column_zones[column])
 
     @property
@@ -92,7 +90,7 @@ class HalfField():
         if location.is_overlay:
             return Card(location=location)
 
-        where: List = self.where(location)
+        where: list = self.where(location)
         card: Card = Card()
 
         if where is None:
@@ -107,8 +105,8 @@ class HalfField():
         return card
 
     
-    def add_card(self, card: Card, location: Location, index: int) -> NoReturn:
-        where: List = self.where(location)
+    def add_card(self, card: Card, location: Location, index: int) -> None:
+        where: list = self.where(location)
         
         if location.is_zone:
             zone: Zone = where[index]
@@ -120,8 +118,8 @@ class HalfField():
             where.insert(index, card)
 
     
-    def remove_card(self, card: Card, location: Location, index: int) -> NoReturn:
-        where: List = self.where(location)
+    def remove_card(self, card: Card, location: Location, index: int) -> None:
+        where: list = self.where(location)
         
         if location.is_zone:
             zone: Zone = where[index]
@@ -159,7 +157,7 @@ class HalfField():
             return None
     
 
-    def set_deck(self, num_of_main: int, num_of_extra: int) -> NoReturn:
+    def set_deck(self, num_of_main: int, num_of_extra: int) -> None:
         self.deck = [Card() for _ in range(num_of_main)]
         self.extradeck = [Card() for _ in range(num_of_extra)]
         

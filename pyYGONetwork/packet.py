@@ -1,4 +1,4 @@
-from typing import TypeVar, NoReturn
+from typing import TypeVar
 
 from pyYGO.enums import Player, Phase
 from pyYGO.wrapper import Location, Position
@@ -21,7 +21,7 @@ class Packet:
         return int.from_bytes(self._msg_id, byteorder="little")
 
     @msg_id.setter
-    def msg_id(self, msg_id: int) -> NoReturn:
+    def msg_id(self, msg_id: int) -> None:
         self._msg_id = msg_id.to_bytes(1, byteorder='little')
 
     @property
@@ -29,7 +29,7 @@ class Packet:
         return self._msg_id + self.content
 
 
-    def write(self, content: Message, * , byte_size: int=4) -> NoReturn:
+    def write(self, content: Message, * , byte_size: int=4) -> None:
         type_: type = type(content)
 
         if type_ == Player:

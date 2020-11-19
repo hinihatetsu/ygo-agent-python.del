@@ -1,4 +1,4 @@
-from typing import NoReturn
+
 
 from pyYGO.enums import Player, CardPosition, CardType, Attribute, Race, Query
 from pyYGO.wrapper import Location
@@ -9,7 +9,7 @@ class Card:
     POSITION: dict[int, CardPosition] = {int(pos): pos for pos in CardPosition}
     ATTRIBUTE: dict[int, Attribute] = {int(a): a for a in Attribute}
     RASE: dict[int, Race] = {int(r): r for r in Race}
-    def __init__(self, card_id: int=0, location: Location=None) -> NoReturn:
+    def __init__(self, card_id: int=0, location: Location=None) -> None:
         # card info
         self.id: int = card_id
         self.arias: int = None
@@ -55,7 +55,7 @@ class Card:
         return bool(self.position & CardPosition.DEFENCE)
 
 
-    def update(self, packet: Packet) -> NoReturn:
+    def update(self, packet: Packet) -> None:
         while True:
             size: int = packet.read_int(2)
             if size == 0:

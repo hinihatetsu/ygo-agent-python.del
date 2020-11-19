@@ -1,6 +1,5 @@
 import asyncio
 import asyncio.streams
-from typing import NoReturn
 
 from pyYGONetwork.packet import Packet
 
@@ -9,7 +8,7 @@ class YGOConnection:
     MAX_PACKET_SIZE : int = 0xffff
     HEADER_SIZE: int = 2
 
-    def __init__(self, hostIP: str, port: int) -> NoReturn:
+    def __init__(self, hostIP: str, port: int) -> None:
         self.hostIP: str = hostIP
         self.port: int = port
         self.recieved_data: asyncio.Queue[bytes] = None
@@ -27,7 +26,7 @@ class YGOConnection:
         return not self.writer.is_closing()
    
 
-    async def connect(self) -> NoReturn:
+    async def connect(self) -> None:
         self.recieved_data = asyncio.Queue()
         try:
             self.reader, self.writer = await asyncio.streams.open_connection(self.hostIP, self.port)
@@ -35,7 +34,7 @@ class YGOConnection:
             pass
 
 
-    def send(self, packet: Packet) -> NoReturn:
+    def send(self, packet: Packet) -> None:
         data: bytes = packet.data
         size: int = len(data)
         if size > self.MAX_PACKET_SIZE:
@@ -46,7 +45,7 @@ class YGOConnection:
         self.last_send = packet
 
 
-    async def listen(self) -> NoReturn:
+    async def listen(self) -> None:
         while self.is_connected:
             try:
                 header: bytes = await self.reader.read(self.HEADER_SIZE)
@@ -67,12 +66,12 @@ class YGOConnection:
         return packet
 
 
-    async def drain(self) -> NoReturn:
+    async def drain(self) -> None:
         if self.is_connected:
             await self.writer.drain()
             
 
-    def close(self) -> NoReturn:
+    def close(self) -> None:
         self.writer.close()
 
 
