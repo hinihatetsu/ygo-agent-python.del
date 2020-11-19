@@ -1,12 +1,12 @@
-from typing import Dict, ValuesView
+from typing import ValuesView, NoReturn
 
 from pyYGOAgent.deck import Deck
 
 
 class UsedFlag:
-    def __init__(self, deck: Deck) -> None:
+    def __init__(self, deck: Deck) -> NoReturn:
         self.deck: Deck = deck
-        self.flag: Dict[int, bool] = dict()
+        self.flag: dict[int, bool] = dict()
         self.load()
 
 
@@ -15,17 +15,17 @@ class UsedFlag:
         return len(self.flag)
         
     
-    def load(self) -> None:
+    def load(self) -> NoReturn:
         for card_id in self.deck.main + self.deck.extra:
             self.flag[card_id] = False
 
 
-    def reset(self) -> None:
+    def reset(self) -> NoReturn:
         for card_id in self.flag:
             self.flag[card_id] = False
 
 
-    def used(self, card_id: int) -> None:
+    def used(self, card_id: int) -> NoReturn:
         self.flag[card_id] = True
 
 

@@ -2,7 +2,7 @@ import argparse
 from argparse import Namespace
 from pathlib import Path
 import sqlite3
-from typing import NamedTuple
+from typing import NamedTuple, NoReturn
 from pyYGONetwork.enums import CtosMessage, GameMessage, StocMessage
 
 VERSION: int = 38 | 1<<8 | 8<<16
@@ -26,7 +26,7 @@ def load_args() -> LaunchInfo:
     return LaunchInfo(args.name, args.deck, args.host, args.port, args.version)
 
 
-def print_message(msg_id: bytes, data: bytes, send: bool=False) -> None:
+def print_message(msg_id: bytes, data: bytes, send: bool=False) -> NoReturn:
     ctsmsgs = {int(cts): cts for cts in CtosMessage}
     stcmsgs = {int(stc): stc for stc in StocMessage}
     gmmsgs = {int(gm): gm for gm in GameMessage}
@@ -57,7 +57,7 @@ def print_message(msg_id: bytes, data: bytes, send: bool=False) -> None:
 
 
 
-def print_description(card_id: int, desc: int) -> None: 
+def print_description(card_id: int, desc: int) -> NoReturn: 
     db_path = Path.cwd() / 'cards.cdb'
     db_conn = sqlite3.connect(db_path)
     cur = db_conn.cursor()

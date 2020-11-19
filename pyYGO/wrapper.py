@@ -23,7 +23,7 @@ class Location(int):
 
 
 class Position(int):
-    pos_dict: Dict[int, CardPosition] = {int(pos): pos for pos in CardPosition}
+    pos_dict: dict[int, CardPosition] = {int(pos): pos for pos in CardPosition}
     def __repr__(self) -> str:
         return self.pos_dict[self].__repr__()
 

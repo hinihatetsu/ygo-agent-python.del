@@ -1,25 +1,25 @@
 from pathlib import Path
-from typing import List
+from typing import NoReturn
 
 
 
 class Deck:
     decks_dir: Path = Path.cwd() / 'Decks'
-    def __init__(self, deck_name: str) -> None:
+    def __init__(self, deck_name: str) -> NoReturn:
         self.name: str = deck_name
-        self.main: List[int] = []
-        self.extra: List[int] = []
-        self.side: List[int] = []
+        self.main: list[int] = []
+        self.extra: list[int] = []
+        self.side: list[int] = []
 
         self.load()
 
     
-    def load(self) -> None:
+    def load(self) -> NoReturn:
         deck: Path = self.decks_dir / self.name / (self.name + '.ydk')
         if not deck.exists():
             self.create()
         
-        box: List[int] = self.main
+        box: list[int] = self.main
         with deck.open() as f:
             for line in f.readlines():
                 line = line.strip()
@@ -35,7 +35,7 @@ class Deck:
                     pass
 
 
-    def create(self) -> None:
+    def create(self) -> NoReturn:
         deck: Path = self.decks_dir / (self.name + '.ydk')
         if not deck.exists():
             raise ValueError(f'not found deck named "{self.name}"')

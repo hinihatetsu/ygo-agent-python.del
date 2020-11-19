@@ -1,4 +1,4 @@
-from typing import List, TypeVar
+from typing import TypeVar, NoReturn
 import numpy as np
 
 from pyYGO.duel import Duel
@@ -13,7 +13,7 @@ ndarray = TypeVar('ndarray')
 
 
 class Network(Network):
-    def backpropagate(self, factor: ndarray) -> None:
+    def backpropagate(self, factor: ndarray) -> NoReturn:
         der: ndarray = self._output_layer.derivative_activation_func(self._output_layer.input_cache)
         self._output_layer.delta =  der * factor
         for i in range(len(self._layer_structure)-2, 0, -1):
@@ -22,7 +22,7 @@ class Network(Network):
 
 
 class DuelNetwork(Network):
-    def __init__(self) -> None:
+    def __init__(self) -> NoReturn:
         super().__init__([13, 8, 4])
 
 
@@ -46,9 +46,9 @@ class LocationNetwork(Network):
     not_in_deck: ndarray = np.array([0, 1, 1, 1, 1, 1, 0, 0, 0, 0], dtype='float64')
     inputs: ndarray
 
-    def __init__(self, deck: Deck) -> None:
+    def __init__(self, deck: Deck) -> NoReturn:
         self.deck: Deck = deck
-        self.deck_list: List[int] = self.deck.main + self.deck.extra # ToDo: include side deck
+        self.deck_list: list[int] = self.deck.main + self.deck.extra # ToDo: include side deck
         self.deck_list.sort()
 
         inputs_size: int = len(self.deck_list) * self.LOCATION_BIT
@@ -130,7 +130,7 @@ class LocationNetwork(Network):
 
 
 class FlagNetwork(Network):
-    def __init__(self, flag: UsedFlag) -> None:
+    def __init__(self, flag: UsedFlag) -> NoReturn:
         layer_structure = [flag.count, 65, 24, 4]
         super().__init__(layer_structure)
 
@@ -143,9 +143,9 @@ class FlagNetwork(Network):
 
 
 class OpponentNetwork(Network):
-    def __init__(self) -> None:
+    def __init__(self) -> NoReturn:
         self.inputs_size: int = 5 + 36 * 13
-        structure: List[int] = [self.inputs_size, 500, 150, 4]    
+        structure: list[int] = [self.inputs_size, 500, 150, 4]    
         super().__init__(structure)
 
     
@@ -166,14 +166,14 @@ class OpponentNetwork(Network):
 
         for i, zone in enumerate(opp_field.monster_zones):
             if zone.has_card:
-                id: List[int] = [(zone.card.id >> j) & 1 for j in range(32)] # card id is 32 bits 
-                pos: List[bool] = [bool(zone.card.position & pos) for pos in POSITION]
+                id: list[int] = [(zone.card.id >> j) & 1 for j in range(32)] # card id is 32 bits 
+                pos: list[bool] = [bool(zone.card.position & pos) for pos in POSITION]
                 inputs[5+36*i:5+36*(i+1)] = np.array(id+pos, dtype='float64')
             
         for i, zone in enumerate(opp_field.spell_zones):
             if zone.has_card:
-                id: List[int] = [(zone.card.id >> j) & 1 for j in range(32)] # card id is 32 bits 
-                pos: List[bool] = [bool(zone.card.position & pos) for pos in POSITION]
+                id: list[int] = [(zone.card.id >> j) & 1 for j in range(32)] # card id is 32 bits 
+                pos: list[bool] = [bool(zone.card.position & pos) for pos in POSITION]
                 inputs[257+36*i:257+36*(i+1)] = np.array(id+pos, dtype='float64')
 
         result: ndarray = self._outputs(inputs)

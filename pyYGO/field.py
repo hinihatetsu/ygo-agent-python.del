@@ -1,5 +1,5 @@
 from pyYGO.wrapper import Location
-from typing import Dict, List
+from typing import NoReturn
 
 from pyYGO.card import Card
 from pyYGO.zone import Zone, MonsterZone, SpellZone
@@ -8,25 +8,25 @@ from pyYGO.enums import CardLocation, CardType
 
 
 class HalfField():
-    def __init__(self) -> None:
-        self.hand: List[Card] = []
-        self.deck: List[Card] = []
-        self.extradeck: List[Card] = []
-        self.graveyard: List[Card] = []
-        self.banished: List[Card] = []
+    def __init__(self) -> NoReturn:
+        self.hand: list[Card] = []
+        self.deck: list[Card] = []
+        self.extradeck: list[Card] = []
+        self.graveyard: list[Card] = []
+        self.banished: list[Card] = []
         # left first
-        self.monster_zones: List[MonsterZone] = [MonsterZone() for _ in range(7)]
-        self.spell_zones: List[SpellZone] = [SpellZone() for _ in range(6)]
+        self.monster_zones: list[MonsterZone] = [MonsterZone() for _ in range(7)]
+        self.spell_zones: list[SpellZone] = [SpellZone() for _ in range(6)]
         
         self.battling_monster: Card = None
         self.under_attack: bool = False
     
     @property
-    def mainmonster_zones(self) -> List[MonsterZone]:
+    def mainmonster_zones(self) -> list[MonsterZone]:
         return self.monster_zones[0:5]
 
     @property
-    def exmonster_zones(self) -> List[MonsterZone]:
+    def exmonster_zones(self) -> list[MonsterZone]:
         return self.monster_zones[5:7]
 
     @property
@@ -34,11 +34,11 @@ class HalfField():
         return self.spell_zones[5]
 
     @property
-    def pendulum_zones(self) -> List[SpellZone]:
+    def pendulum_zones(self) -> list[SpellZone]:
         return [self.spell_zones[0], self.spell_zones[4]]
 
     @property
-    def column_zones(self) -> List[List[Zone]]:
+    def column_zones(self) -> list[list[Zone]]:
         return [
             [self.spell_zones[0], self.mainmonster_zones[0]],
             [self.spell_zones[1], self.mainmonster_zones[1], self.exmonster_zones[0]],
@@ -72,7 +72,7 @@ class HalfField():
         return len(self.deck)
 
     @property
-    def columncard_count(self, column: int) -> None:
+    def columncard_count(self, column: int) -> NoReturn:
         return sum(int(zone.has_card) for zone in self.column_zones[column])
 
     @property
@@ -107,7 +107,7 @@ class HalfField():
         return card
 
     
-    def add_card(self, card: Card, location: Location, index: int) -> None:
+    def add_card(self, card: Card, location: Location, index: int) -> NoReturn:
         where: List = self.where(location)
         
         if location.is_zone:
@@ -120,7 +120,7 @@ class HalfField():
             where.insert(index, card)
 
     
-    def remove_card(self, card: Card, location: Location, index: int) -> None:
+    def remove_card(self, card: Card, location: Location, index: int) -> NoReturn:
         where: List = self.where(location)
         
         if location.is_zone:
@@ -133,7 +133,7 @@ class HalfField():
             where.remove(card)
 
 
-    def where(self, location: Location) -> List:
+    def where(self, location: Location) -> list:
         if location & CardLocation.DECK:
             return self.deck
 
@@ -159,36 +159,36 @@ class HalfField():
             return None
     
 
-    def set_deck(self, num_of_main: int, num_of_extra: int) -> None:
+    def set_deck(self, num_of_main: int, num_of_extra: int) -> NoReturn:
         self.deck = [Card() for _ in range(num_of_main)]
         self.extradeck = [Card() for _ in range(num_of_extra)]
         
 
-    def get_mainzone_monsters(self) -> List[Card]:
+    def get_mainzone_monsters(self) -> list[Card]:
         return [zone.card for zone in self.mainmonster_zones if zone.has_card]
 
 
-    def get_exzone_monsters(self) -> List[Card]:
+    def get_exzone_monsters(self) -> list[Card]:
         return [zone.card for zone in self.exmonster_zones if zone.has_card]
     
 
-    def get_monsters(self) -> List[Card]:
+    def get_monsters(self) -> list[Card]:
         return [zone.card for zone in self.monster_zones if zone.has_card]
 
     
-    def get_graveyard_monsters(self) -> List[Card]:
+    def get_graveyard_monsters(self) -> list[Card]:
         return [card for card in self.graveyard if card.type == CardType.MONSTER]
 
 
-    def get_graveyard_spells(self) -> List[Card]:
+    def get_graveyard_spells(self) -> list[Card]:
         return [card for card in self.graveyard if card.type == CardType.SPELL]
     
     
-    def get_graveyard_traps(self) -> List[Card]:
+    def get_graveyard_traps(self) -> list[Card]:
         return [card for card in self.graveyard if card.type == CardType.TRAP]
 
     
-    def get_spells(self) -> List[Card]:
+    def get_spells(self) -> list[Card]:
         return [zone.card for zone in self.spell_zones if zone.has_card]
         
 

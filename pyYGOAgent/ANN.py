@@ -1,4 +1,4 @@
-from typing import List, TypeVar
+from typing import TypeVar, NoReturn
 import numpy as np
 ndarray = TypeVar('ndarray')
 
@@ -10,7 +10,7 @@ from pyYGOAgent.network import Network, DuelNetwork, LocationNetwork, FlagNetwor
 
 
 class ActionNetwork:
-    def __init__(self, deck: Deck, usedflag: UsedFlag) -> None:
+    def __init__(self, deck: Deck, usedflag: UsedFlag) -> NoReturn:
         self.final_decision_network: Network = Network([16, 10, 1]) # network for final dicision
         # basic parts
         self.duel_network: DuelNetwork = DuelNetwork()
@@ -34,7 +34,7 @@ class ActionNetwork:
         return value
 
     
-    def train(self, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> None:
+    def train(self, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> NoReturn:
         self.outputs(duel, usedflag)
         # backpropagation
         self.final_decision_network._backpropagate(expected) # original backpropagation in networkbase.py
@@ -55,7 +55,7 @@ class ActionNetwork:
 
 
 class SummonNetwork(ActionNetwork):
-    def __init__(self, deck: Deck, usedflag: UsedFlag) -> None:
+    def __init__(self, deck: Deck, usedflag: UsedFlag) -> NoReturn:
         super().__init__(deck, usedflag)
         self.final_decision_network = Network([16 + 32, 32, 1])
 
@@ -67,7 +67,7 @@ class SummonNetwork(ActionNetwork):
         return value
 
 
-    def train(self, card_id: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> None:
+    def train(self, card_id: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> NoReturn:
         self.outputs(card_id, duel, usedflag)
         # backpropagation
         self.final_decision_network._backpropagate(expected) # original backpropagation in networkbase.py
@@ -89,7 +89,7 @@ class SummonNetwork(ActionNetwork):
     
 
 class SpecialSummonNetwork(ActionNetwork):
-    def __init__(self, deck: Deck, usedflag: UsedFlag) -> None:
+    def __init__(self, deck: Deck, usedflag: UsedFlag) -> NoReturn:
         super().__init__(deck, usedflag)
         self.final_decision_network = Network([16 + 32, 32, 1])
 
@@ -101,7 +101,7 @@ class SpecialSummonNetwork(ActionNetwork):
         return value
 
 
-    def train(self, card_id: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> None:
+    def train(self, card_id: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> NoReturn:
         self.outputs(card_id, duel, usedflag)
         # backpropagation
         self.final_decision_network._backpropagate(expected) # original backpropagation in networkbase.py
@@ -123,7 +123,7 @@ class SpecialSummonNetwork(ActionNetwork):
 
 
 class RepositionNetwork(ActionNetwork):
-    def __init__(self, deck: Deck, usedflag: UsedFlag) -> None:
+    def __init__(self, deck: Deck, usedflag: UsedFlag) -> NoReturn:
         super().__init__(deck, usedflag)
         self.final_decision_network = Network([16 + 32, 32, 1])
 
@@ -135,7 +135,7 @@ class RepositionNetwork(ActionNetwork):
         return value
 
     
-    def train(self, card_id: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> None:
+    def train(self, card_id: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> NoReturn:
         self.outputs(card_id, duel, usedflag)
         # backpropagation
         self.final_decision_network._backpropagate(expected) # original backpropagation in networkbase.py
@@ -157,7 +157,7 @@ class RepositionNetwork(ActionNetwork):
 
 
 class SetNetwork(ActionNetwork):
-    def __init__(self, deck: Deck, usedflag: UsedFlag) -> None:
+    def __init__(self, deck: Deck, usedflag: UsedFlag) -> NoReturn:
         super().__init__(deck, usedflag)
         self.final_decision_network = Network([16 + 32, 32, 1])
 
@@ -169,7 +169,7 @@ class SetNetwork(ActionNetwork):
         return value
 
     
-    def train(self, card_id: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> None:
+    def train(self, card_id: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> NoReturn:
         self.outputs(card_id, duel, usedflag)
         # backpropagation
         self.final_decision_network._backpropagate(expected) # original backpropagation in networkbase.py
@@ -191,7 +191,7 @@ class SetNetwork(ActionNetwork):
 
 
 class ActivateNetwork(ActionNetwork):
-    def __init__(self, deck: Deck, usedflag: UsedFlag) -> None:
+    def __init__(self, deck: Deck, usedflag: UsedFlag) -> NoReturn:
         super().__init__(deck, usedflag)
         self.final_decision_network = Network([16 + 8, 16, 1])
         self.activate_network: Network = Network([32 + 64, 64, 8])
@@ -206,7 +206,7 @@ class ActivateNetwork(ActionNetwork):
         return value
 
     
-    def train(self, card_id: int, activation_desc: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> None:
+    def train(self, card_id: int, activation_desc: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> NoReturn:
         self.outputs(card_id, activation_desc, duel, usedflag)
         # backpropagation
         self.final_decision_network._backpropagate(expected) # original backpropagation in networkbase.py
@@ -231,7 +231,7 @@ class ActivateNetwork(ActionNetwork):
 
 
 class AttackNetwork(ActionNetwork):
-    def __init__(self, deck: Deck, usedflag: UsedFlag) -> None:
+    def __init__(self, deck: Deck, usedflag: UsedFlag) -> NoReturn:
         super().__init__(deck, usedflag)
         self.final_decision_network = Network([16 + 32, 32, 1])
 
@@ -243,7 +243,7 @@ class AttackNetwork(ActionNetwork):
         return value
 
     
-    def train(self, card_id: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> None:
+    def train(self, card_id: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> NoReturn:
         self.outputs(card_id, duel, usedflag)
         # backpropagation
         self.final_decision_network._backpropagate(expected) # original backpropagation in networkbase.py
@@ -265,7 +265,7 @@ class AttackNetwork(ActionNetwork):
 
 
 class ChainNetwork(ActionNetwork):
-    def __init__(self, deck: Deck, usedflag: UsedFlag) -> None:
+    def __init__(self, deck: Deck, usedflag: UsedFlag) -> NoReturn:
         super().__init__(deck, usedflag)
         self.final_decision_network = Network([16 + 8, 16, 1])
         self.chain_network: Network = Network([32 + 64 + 2 + 32*2, 124, 8])
@@ -276,7 +276,7 @@ class ChainNetwork(ActionNetwork):
         desc: ndarray = np.array([(activation_desc >> i) & 1 for i in range(64)], dtype='float64')
         is_chain_target: ndarray = np.array([any([card.id == card_id for card in duel.chain_targets])], dtype='float64')
         chain_player: ndarray = np.array([int(duel.last_chain_player)], dtype='float64')
-        chain: List[ndarray] = [np.zeros((32,), dtype='float64') for _ in range(2)]
+        chain: list[ndarray] = [np.zeros((32,), dtype='float64') for _ in range(2)]
         for i, card in enumerate(reversed(duel.current_chain)):
             if i > 1:
                 break
@@ -290,7 +290,7 @@ class ChainNetwork(ActionNetwork):
         return value
 
 
-    def train(self, card_id: int,  activation_desc: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> None:
+    def train(self, card_id: int,  activation_desc: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> NoReturn:
         self.outputs(card_id, activation_desc, duel, usedflag)
         # backpropagation
         self.final_decision_network._backpropagate(expected) # original backpropagation in networkbase.py
@@ -314,7 +314,7 @@ class ChainNetwork(ActionNetwork):
 
 
 class SelectNetwork(ActionNetwork):
-    def __init__(self, deck: Deck, usedflag: UsedFlag) -> None:
+    def __init__(self, deck: Deck, usedflag: UsedFlag) -> NoReturn:
         super().__init__(deck, usedflag)
         self.final_decision_network = Network([16 + 8, 16, 1])
         self.select_network: Network = Network([32 + 10, 28, 8])
@@ -330,7 +330,7 @@ class SelectNetwork(ActionNetwork):
         return value
 
 
-    def train(self, card_id: int, select_hint: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> None:
+    def train(self, card_id: int, select_hint: int, duel: Duel, usedflag: UsedFlag, expected: ndarray) -> NoReturn:
         self.outputs(card_id, select_hint, duel, usedflag)
         # backpropagation
         self.final_decision_network._backpropagate(expected) # original backpropagation in networkbase.py

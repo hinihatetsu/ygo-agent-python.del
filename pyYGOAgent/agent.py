@@ -1,5 +1,5 @@
 import random
-from typing import List, Tuple
+from typing import NoReturn
 
 from pyYGO.duel import Duel
 from pyYGO.card import Card
@@ -15,7 +15,7 @@ from pyYGOAgent.flags import UsedFlag
 
 class DuelAgent:
     TRAINING_INTERVAL: int = 3
-    def __init__(self, deck_name: str, duel: Duel) -> None:
+    def __init__(self, deck_name: str, duel: Duel) -> NoReturn:
         self.deck: Deck = Deck(deck_name)
         self.duel: Duel = duel
         self.usedflag: UsedFlag = UsedFlag(self.deck)
@@ -23,29 +23,28 @@ class DuelAgent:
         self.brain: AgentBrain = AgentBrain(self.deck)
 
     
-    def start_new_game(self) -> None:
-        self.brain.duel = self.duel
-        self.brain.usedflag = self.usedflag
+    def on_start(self) -> NoReturn:
+        self.brain.on_start(self.duel, self.usedflag)
         self.recorder.reset_cache()
 
     
-    def on_new_turn(self) -> None:
+    def on_new_turn(self) -> NoReturn:
         self.usedflag.reset()
         if self.duel.turn_player == Player.ME:
             self.recorder.evaluate()
 
 
-    def on_win(self) -> None:
+    def on_win(self) -> NoReturn:
         self.recorder.evaluate()
 
     
-    def update_usedflag(self, card_id: int) -> None:
+    def update_usedflag(self, card_id: int) -> NoReturn:
         self.usedflag.used(card_id)
         
 
     def select_mainphase_action(self, main: MainPhase) -> int:
         value: float = 0
-        evaluated: List[MainAction] = []
+        evaluated: list[MainAction] = []
 
         for index, card in enumerate(main.summonable):
             value = self.brain.evaluate_summon(card)
@@ -99,7 +98,7 @@ class DuelAgent:
 
     def select_battle_action(self, battle: BattlePhase) -> int:
         value: float = 0
-        evaluated: List[BattleAction] = []
+        evaluated: list[BattleAction] = []
 
         for index, card in enumerate(battle.attackable):
             value = self.brain.evaluate_attack(card)
@@ -137,13 +136,13 @@ class DuelAgent:
         return True
 
     
-    def select_option(self, options: List[int]) -> int:
+    def select_option(self, options: list[int]) -> int:
         return random.choice(list(range(len(options))))
 
 
-    def select_card(self, choices: List[Card], min_: int, max_: int, cancelable: bool, hint: int) -> List[int]:
+    def select_card(self, choices: list[Card], min_: int, max_: int, cancelable: bool, hint: int) -> list[int]:
         value: float = 0
-        evaluated: List[SelectAction] = []
+        evaluated: list[SelectAction] = []
         for index, card in enumerate(choices):
             value = self.brain.evaluate_selection(card, hint)
             evaluated.append(SelectAction(value, index, card.id, hint))
@@ -155,9 +154,9 @@ class DuelAgent:
         return [selected.index for selected in evaluated][:max_]
 
 
-    def select_chain(self, choices: List[Card], descriptions: List[int], forced: bool) -> int:
+    def select_chain(self, choices: list[Card], descriptions: list[int], forced: bool) -> int:
         value: float = 0
-        evaluated: List[ChainAction] = []
+        evaluated: list[ChainAction] = []
 
         for index, card in enumerate(choices):
             desc: int = descriptions[index]
@@ -178,8 +177,8 @@ class DuelAgent:
 
 
     def select_place(self, player: Player, location: CardLocation, selectable: int, is_pzone: bool) -> int:
-        zones: List[Zone] = self.duel.field[player].where(location)
-        choices: List[int] = [i for i, zone in enumerate(zones) if bool(selectable & zone.id)]
+        zones: list[Zone] = self.duel.field[player].where(location)
+        choices: list[int] = [i for i, zone in enumerate(zones) if bool(selectable & zone.id)]
         ans: int = random.choice(choices)
         
         if is_pzone:
@@ -188,44 +187,44 @@ class DuelAgent:
         return ans 
 
 
-    def select_position(self, card_id: int, choices: List[CardPosition]) -> int:
+    def select_position(self, card_id: int, choices: list[CardPosition]) -> int:
         return int(choices[0])
 
 
-    def select_tribute(self, choices: List[Card], min_: int, max_: int, cancelable: bool, hint: int) -> int:
-        my_card: List[Card] = sorted([card for card in choices if card.controller == Player.ME], key=lambda x:x.attack)
-        op_card: List[Card] = sorted([card for card in choices if card.controller == Player.OPPONENT], key=lambda x:-x.attack)
-        choosed: List[Card] = (op_card + my_card)[0:max_]
+    def select_tribute(self, choices: list[Card], min_: int, max_: int, cancelable: bool, hint: int) -> int:
+        my_card: list[Card] = sorted([card for card in choices if card.controller == Player.ME], key=lambda x:x.attack)
+        op_card: list[Card] = sorted([card for card in choices if card.controller == Player.OPPONENT], key=lambda x:-x.attack)
+        choosed: list[Card] = (op_card + my_card)[0:max_]
         return [choices.index(card) for card in choosed]
     
 
-    def select_sum(self, choices: List[Tuple[Card, Tuple[int, int]]], min_: int, max_: int, must_just: bool, hint: int) -> List[int]:
+    def select_sum(self, choices: list[tuple[Card, tuple[int, int]]], sum_value: int, min_: int, max_: int, must_just: bool, hint: int) -> list[int]:
         raise Exception('not complete coding')
 
 
-    def select_unselect(self, choices: List[Card], min_: int, max_: int, cancelable: bool, hint: int):
+    def select_unselect(self, choices: list[Card], min_: int, max_: int, cancelable: bool, hint: int):
         return self.select_card(choices, min_, max_, cancelable, hint)
 
 
-    def select_counter(self, counter_type: int, quantity: int, cards: List[int], counters: List[int]) -> List[int]:
+    def select_counter(self, counter_type: int, quantity: int, cards: list[int], counters: list[int]) -> list[int]:
         raise Exception('not complete coding')
 
 
-    def select_number(self, choices: List[int]) -> int:
-        raise Exception('not complete coding')
-
-    
-    def sort_card(self, cards: List[Card]) -> List[int]:
-        raise Exception('not complete coding')
-
-
-    def announce_attr(self, choices: List[Attribute], count: int) -> List[int]:
-        raise Exception('not complete coding')
-
-
-    def announce_race(self, choices: List[Race], count: int) -> List[int]:
+    def select_number(self, choices: list[int]) -> int:
         raise Exception('not complete coding')
 
     
-    def train(self) -> None:
+    def sort_card(self, cards: list[Card]) -> list[int]:
+        raise Exception('not complete coding')
+
+
+    def announce_attr(self, choices: list[Attribute], count: int) -> list[int]:
+        raise Exception('not complete coding')
+
+
+    def announce_race(self, choices: list[Race], count: int) -> list[int]:
+        raise Exception('not complete coding')
+
+    
+    def train(self) -> NoReturn:
         self.brain.train()

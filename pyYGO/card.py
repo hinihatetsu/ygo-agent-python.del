@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import NoReturn
 
 from pyYGO.enums import Player, CardPosition, CardType, Attribute, Race, Query
 from pyYGO.wrapper import Location
@@ -6,14 +6,14 @@ from pyYGONetwork.packet import Packet
 
 
 class Card:
-    POSITION: Dict[int, CardPosition] = {int(pos): pos for pos in CardPosition}
-    ATTRIBUTE: Dict[int, Attribute] = {int(a): a for a in Attribute}
-    RASE: Dict[int, Race] = {int(r): r for r in Race}
-    def __init__(self, card_id: int=0, location: Location=None) -> None:
+    POSITION: dict[int, CardPosition] = {int(pos): pos for pos in CardPosition}
+    ATTRIBUTE: dict[int, Attribute] = {int(a): a for a in Attribute}
+    RASE: dict[int, Race] = {int(r): r for r in Race}
+    def __init__(self, card_id: int=0, location: Location=None) -> NoReturn:
         # card info
         self.id: int = card_id
         self.arias: int = None
-        self.type: List[CardType] = []
+        self.type: list[CardType] = []
         self.level: int = None
         self.rank: int = None
         self.attribute: Attribute = None
@@ -31,11 +31,11 @@ class Card:
         self.controller: Player = None
         self.location: Location = location
         self.position: CardPosition = None
-        self.target_cards: List[Card] = []
-        self.targeted_by: List[Card] = []
+        self.target_cards: list[Card] = []
+        self.targeted_by: list[Card] = []
         self.equip_target: Card = None
-        self.equip_cards: List[Card] = []
-        self.overlays: List[int] = []
+        self.equip_cards: list[Card] = []
+        self.overlays: list[int] = []
 
         # status flag
         self.attacked: bool = False
@@ -55,7 +55,7 @@ class Card:
         return bool(self.position & CardPosition.DEFENCE)
 
 
-    def update(self, packet: Packet) -> None:
+    def update(self, packet: Packet) -> NoReturn:
         while True:
             size: int = packet.read_int(2)
             if size == 0:
@@ -107,7 +107,7 @@ class Card:
 
             elif query == Query.OVERLAY_CARD:
                 num_of_overlay: int = packet.read_int(4)
-                self.overlays: List[int] = [packet.read_int(4) for _ in range(num_of_overlay)]
+                self.overlays: list[int] = [packet.read_int(4) for _ in range(num_of_overlay)]
 
             elif query == Query.CONTROLLER:
                 self.controller = packet.read_player()

@@ -3,7 +3,7 @@ import copy
 import datetime
 import pickle
 from pathlib import Path
-from typing import Any, List, NamedTuple
+from typing import Any, NamedTuple, NoReturn
 
 from pyYGO.duel import Duel
 from pyYGO.enums import Player
@@ -27,30 +27,30 @@ class Dicision(NamedTuple):
 
 class DicisionRecorder:
     DISCOUNT_RATE = 0.6
-    def __init__(self, deck: Deck, duel: Duel, usedflag: UsedFlag) -> None:
+    def __init__(self, deck: Deck, duel: Duel, usedflag: UsedFlag) -> NoReturn:
         self.deck: Deck = deck
         self.duel: Duel = duel
         self.usedflag: UsedFlag = usedflag
 
-        self.dicisions: List[Dicision] = []
-        self.evaluated_dicisions: List[Dicision] = []
-        self.hand_cache: List[int] = None
-        self.field_cache: List[int] = None
-        self.deck_cache: List[int] = None
-        self.life_cache: List[int] = None
+        self.dicisions: list[Dicision] = []
+        self.evaluated_dicisions: list[Dicision] = []
+        self.hand_cache: list[int] = None
+        self.field_cache: list[int] = None
+        self.deck_cache: list[int] = None
+        self.life_cache: list[int] = None
 
         self.record_dir: Path = Path.cwd() / 'Decks' / self.deck.name / 'Records'
         if not self.record_dir.exists():
             self.record_dir.mkdir()
 
     
-    def save_dicision(self, action: Action, card_id: int, option: Any) -> None:
+    def save_dicision(self, action: Action, card_id: int, option: Any) -> NoReturn:
         dc = Dicision(action, card_id, copy.deepcopy(self.duel), copy.deepcopy(self.usedflag), option)
         self.dicisions.append(dc)
 
 
-    def evaluate(self) -> None:
-        scores: List[float] = [0, 0]
+    def evaluate(self) -> NoReturn:
+        scores: list[float] = [0, 0]
         for p in (Player.ME, Player.OPPONENT):
             hand = (self.duel.field[p].hand_count - self.hand_cache[p]) / 2
             field = (self.duel.field[p].field_count - self.field_cache[p]) 
@@ -69,7 +69,7 @@ class DicisionRecorder:
         self.dump()
 
 
-    def dump(self) -> None:
+    def dump(self) -> NoReturn:
         now = datetime.datetime.now()
         for index, dc in enumerate(self.evaluated_dicisions):
             save_path = self.record_dir / (now.isoformat(sep='-', timespec='seconds').replace(':', '-') + f'_{index}.dicision')
@@ -79,8 +79,8 @@ class DicisionRecorder:
         self.evaluated_dicisions.clear()
 
 
-    def reset_cache(self) -> None:
-        self.hand_cache: List[int] = [5, 5]
-        self.field_cache: List[int] = [0, 0]
-        self.deck_cache: List[int] = [35, 35]
-        self.life_cache: List[int] = [8000, 8000]
+    def reset_cache(self) -> NoReturn:
+        self.hand_cache: list[int] = [5, 5]
+        self.field_cache: list[int] = [0, 0]
+        self.deck_cache: list[int] = [35, 35]
+        self.life_cache: list[int] = [8000, 8000]

@@ -42,7 +42,7 @@ def derivative_tanh(x: ndarray[float]) -> ndarray[float]:
     return 1 / (np.cosh(x))**2
  
 
-def normalize_vector(vector: List[float]) -> List[float]:
+def normalize_vector(vector: list[float]) -> list[float]:
     v: ndarray[float] = np.array(vector)
     norm: float = np.linalg.norm(v)
     return v / norm if norm != 0 else v
