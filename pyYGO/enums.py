@@ -106,6 +106,7 @@ class Race(enum.IntEnum):
 
 
 class CardPosition(enum.IntEnum):
+    _                = 0x0
     FASEUP_ATTACK    = 0x1
     FASEDOWN_ATTACK  = 0x2
     FASEUP_DEFENCE   = 0x4

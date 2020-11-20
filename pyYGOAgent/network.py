@@ -4,7 +4,6 @@ import numpy as np
 from pyYGO.duel import Duel
 from pyYGO.field import HalfField
 from pyYGO.enums import CardPosition, Player
-from pyYGO.wrapper import Position
 from pyYGOAgent.deck import Deck
 from pyYGOAgent.flags import UsedFlag
 from pyYGOAgent.networkbase import Network
@@ -117,7 +116,7 @@ class LocationNetwork(Network):
         return index
 
 
-    def position_array(self, pos: Position) -> ndarray:
+    def position_array(self, pos: CardPosition) -> ndarray:
         POSITION = [
             CardPosition.FASEUP_ATTACK,
             CardPosition.FASEDOWN_ATTACK, 

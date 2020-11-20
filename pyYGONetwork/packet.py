@@ -1,16 +1,15 @@
 from typing import TypeVar
 
-from pyYGO.enums import Player, Phase
-from pyYGO.wrapper import Location, Position
+from pyYGO.enums import Player, Phase, CardPosition
+from pyYGO.wrapper import Location
 
 Message = TypeVar('Message', Player, str, int, bytes, bytearray, bool)
 
 class Packet:
     first_is_me: bool
-    PHASE: dict[int, Phase] = {int(phase): phase for phase in Phase}
     
     def __init__(self, msg_id: int=None):
-        self._msg_id: bytes = b'' # _msg_id is 'bytes', msg_id is 'int'
+        self._msg_id_bytes: bytes = b'' 
         self.content: bytes = b''
         self._position: int = 0
         if msg_id is not None:
@@ -18,15 +17,15 @@ class Packet:
     
     @property
     def msg_id(self) -> int:
-        return int.from_bytes(self._msg_id, byteorder="little")
+        return int.from_bytes(self._msg_id_bytes, byteorder="little")
 
     @msg_id.setter
     def msg_id(self, msg_id: int) -> None:
-        self._msg_id = msg_id.to_bytes(1, byteorder='little')
+        self._msg_id_bytes = msg_id.to_bytes(1, byteorder='little')
 
     @property
     def data(self) -> bytes:
-        return self._msg_id + self.content
+        return self._msg_id_bytes + self.content
 
 
     def write(self, content: Message, * , byte_size: int=4) -> None:
@@ -97,14 +96,13 @@ class Packet:
         return Location(loc)
 
 
-    def read_position(self) -> Position:
+    def read_position(self) -> CardPosition:
         pos: int = self.read_int(4)
-        return Position(pos)
+        return CardPosition(pos)
 
 
     def read_phase(self) -> Phase:
-        phase: int = self.read_int(4)
-        return self.PHASE[phase]
+        return Phase(self.read_int(4))
 
 
     def __repr__(self) -> str:

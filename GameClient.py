@@ -9,7 +9,7 @@ from pyYGO.card import Card
 from pyYGO.zone import Zone
 from pyYGO.phase import MainPhase, BattlePhase
 from pyYGO.enums import Phase, Player, CardLocation, CardPosition, Attribute, Race
-from pyYGO.wrapper import Location, Position 
+from pyYGO.wrapper import Location
 from pyYGOAgent.agent import DuelAgent
 from pyYGONetwork.network import YGOConnection
 from pyYGONetwork.packet import Packet
@@ -433,7 +433,7 @@ class GameClient:
         controller: Player = packet.read_player()
         location: Location = packet.read_location()
         index: int = packet.read_int(4)
-        position: Position = packet.read_position()
+        position: CardPosition = packet.read_position()
         description: int = packet.read_int(8)
 
         card: Card = self.duel.get_card(controller, location, index)
@@ -481,7 +481,7 @@ class GameClient:
             controller: Player = packet.read_player()
             location: Location = packet.read_location()
             index: int = packet.read_int(4)
-            position: Position = packet.read_position()
+            position: CardPosition = packet.read_position()
             card: Card = self.duel.get_card(controller, location, index)
             card.id = card_id
             choices.append(card)
@@ -511,7 +511,7 @@ class GameClient:
             controller: Player = packet.read_player()
             location: Location = packet.read_location()
             index: int = packet.read_int(4)
-            position: Position = packet.read_position()
+            position: CardPosition = packet.read_position()
             description: int = packet.read_int(8)
             card: Card = self.duel.get_card(controller, location, index)
             card.id = card_id
@@ -564,7 +564,7 @@ class GameClient:
     def on_select_position(self, packet: Packet) -> None:
         player_msg_sent_to: int = packet.read_player()
         card_id: int = packet.read_id()
-        selectable_position: Position = packet.read_int(1)
+        selectable_position: CardPosition = packet.read_int(1)
 
         POSITION: list[CardPosition] = [
             CardPosition.FASEUP_ATTACK, 
@@ -693,7 +693,7 @@ class GameClient:
             controller: Player = packet.read_player()
             location: Location = packet.read_location()
             index: int = packet.read_int(4)
-            position: Position = packet.read_position()
+            position: CardPosition = packet.read_position()
 
             card: Card = self.duel.get_card(controller, location, index)
             card.id = card_id
@@ -706,7 +706,7 @@ class GameClient:
             controller: Player = packet.read_player()
             location: Location = packet.read_location()
             index: int = packet.read_int(4)
-            position: Position = packet.read_position()
+            position: CardPosition = packet.read_position()
 
         max = 1
         selected: list[int] = self.agent.select_unselect(cards, int(not finishable), max, cancelable, self.select_hint)
@@ -750,7 +750,7 @@ class GameClient:
             controller: Player = packet.read_player()
             location: Location = packet.read_location()
             index: int = packet.read_int(4)
-            position: Position = packet.read_position()
+            position: CardPosition = packet.read_position()
             card: Card = self.duel.get_card(controller, location, index)
             card.id = 0
             old.append(card)
@@ -759,7 +759,7 @@ class GameClient:
             controller: Player = packet.read_player()
             location: Location = packet.read_location()
             index: int = packet.read_int(4)
-            position: Position = packet.read_position()
+            position: CardPosition = packet.read_position()
             self.duel.add_card(old[i], controller, location, index)
 
     
@@ -806,11 +806,11 @@ class GameClient:
         p_controller: Player = packet.read_player()
         p_location: Location = packet.read_location()
         p_index: int = packet.read_int(4)
-        p_position: Position = packet.read_position()
+        p_position: CardPosition = packet.read_position()
         c_controller: Player = packet.read_player()
         c_location: Location = packet.read_location()
         c_index: int = packet.read_int(4)
-        c_position: Position = packet.read_position()
+        c_position: CardPosition = packet.read_position()
         reason: int = packet.read_int(4)
 
         card: Card = self.duel.get_card(p_controller, p_location, p_index)
@@ -845,12 +845,12 @@ class GameClient:
         controller_1: Player = packet.read_player()
         location_1: Location = packet.read_location()
         index_1: int = packet.read_int(4)
-        position_1: Position = packet.read_position()
+        position_1: CardPosition = packet.read_position()
         card_id_2: int = packet.read_id()
         controller_2: Player = packet.read_player()
         location_2: Location = packet.read_location()
         index_2: int = packet.read_int(4)
-        position_2: Position = packet.read_position()
+        position_2: CardPosition = packet.read_position()
 
         card_1: Card = self.duel.get_card(controller_1, location_1, index_1)
         card_1.id = card_id_1
@@ -868,7 +868,7 @@ class GameClient:
         controller: Player = packet.read_player()
         location: Location = packet.read_location()
         index: int = packet.read_int(4)
-        position: Position = packet.read_position()
+        position: CardPosition = packet.read_position()
         card: Card = self.duel.get_card(controller, location, index)
         card.id = card_id
         self.duel.on_summoning(controller, card)
@@ -883,7 +883,7 @@ class GameClient:
         controller: Player = packet.read_player()
         location: Location = packet.read_location()
         index: int = packet.read_int(4)
-        position: Position = packet.read_position()
+        position: CardPosition = packet.read_position()
         card: Card = self.duel.get_card(controller, location, index)
         card.id = card_id
         self.duel.on_summoning(controller, card)
@@ -898,7 +898,7 @@ class GameClient:
         controller: Player = packet.read_player()
         location: Location = packet.read_location()
         index: int = packet.read_int(4)
-        position: Position = packet.read_position()
+        position: CardPosition = packet.read_position()
         card: Card = self.duel.get_card(controller, location, index)
         card.id = card_id
         last_chain_player: Player = packet.read_player()
@@ -914,7 +914,7 @@ class GameClient:
             controller: Player = packet.read_player()
             location: Location = packet.read_location()
             index: int = packet.read_int(4)
-            position: Position = packet.read_position()
+            position: CardPosition = packet.read_position()
             card: Card = self.duel.get_card(controller, location, index)
             self.duel.on_become_target(card)
 
@@ -941,11 +941,11 @@ class GameClient:
         controller_1: Player = packet.read_player()
         location_1: Location = packet.read_location()
         index_1: int = packet.read_int(4)
-        position_1: Position = packet.read_position()
+        position_1: CardPosition = packet.read_position()
         controller_2: Player = packet.read_player()
         location_2: Location = packet.read_location()
         index_2: int = packet.read_int(4)
-        position_2: Position = packet.read_position()
+        position_2: CardPosition = packet.read_position()
 
         equip: Card = self.duel.get_card(controller_1, location_1, index_1)
         equipped: Card = self.duel.get_card(controller_2, location_2, index_2)
@@ -958,7 +958,7 @@ class GameClient:
         controller: Player = packet.read_player()
         location: Location = packet.read_location()
         index: int = packet.read_int(4)
-        position: Position = packet.read_position()
+        position: CardPosition = packet.read_position()
         equip: Card = self.duel.get_card(controller, location, index)
         equip.equip_target.equip_cards.remove(equip)
         equip.equip_target = None
@@ -974,11 +974,11 @@ class GameClient:
         controller_1: Player = packet.read_player()
         location_1: Location = packet.read_location()
         index_1: int = packet.read_int(4)
-        position_1: Position = packet.read_position()
+        position_1: CardPosition = packet.read_position()
         controller_2: Player = packet.read_player()
         location_2: Location = packet.read_location()
         index_2: int = packet.read_int(4)
-        position_2: Position = packet.read_position()
+        position_2: CardPosition = packet.read_position()
         targeting: Card = self.duel.get_card(controller_1, location_1, index_1)
         targeted: Card = self.duel.get_card(controller_2, location_2, index_2)
         targeting.target_cards.append(targeted)
@@ -989,11 +989,11 @@ class GameClient:
         controller_1: Player = packet.read_player()
         location_1: Location = packet.read_location()
         index_1: int = packet.read_int(4)
-        position_1: Position = packet.read_position()
+        position_1: CardPosition = packet.read_position()
         controller_2: Player = packet.read_player()
         location_2: Location = packet.read_location()
         index_2: int = packet.read_int(4)
-        position_2: Position = packet.read_position()
+        position_2: CardPosition = packet.read_position()
         targeting: Card = self.duel.get_card(controller_1, location_1, index_1)
         targeted: Card = self.duel.get_card(controller_2, location_2, index_2)
         targeting.target_cards.remove(targeted)
@@ -1004,11 +1004,11 @@ class GameClient:
         controller_1: Player = packet.read_player()
         location_1: Location = packet.read_location()
         index_1: int = packet.read_int(4)
-        position_1: Position = packet.read_position()
+        position_1: CardPosition = packet.read_position()
         controller_2: Player = packet.read_player()
         location_2: Location = packet.read_location()
         index_2: int = packet.read_int(4)
-        position_2: Position = packet.read_position()
+        position_2: CardPosition = packet.read_position()
         attacking: Card = self.duel.get_card(controller_1, location_1, index_1)
         attacked: Card = self.duel.get_card(controller_2, location_2, index_2)
         self.duel.on_attack(attacking, attacked)

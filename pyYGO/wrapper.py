@@ -1,4 +1,4 @@
-from pyYGO.enums import CardLocation, CardPosition
+from pyYGO.enums import CardLocation
 
 class Location(int):
     """
@@ -20,8 +20,4 @@ class Location(int):
 
 
 
-class Position(int):
-    pos_dict: dict[int, CardPosition] = {int(pos): pos for pos in CardPosition}
-    def __repr__(self) -> str:
-        return self.pos_dict[self].__repr__()
 
