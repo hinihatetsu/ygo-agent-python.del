@@ -23,6 +23,8 @@ class YGOConnection:
         
     @property
     def is_connected(self) -> bool:
+        if self.writer is None:
+            return False
         return not self.writer.is_closing()
    
 

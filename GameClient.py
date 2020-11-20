@@ -55,8 +55,18 @@ class GameClient:
             self.on_recieved(packet)
             await self.connection.drain()
 
+    
+    def chat(self, content: str) -> None:
+        reply: Packet = Packet(CtosMessage.CHAT)
+        reply.write(content, byte_size=2*len(content))
+        reply.write(0)
+        self.connection.send(reply)
+
 
     def on_connected(self) -> None:
+        if not self.connection.is_connected:
+            return
+            
         packet: Packet = Packet(CtosMessage.PLAYER_INFO)
         packet.write(self.info.name, byte_size=40)
         self.connection.send(packet)
@@ -174,12 +184,9 @@ class GameClient:
 
     def on_replay(self, packet: Packet) -> None:
         if self.match_count % self.agent.TRAINING_INTERVAL == 0:
-            reply: Packet = Packet(CtosMessage.CHAT)
-            content: str = "I'm training now. Please wait for a while."
-            reply.write(content, byte_size=2*len(content))
-            reply.write(0)
-            self.connection.send(reply)
+            self.chat("I'm training now. Please wait for a while.")
             self.agent.train()
+            self.chat("ready to go")
 
 
     def on_timelimit(self, packet: Packet) -> None:

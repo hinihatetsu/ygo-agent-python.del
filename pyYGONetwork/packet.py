@@ -37,11 +37,10 @@ class Packet:
         elif type_ == str:
             content = str(content)
             encoded = content.encode(encoding='utf-16-le')
-            max_size = byte_size - 2
-            if len(encoded) <= max_size:
+            if len(encoded) <= byte_size:
                 self.content += encoded + bytes(byte_size-len(encoded))
             else:
-                self.content += encoded[:max_size] + bytes(2)
+                self.content += encoded[:byte_size]
         
         elif type_ == int:
             content = int(content)
