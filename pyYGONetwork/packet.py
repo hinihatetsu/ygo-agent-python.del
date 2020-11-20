@@ -57,6 +57,9 @@ class Packet:
 
         elif type_ == bool:
             self.content += int(content).to_bytes(1, byteorder='little')
+
+        else:
+            raise ValueError('invalid type')
             
     
     def read_bytes(self, byte: int) -> bytes:
