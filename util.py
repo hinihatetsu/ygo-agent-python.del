@@ -17,11 +17,11 @@ class LaunchInfo(NamedTuple):
 def load_args() -> LaunchInfo:
     parser = argparse.ArgumentParser()
     parser.set_defaults(name='AI', host='127.0.0.1', port=7911, version=VERSION)
-    parser.add_argument('-name', type=str, help="AI's name (default: %(default)s)")
-    parser.add_argument('-deck', type=str, help='deck name', required=True)
-    parser.add_argument('-host', type=str, help='host adress (default: %(default)s)')
-    parser.add_argument('-port', type=int, help='port (default: %(default)s)')
-    parser.add_argument('-version', type=int, help='version (default: %(default)s)')
+    parser.add_argument('--name', type=str, help="AI's name (default: %(default)s)")
+    parser.add_argument('--deck', type=str, help='deck name', required=True)
+    parser.add_argument('--host', type=str, help='host adress (default: %(default)s)')
+    parser.add_argument('--port', type=int, help='port (default: %(default)s)')
+    parser.add_argument('--version', type=int, help='version (default: %(default)s)')
     args: Namespace = parser.parse_args()
     return LaunchInfo(args.name, args.deck, args.host, args.port, args.version)
 
