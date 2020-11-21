@@ -8,17 +8,17 @@ from pyYGO.enums import CardPosition, Player, CardLocation, Attribute, Race
 from pyYGOAgent.deck import Deck
 from pyYGOAgent.action import Action, ChainAction, MainAction, BattleAction, SelectAction
 from pyYGOAgent.brain import AgentBrain
-from pyYGOAgent.recorder import DicisionRecorder
+from pyYGOAgent.recorder import DecisionRecorder
 from pyYGOAgent.flags import UsedFlag
 
 
 class DuelAgent:
-    TRAINING_INTERVAL: int = 3
+    TRAINING_INTERVAL: int = 10
     def __init__(self, deck_name: str, duel: Duel) -> None:
         self.deck: Deck = Deck(deck_name)
         self.duel: Duel = duel
         self.usedflag: UsedFlag = UsedFlag(self.deck)
-        self.recorder: DicisionRecorder = DicisionRecorder(self.deck, self.duel, self.usedflag)
+        self.recorder: DecisionRecorder = DecisionRecorder(self.deck, self.duel, self.usedflag)
         self.brain: AgentBrain = AgentBrain(self.deck)
 
     
@@ -87,7 +87,7 @@ class DuelAgent:
         evaluated.sort(key=lambda x:x.value, reverse=True)
         selected: MainAction = evaluated[0]
 
-        self.recorder.save_dicision(selected.action, selected.card_id, selected.option)
+        self.recorder.save_decision(selected.action, selected.card_id, selected.option)
         
         if selected.action == Action.ACTIVATE:
             self.update_usedflag(selected.card_id)
@@ -115,7 +115,7 @@ class DuelAgent:
         evaluated.sort(key=lambda x:x.value, reverse=True)
         selected: BattleAction = evaluated[0]
 
-        self.recorder.save_dicision(selected.action, selected.card_id, selected.option)
+        self.recorder.save_decision(selected.action, selected.card_id, selected.option)
 
         if selected.action == Action.ACTIVATE_IN_BATTLE:
             self.update_usedflag(selected.card_id)
@@ -148,7 +148,7 @@ class DuelAgent:
 
         evaluated.sort(key=lambda x:x.value, reverse=True)
         for selected in evaluated[:max_]:
-            self.recorder.save_dicision(selected.action, selected.card_id, selected.hint)
+            self.recorder.save_decision(selected.action, selected.card_id, selected.hint)
 
         return [selected.index for selected in evaluated][:max_]
 
@@ -169,7 +169,7 @@ class DuelAgent:
         selected: ChainAction = evaluated[0]
 
         if selected.index != -1: # activate something
-            self.recorder.save_dicision(selected.action, selected.card_id, selected.desc)
+            self.recorder.save_decision(selected.action, selected.card_id, selected.desc)
             self.update_usedflag(selected.card_id)
 
         return selected.to_int()

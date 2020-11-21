@@ -1,7 +1,7 @@
 # ydk / brain / decision
 *.ydk
 *.brain
-*.dicision
+*.decision
 
 cards.cdb
 .vscode

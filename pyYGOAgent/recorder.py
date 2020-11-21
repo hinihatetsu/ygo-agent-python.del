@@ -12,7 +12,7 @@ from pyYGOAgent.action import Action
 from pyYGOAgent.flags import UsedFlag
 
 
-class Dicision(NamedTuple):
+class Decision(NamedTuple):
     action: Action
     card_id: int
     duel: Duel
@@ -21,19 +21,19 @@ class Dicision(NamedTuple):
     value: float = 0
 
     def __repr__(self) -> str:
-        return f'Action:{self.action}; value:{self.value}'
+        return f'<Action:{self.action}; value:{self.value}>'
 
 
 
-class DicisionRecorder:
+class DecisionRecorder:
     DISCOUNT_RATE = 0.6
     def __init__(self, deck: Deck, duel: Duel, usedflag: UsedFlag) -> None:
         self.deck: Deck = deck
         self.duel: Duel = duel
         self.usedflag: UsedFlag = usedflag
 
-        self.dicisions: list[Dicision] = []
-        self.evaluated_dicisions: list[Dicision] = []
+        self.decisions: list[Decision] = []
+        self.evaluated_decisions: list[Decision] = []
         self.hand_cache: list[int] = None
         self.field_cache: list[int] = None
         self.deck_cache: list[int] = None
@@ -44,9 +44,9 @@ class DicisionRecorder:
             self.record_dir.mkdir()
 
     
-    def save_dicision(self, action: Action, card_id: int, option: Any) -> None:
-        dc = Dicision(action, card_id, copy.deepcopy(self.duel), copy.deepcopy(self.usedflag), option)
-        self.dicisions.append(dc)
+    def save_decision(self, action: Action, card_id: int, option: Any) -> None:
+        dc = Decision(action, card_id, copy.deepcopy(self.duel), copy.deepcopy(self.usedflag), option)
+        self.decisions.append(dc)
 
 
     def evaluate(self) -> None:
@@ -61,22 +61,22 @@ class DicisionRecorder:
             self.life_cache[p^1] = self.duel.life[p^1]
         score: float = scores[Player.ME] - scores[Player.OPPONENT]
 
-        for i, dc in enumerate(reversed(self.dicisions)):
-            dc = Dicision(dc.action, dc.card_id, dc.duel, dc.usedflag, dc.option, score * self.DISCOUNT_RATE**i)
-            self.evaluated_dicisions.append(dc)
+        for i, dc in enumerate(reversed(self.decisions)):
+            dc = Decision(dc.action, dc.card_id, dc.duel, dc.usedflag, dc.option, score * self.DISCOUNT_RATE**i)
+            self.evaluated_decisions.append(dc)
         
-        self.dicisions.clear()
+        self.decisions.clear()
         self.dump()
 
 
     def dump(self) -> None:
         now = datetime.datetime.now()
-        for index, dc in enumerate(self.evaluated_dicisions):
-            save_path = self.record_dir / (now.isoformat(sep='-', timespec='seconds').replace(':', '-') + f'_{index}.dicision')
+        for index, dc in enumerate(self.evaluated_decisions):
+            save_path = self.record_dir / (now.isoformat(sep='-', timespec='seconds').replace(':', '-') + f'_{index}.decision')
             with open(save_path, mode='wb') as f:
                 pickle.dump(dc, f)
 
-        self.evaluated_dicisions.clear()
+        self.evaluated_decisions.clear()
 
 
     def reset_cache(self) -> None:
