@@ -28,9 +28,9 @@ class Duel:
         self.field: DuelField = DuelField(HalfField(), HalfField())
         self.first: Player = None
         self.second: Player = None
-        self.turn_player: Player = None
+        self.turn_player: Player = Player.ME
         self.turn: int = 0
-        self.phase: Phase = None
+        self.phase: Phase = Phase.DRAW
         self.life: list[int] = [8000, 8000]
 
         self.mainphase_end: bool = False
