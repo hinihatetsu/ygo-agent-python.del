@@ -60,6 +60,8 @@ class Duel:
 
 
     def add_card(self, card: Card, controller: Player, location: Location, index: int) -> None:
+        card.controller = controller
+        card.location = location
         self.field[controller].add_card(card, location, index)
 
     

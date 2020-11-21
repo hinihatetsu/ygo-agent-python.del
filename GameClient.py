@@ -821,11 +821,8 @@ class GameClient:
         reason: int = packet.read_int(4)
 
         card: Card = self.duel.get_card(p_controller, p_location, p_index)
-        self.duel.remove_card(card, p_controller, p_location, p_index)
         card.id = card_id
-        card.controller = c_controller
-        card.location = c_location
-        card.position = c_position
+        self.duel.remove_card(card, p_controller, p_location, p_index)
         self.duel.add_card(card, c_controller, c_location, c_index)
 
 

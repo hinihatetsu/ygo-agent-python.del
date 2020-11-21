@@ -107,7 +107,8 @@ class Card:
 
             elif query == Query.OVERLAY_CARD:
                 num_of_overlay: int = packet.read_int(4)
-                self.overlays: list[int] = [packet.read_int(4) for _ in range(num_of_overlay)]
+                for _ in range(num_of_overlay):
+                    self.overlays.append(packet.read_id())
 
             elif query == Query.CONTROLLER:
                 self.controller = packet.read_player()

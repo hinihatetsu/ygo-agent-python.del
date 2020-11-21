@@ -107,26 +107,43 @@ class HalfField():
     
     def add_card(self, card: Card, location: Location, index: int) -> None:
         where: list = self.where(location)
+        if where is None:
+            del card
+            return
+
+        if location.is_overlay:
+            if location.is_zone:
+                zone: Zone = where[index]
+                zone.card.overlays.append(card.id)
+            else:
+                pcard: Card = where[index]
+                pcard.overlays.append(card.id)
+            return
         
         if location.is_zone:
             zone: Zone = where[index]
-            if location.is_overlay:
-                zone.card.overlays.append(card.id)
-            else:
-                zone.card = card
+            zone.card = card
         else:
             where.insert(index, card)
 
     
     def remove_card(self, card: Card, location: Location, index: int) -> None:
         where: list = self.where(location)
+        if where is None:
+            return
+        
+        if location.is_overlay:
+            if location.is_zone:
+                zone: Zone = where[index]
+                zone.card.overlays.remove(card.id)
+            else:
+                pcard: Card = where[index]
+                pcard.overlays.remove(card.id)
+            return
         
         if location.is_zone:
             zone: Zone = where[index]
-            if location.is_overlay:
-                zone.card.overlays.remove(card.id)
-            else:
-                zone.card = None
+            zone.card = None
         else:
             where.remove(card)
 
