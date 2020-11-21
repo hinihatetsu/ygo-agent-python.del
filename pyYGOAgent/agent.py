@@ -46,11 +46,11 @@ class DuelAgent:
         evaluated: list[MainAction] = []
 
         for index, card in enumerate(main.summonable):
-            value = self.brain.evaluate_summon(card)
+            value = self.brain.evaluate_summon(card.id)
             evaluated.append(MainAction(value, Action.SUMMON, index, card.id))
         
         for index, card in enumerate(main.special_summonable):
-            value = self.brain.evaluate_special_summon(card)
+            value = self.brain.evaluate_special_summon(card.id)
             evaluated.append(MainAction(value, Action.SP_SUMMON, index, card.id))
 
         for index, card in enumerate(main.repositionable):
@@ -64,16 +64,16 @@ class DuelAgent:
             evaluated.append(MainAction(value, Action.REPOSITION, index, card.id))
 
         for index, card in enumerate(main.moster_settable):
-            value = self.brain.evaluate_set(card)
+            value = self.brain.evaluate_set(card.id)
             evaluated.append(MainAction(value, Action.SET_MONSTER, index, card.id))
 
         for index, card in enumerate(main.spell_settable):
-            value = self.brain.evaluate_set(card)
+            value = self.brain.evaluate_set(card.id)
             evaluated.append(MainAction(value, Action.SET_SPELL, index, card.id))
 
         for index, card in enumerate(main.activatable):
             desc: int = main.activation_descs[index]
-            value = self.brain.evaluate_activate(card, desc)
+            value = self.brain.evaluate_activate(card.id, desc)
             evaluated.append(MainAction(value, Action.ACTIVATE, index, card.id, desc))
 
         if main.can_battle:
@@ -100,12 +100,12 @@ class DuelAgent:
         evaluated: list[BattleAction] = []
 
         for index, card in enumerate(battle.attackable):
-            value = self.brain.evaluate_attack(card)
+            value = self.brain.evaluate_attack(card.id)
             evaluated.append(BattleAction(value, Action.ATTACK, index, card.id))
 
         for index, card in enumerate(battle.activatable):
             desc: int = battle.activation_descs[index]
-            value = self.brain.evaluate_activate(card, desc)
+            value = self.brain.evaluate_activate(card.id, desc)
             evaluated.append(BattleAction(value, Action.ACTIVATE_IN_BATTLE, index, card.id, option=desc))
 
         if battle.can_main2:
@@ -143,7 +143,7 @@ class DuelAgent:
         value: float = 0
         evaluated: list[SelectAction] = []
         for index, card in enumerate(choices):
-            value = self.brain.evaluate_selection(card, hint)
+            value = self.brain.evaluate_selection(card.id, hint)
             evaluated.append(SelectAction(value, index, card.id, hint))
 
         evaluated.sort(key=lambda x:x.value, reverse=True)
@@ -159,7 +159,7 @@ class DuelAgent:
 
         for index, card in enumerate(choices):
             desc: int = descriptions[index]
-            value = self.brain.evaluate_chain(card, desc)
+            value = self.brain.evaluate_chain(card.id, desc)
             evaluated.append(ChainAction(value, index, card.id, desc))
 
         if not forced:
