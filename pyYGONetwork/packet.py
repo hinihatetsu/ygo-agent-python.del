@@ -1,9 +1,8 @@
-from typing import TypeVar
+from typing import Union
 
 from pyYGO.enums import Player, Phase, CardPosition
 from pyYGO.wrapper import Location
 
-Message = TypeVar('Message', Player, str, int, bytes, bytearray, bool)
 
 class Packet:
     first_is_me: bool
@@ -28,7 +27,7 @@ class Packet:
         return self._msg_id_bytes + self.content
 
 
-    def write(self, content: Message, * , byte_size: int=4) -> None:
+    def write(self, content: Union[str, int, bytes, bytearray, bool, Player], * , byte_size: int=4) -> None:
         type_: type = type(content)
 
         if type_ == Player:
