@@ -10,7 +10,7 @@ from pyYGOAgent.action import Action
 from pyYGOAgent.flags import UsedFlag
 from pyYGOAgent.ANN import ActionNetwork, SummonNetwork, SpecialSummonNetwork, RepositionNetwork, SetNetwork
 from pyYGOAgent.ANN import ActivateNetwork, AttackNetwork, ChainNetwork, SelectNetwork
-from pyYGOAgent.recorder import Dicision
+from pyYGOAgent.recorder import Decision
 
 
 
@@ -100,6 +100,7 @@ class AgentBrain:
     def evaluate_summon(self, card: Card) -> float:
         if card.id not in self.summon_networks:
             self.summon_networks[card.id] = SummonNetwork(self.deck)
+            self.save_networks()
         value: float = self.summon_networks[card.id].outputs(self.duel, self.usedflag)
         return value
 
@@ -107,6 +108,7 @@ class AgentBrain:
     def evaluate_special_summon(self, card: Card) -> float:
         if card.id not in self.special_summon_networks:
             self.special_summon_networks[card.id] = SpecialSummonNetwork(self.deck)
+            self.save_networks()
         value: float = self.special_summon_networks[card.id].outputs(self.duel, self.usedflag)
         return value
 
@@ -114,6 +116,7 @@ class AgentBrain:
     def evaluate_reposition(self, card: Card) -> float:
         if card.id not in self.reposition_networks:
             self.reposition_networks[card.id] = RepositionNetwork(self.deck)
+            self.save_networks()
         value: float = self.reposition_networks[card.id].outputs(self.duel, self.usedflag)
         return value
 
@@ -121,6 +124,7 @@ class AgentBrain:
     def evaluate_set(self, card: Card) -> float:
         if card.id not in self.set_networks:
             self.set_networks[card.id] = SetNetwork(self.deck)
+            self.save_networks()
         value: float = self.set_networks[card.id].outputs(self.duel, self.usedflag)
         return value
 
@@ -128,6 +132,7 @@ class AgentBrain:
     def evaluate_activate(self, card: Card, activation_desc: int) -> float:
         if card.id not in self.activate_networks:
             self.activate_networks[card.id] = ActivateNetwork(self.deck)
+            self.save_networks()
         value: float = self.activate_networks[card.id].outputs(activation_desc, self.duel, self.usedflag)
         return value
     
@@ -140,6 +145,7 @@ class AgentBrain:
     def evaluate_attack(self, card: Card) -> float:
         if card.id not in self.attack_networks:
             self.attack_networks[card.id] = AttackNetwork(self.deck)
+            self.save_networks()
         value: float = self.attack_networks[card.id].outputs(self.duel, self.usedflag)
         return value
         
@@ -147,6 +153,7 @@ class AgentBrain:
     def evaluate_chain(self, card: Card, activation_desc: int) -> float:
         if card.id not in self.chain_networks:
             self.chain_networks[card.id] = ChainNetwork(self.deck)
+            self.save_networks()
         value: float = self.chain_networks[card.id].outputs(card.id, activation_desc, self.duel, self.usedflag)
         return value
 
@@ -157,14 +164,14 @@ class AgentBrain:
     
 
     def train(self) -> None:
-        dicisions: list[Dicision] = []
-        for path in self.record_dir.glob('*.dicision'):
+        decisions: list[Decision] = []
+        for path in self.record_dir.glob('*.decision'):
             with open(path, mode='rb') as f:
-                dicisions.append(pickle.load(f))
+                decisions.append(pickle.load(f))
 
         for _ in range(self.EPOCH):
-            random.shuffle(dicisions)
-            for dc in dicisions:
+            random.shuffle(decisions)
+            for dc in decisions:
                 expected: np.ndarray = np.array([dc.value], dtype='float64')
                 if dc.action == Action.SUMMON:
                     self.summon_networks[dc.card_id].train(dc.duel, dc.usedflag, expected)
@@ -196,7 +203,7 @@ class AgentBrain:
         
         self.save_networks()
 
-        for path in self.record_dir.glob('*.dicision'):
+        for path in self.record_dir.glob('*.decision'):
             path.unlink()
 
 

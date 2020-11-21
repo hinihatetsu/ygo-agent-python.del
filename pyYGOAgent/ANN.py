@@ -21,6 +21,7 @@ class ActionNetwork:
     def __init__(self, deck: Deck) -> None:
         self.deck: Deck = deck
         self._deck_list: list[int] = self.deck.main + self.deck.extra # ToDo: add side deck
+        self._deck_list.sort()
         size: int = self._input_size
         self._network: Network = Network([size, size * 2 // 3, 1])
 
