@@ -18,7 +18,7 @@ from pyYGONetwork.enums import CtosMessage, StocMessage, GameMessage
 
 class GameClient:
     SERVER_HANDSHAKE: int = 4043399681
-    MAX_MATCH: int = 500
+    MAX_MATCH: int = 100
     def __init__(self, info: LaunchInfo) -> None:
         self.info: LaunchInfo = info
         self.connection = YGOConnection(info.host, info.port)

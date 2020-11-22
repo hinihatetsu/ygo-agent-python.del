@@ -8,6 +8,7 @@ from pyYGOAgent.deck import Deck
 from pyYGOAgent.flags import UsedFlag
 from pyYGOAgent.networkbase import Network
 
+
 _LOCATION_BIT: int = 10
 _IN_DECK: np.ndarray     = np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype='float64')
 _IN_HAND: np.ndarray     = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 0], dtype='float64')
@@ -16,7 +17,6 @@ _IN_GY: np.ndarray       = np.array([0, 0, 0, 1, 0, 0, 0, 0, 0, 0], dtype='float
 _IN_BANISHED: np.ndarray = np.array([0, 0, 0, 0, 1, 0, 0, 0, 0, 0], dtype='float64')
 _IN_SIDE: np.ndarray     = np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0], dtype='float64')
 _NOT_IN_DECK: np.ndarray = np.array([0, 1, 1, 1, 1, 1, 0, 0, 0, 0], dtype='float64')
-_POSITION: list[CardPosition] = [CardPosition.FASEUP_ATTACK, CardPosition.FASEDOWN_ATTACK, CardPosition.FASEUP_DEFENCE, CardPosition.FASEDOWN_DEFENCE]
 
 
 
@@ -263,7 +263,7 @@ def _get_index(deck_list: list[int], inputs: np.ndarray, card_id: int) -> int:
 
 def _create_position_array(pos: CardPosition) -> np.ndarray:
     """create 4 bits array of position"""
-    return np.array([bool(pos & p) for p in _POSITION], dtype='float64')
+    return np.array([(pos >> i) & 1 for i in range(4)], dtype='float64')
 
 
 def _create_usedflag(flag: UsedFlag) -> np.ndarray:
@@ -274,9 +274,9 @@ def _create_usedflag(flag: UsedFlag) -> np.ndarray:
 def _create_opfield(op_field: HalfField) -> np.ndarray:
     """create ndarray from opponent field state"""
     num_cards: np.ndarray = np.zeros((5,), dtype='float64')
-    num_cards[0] = len(op_field.deck) 
-    num_cards[1] = len(op_field.hand) 
-    num_cards[2] = len(op_field.graveyard) 
+    num_cards[0] = len(op_field.deck)
+    num_cards[1] = len(op_field.hand)
+    num_cards[2] = len(op_field.graveyard)
     num_cards[3] = len(op_field.banished) 
     num_cards[4] = len(op_field.extradeck)
 
@@ -295,6 +295,6 @@ def _create_opfield(op_field: HalfField) -> np.ndarray:
 
 
 def _create_card_id_array(card_id: int) -> np.ndarray:
-    return np.array([(card_id >> j) & 1 for j in range(32)], dtype='float64')
+    return np.array([(card_id >> i) & 1 for i in range(32)], dtype='float64')
 
 

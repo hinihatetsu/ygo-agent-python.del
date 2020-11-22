@@ -176,7 +176,8 @@ class DuelAgent:
         usedflag = copy.deepcopy(self._usedflag)
         decision = Decision(selected.action, selected.card_id, selected.desc, duel, usedflag, selected.value)
         self._recorder.save(decision)
-        self.update_usedflag(selected.card_id)
+        if selected.index != -1:
+            self.update_usedflag(selected.card_id)
 
         return selected.to_int()
 

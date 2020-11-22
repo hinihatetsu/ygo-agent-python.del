@@ -16,8 +16,8 @@ class Layer:
         self.learning_rate: float = learning_rate
          
         num_inputs: int = num_neurons if self.prev_layer is None else self.prev_layer.num_neurons
-        self.weight: np.ndarray[float] = np.random.rand(num_neurons, num_inputs) / np.sqrt(num_inputs)
-        self.bias: np.ndarray[float] = np.random.rand(num_neurons) / np.sqrt(num_neurons)
+        self.weight: np.ndarray[float] = np.random.randn(num_neurons, num_inputs) / np.sqrt(num_inputs)
+        self.bias: np.ndarray[float] = np.random.randn(num_neurons) / np.sqrt(num_neurons)
         self.delta: np.ndarray[float] = np.zeros(num_neurons, dtype='float64')
         self.input_cache: np.ndarray[float] = np.zeros(num_neurons)
         self.output_cache: np.ndarray[float] = np.zeros(num_neurons)
@@ -56,7 +56,7 @@ class Network:
         self.learning_rate: float = learning_rate
         self._layer_size: int = len(self._layer_structure)
         for prev, n in enumerate(layer_structure[1:]):
-            self._layers += [Layer(self._layers[prev], n, learning_rate, act_func)]
+            self._layers.append(Layer(self._layers[prev], n, learning_rate, act_func))
         self._output_layer: Layer = self._layers[self._layer_size-1]
         
     @property
