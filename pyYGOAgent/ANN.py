@@ -22,7 +22,7 @@ _POSITION: list[CardPosition] = [CardPosition.FASEUP_ATTACK, CardPosition.FASEDO
 
 class ActionNetwork(ABC):
     def __init__(self, deck: Deck) -> None:
-        self.deck: Deck = deck
+        self._deck: Deck = deck
         self._deck_list: list[int] = deck.main + deck.extra # ToDo: add side deck
         self._deck_list.sort()
         size: int = self._input_size
@@ -49,7 +49,7 @@ class CardIDNetwork(ActionNetwork):
 
     @property
     def _input_size(self) -> int:
-        return len(self._create_inputs(0, Duel(), UsedFlag(self.deck)))
+        return len(self._create_inputs(0, Duel(), UsedFlag(self._deck)))
 
     
     def _create_inputs(self, card_id: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
@@ -93,7 +93,7 @@ class ActivateNetwork(ActionNetwork):
 
     @property
     def _input_size(self) -> int:
-        return len(self._create_inputs(0, 0, Duel(), UsedFlag(self.deck)))
+        return len(self._create_inputs(0, 0, Duel(), UsedFlag(self._deck)))
     
 
     def _create_inputs(self, card_id: int,activation_desc: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
@@ -123,7 +123,7 @@ class ChainNetwork(ActionNetwork):
 
     @property
     def _input_size(self) -> int:
-        return len(self._create_inputs(0, 0, Duel(), UsedFlag(self.deck)))
+        return len(self._create_inputs(0, 0, Duel(), UsedFlag(self._deck)))
 
 
     def _create_inputs(self, card_id: int, activation_desc: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
@@ -153,7 +153,7 @@ class SelectNetwork(ActionNetwork):
 
     @property
     def _input_size(self) -> int:
-        return len(self._create_inputs(0, 0, Duel(), UsedFlag(self.deck)))
+        return len(self._create_inputs(0, 0, Duel(), UsedFlag(self._deck)))
     
 
     def _create_inputs(self, card_id: int, select_hint: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
@@ -178,7 +178,7 @@ class PhaseNetwork(ActionNetwork):
 
     @property
     def _input_size(self) -> int:
-        return len(self._create_inputs(Duel(), UsedFlag(self.deck)))
+        return len(self._create_inputs(Duel(), UsedFlag(self._deck)))
 
     
     def _create_inputs(self, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
@@ -196,7 +196,7 @@ def _create_inputs_base(network: ActionNetwork, duel: Duel, usedflag: UsedFlag) 
 
 
 def _create_basic(duel: Duel) -> np.ndarray:
-    """create ndarray from basic duel information"""
+    """create ndarray from basic duel state"""
     turn_player: list[float] = [float(duel.turn_player)]
     phase: list[float] = [(duel.phase >> i) & 1 for i in range(10)]
     life: list[float] = [duel.life[Player.ME] / 8000, duel.life[Player.OPPONENT] / 8000]
@@ -241,7 +241,7 @@ def _create_locations(network: ActionNetwork, my_field: HalfField) -> np.ndarray
             inputs[index:index+_LOCATION_BIT] = _IN_BANISHED
             inputs[index+6:index+_LOCATION_BIT] = _create_position_array(card.position)
 
-    for side in network.deck.side:
+    for side in network._deck.side:
         pass
 
     return inputs
@@ -262,16 +262,17 @@ def _get_index(deck_list: list[int], inputs: np.ndarray, card_id: int) -> int:
 
 
 def _create_position_array(pos: CardPosition) -> np.ndarray:
+    """create 4 bits array of position"""
     return np.array([bool(pos & p) for p in _POSITION], dtype='float64')
 
 
 def _create_usedflag(flag: UsedFlag) -> np.ndarray:
-    """create ndarray from usedflag"""
+    """create ndarray from usedflag state"""
     return np.array([float(v) for v in flag.values()], dtype='float64')
 
 
 def _create_opfield(op_field: HalfField) -> np.ndarray:
-    """create ndarray from opponent field"""
+    """create ndarray from opponent field state"""
     num_cards: np.ndarray = np.zeros((5,), dtype='float64')
     num_cards[0] = len(op_field.deck) 
     num_cards[1] = len(op_field.hand) 
@@ -295,3 +296,5 @@ def _create_opfield(op_field: HalfField) -> np.ndarray:
 
 def _create_card_id_array(card_id: int) -> np.ndarray:
     return np.array([(card_id >> j) & 1 for j in range(32)], dtype='float64')
+
+

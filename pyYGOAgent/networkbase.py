@@ -17,7 +17,7 @@ class Layer:
          
         num_inputs: int = num_neurons if self.prev_layer is None else self.prev_layer.num_neurons
         self.weight: np.ndarray[float] = np.random.rand(num_neurons, num_inputs) / np.sqrt(num_inputs)
-        self.bias: np.ndarray[float] = np.random.rand(num_neurons)
+        self.bias: np.ndarray[float] = np.random.rand(num_neurons) / np.sqrt(num_neurons)
         self.delta: np.ndarray[float] = np.zeros(num_neurons, dtype='float64')
         self.input_cache: np.ndarray[float] = np.zeros(num_neurons)
         self.output_cache: np.ndarray[float] = np.zeros(num_neurons)
@@ -64,9 +64,12 @@ class Network:
         return [layer.weight for layer in self._layers]
 
 
+    def _activate(self, inputs: np.ndarray, layer: Layer) -> np.ndarray:
+        return layer.outputs(inputs)
+
+
     def _outputs(self, inputs: np.ndarray) -> np.ndarray:
-        activate = lambda inputs, layer: layer.outputs(inputs)
-        return reduce(activate, self._layers, inputs)
+        return reduce(self._activate, self._layers, inputs)
 
 
     def _calculate_deltas_for_output_layer(self, expected: np.ndarray) -> None:
