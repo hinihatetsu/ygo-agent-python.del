@@ -1,4 +1,3 @@
-from itertools import reduce
 from typing import NamedTuple
 
 from pyYGO.field import HalfField
@@ -71,6 +70,18 @@ class Duel:
     def field(self) -> DuelField:
         return self._field
 
+    @property
+    def current_chain(self) -> list[Card]:
+        return self._current_chain
+
+    @property
+    def last_chain_player(self) -> Player:
+        return self._last_chain_player
+
+    @property
+    def chain_targets(self) -> list[Card]:
+        return self._chain_targets
+
 
     def set_deck(self, player: Player, num_of_main: int, num_of_extra: int) -> None:
         self._field[player].set_deck(num_of_main, num_of_extra)
@@ -100,6 +111,10 @@ class Duel:
 
         return cards 
     
+
+    def at_mainphase_end(self) -> None:
+        self._mainphase_end = True
+
 
     def on_start(self, first_player: Player) -> None:
         self.__init__()

@@ -14,17 +14,19 @@ from pyYGOAgent.flags import UsedFlag
 
 
 class DuelAgent:
-    TRAINING_INTERVAL: int = 5
+    _MAX_MATCH: int = 10
+    _TRAINING_INTERVAL: int = 5
     def __init__(self, deck_name: str, duel: Duel) -> None:
         self._deck: Deck = Deck(deck_name)
         self._duel: Duel = duel
         self._usedflag: UsedFlag = UsedFlag(self._deck)
         self._recorder: DecisionRecorder = DecisionRecorder(self._deck)
         self._brain: AgentBrain = AgentBrain(self._deck)
+        self._match_count: int = 0
 
     @property
     def deck(self) -> Deck:
-        self._deck
+        return self._deck
 
     
     def on_start(self) -> None:
@@ -38,8 +40,19 @@ class DuelAgent:
             self._recorder.calculate_reward(self._duel)
 
 
-    def on_win(self) -> None:
+    def on_win(self, win: bool) -> None:
         self._recorder.calculate_reward(self._duel)
+        print(f'Match {self._match_count}: ' + ('win' if win else 'lose'))
+        self._recorder.save_match_result(self._match_count, win)
+
+    
+    def on_rematch(self) -> bool:
+        self._match_count += 1
+        if self._match_count <= self._MAX_MATCH:
+            return True
+        else:
+            self._recorder.dump_match_result()
+            return False
 
     
     def update_usedflag(self, card_id: int) -> None:
