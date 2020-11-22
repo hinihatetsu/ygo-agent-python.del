@@ -53,6 +53,7 @@ class GameClient:
             packet: Packet = await self.connection.receive_pending_packet()
             self.on_recieved(packet)
             await self.connection.drain()
+        self.agent.on_finish()
 
     
     def chat(self, content: str) -> None:

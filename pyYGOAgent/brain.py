@@ -49,6 +49,19 @@ class AgentBrain:
             self._phase_network
         ] = networks
 
+    
+    def _create_networks(self) -> None:
+        self._summon_network = SummonNetwork(self._deck)
+        self._special_summon_network = SpecialSummonNetwork(self._deck)
+        self._reposition_network = RepositionNetwork(self._deck)
+        self._set_network = SetNetwork(self._deck)
+        self._activate_network = ActivateNetwork(self._deck)
+        self._chain_network = ChainNetwork(self._deck)
+        self._select_network = SelectNetwork(self._deck)
+        self._attack_network = AttackNetwork(self._deck)
+        self._phase_network = PhaseNetwork(self._deck)
+        self._save_networks()
+
 
     def _save_networks(self) -> None:
         info: list = [
@@ -64,19 +77,6 @@ class AgentBrain:
         ]
         with open(self._brain_path, mode='wb') as f:
             pickle.dump(info, f)
-
-    
-    def _create_networks(self) -> None:
-        self._summon_network = SummonNetwork(self._deck)
-        self._special_summon_network = SpecialSummonNetwork(self._deck)
-        self._reposition_network = RepositionNetwork(self._deck)
-        self._set_network = SetNetwork(self._deck)
-        self._activate_network = ActivateNetwork(self._deck)
-        self._chain_network = ChainNetwork(self._deck)
-        self._select_network = SelectNetwork(self._deck)
-        self._attack_network = AttackNetwork(self._deck)
-        self._phase_network = PhaseNetwork(self._deck)
-        self._save_networks()
 
 
     def on_start(self, duel: Duel, usedflag: UsedFlag) -> None:

@@ -42,7 +42,7 @@ class DecisionRecorder:
 
 
     def load(self) -> list[Decision]:
-        return self._evaluated_decisions
+        return [dc for dc in self._evaluated_decisions]
 
     
     def clear(self) -> None:
