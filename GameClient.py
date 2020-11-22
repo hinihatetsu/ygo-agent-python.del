@@ -18,7 +18,6 @@ from pyYGONetwork.enums import CtosMessage, StocMessage, GameMessage
 
 class GameClient:
     SERVER_HANDSHAKE: int = 4043399681
-    MAX_MATCH: int = 100
     def __init__(self, info: LaunchInfo) -> None:
         self.info: LaunchInfo = info
         self.connection = YGOConnection(info.host, info.port)
@@ -31,7 +30,6 @@ class GameClient:
         self.register_processes()
 
         self.select_hint: int = 0
-        self.match_count: int = 0
 
 
     def start(self) -> None:
@@ -181,10 +179,7 @@ class GameClient:
 
 
     def on_replay(self, packet: Packet) -> None:
-        if self.match_count % self.agent.TRAINING_INTERVAL == 0:
-            self.chat("I'm training now. Please wait for a while.")
-            self.agent.train()
-            self.chat("ready to go")
+        pass
 
 
     def on_timelimit(self, packet: Packet) -> None:
@@ -206,13 +201,7 @@ class GameClient:
 
 
     def on_rematch(self, packet: Packet) -> None:
-        ans: bool = None
-        if self.match_count < self.MAX_MATCH:
-            ans = True
-            self.match_count += 1
-        else:
-            ans = False
-        
+        ans: bool = self.agent.on_rematch()    
         reply: Packet = Packet(CtosMessage.REMATCH_RESPONSE)
         reply.write(ans)
         self.connection.send(reply)
@@ -298,7 +287,7 @@ class GameClient:
         data: int = packet.read_int(8)
         if hint_type == HINT_EVENT:
             if data == MAINPHASE_END:
-                self.duel.mainphase_end = True
+                self.duel.at_mainphase_end()
                 
             elif data == BATTLEING:
                 self.duel.field[0].under_attack = False
@@ -325,9 +314,7 @@ class GameClient:
         
 
     def on_win(self, packet: Packet) -> None:
-        print(f'Match {self.match_count}:', end='')
-        print('win' if packet.read_player() == Player.ME else 'lose')
-        self.agent.on_win()
+        self.agent.on_win(packet.read_player() == Player.ME)
         
 
     def on_update_data(self, packet: Packet) -> None:
