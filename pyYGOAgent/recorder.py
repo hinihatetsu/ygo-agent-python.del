@@ -1,4 +1,7 @@
 import math
+import datetime
+import csv
+from pathlib import Path
 from typing import Any, NamedTuple
 
 from pyYGO.duel import Duel
@@ -31,6 +34,7 @@ class DecisionRecorder:
         self._field_cache: list[int] = None
         self._deck_cache: list[int] = None
         self._life_cache: list[int] = None
+        self._match_result: list[bool] = []
 
     
     def save(self, decision: Decision) -> None:
@@ -69,3 +73,23 @@ class DecisionRecorder:
         self._field_cache = [0, 0]
         self._deck_cache = [35, 35]
         self._life_cache = [8000, 8000]
+
+
+    def save_match_result(self, match_count: int, win: bool):
+        size = len(self._match_result)
+        if size >= match_count:
+            self._match_result = self._match_result[:match_count]
+        for _ in range(match_count - size - 1):
+            self._match_result.append(None)
+        self._match_result.append(win)
+
+
+    def dump_match_result(self) -> None:
+        now = datetime.datetime.now().isoformat(timespec='seconds').replace(':', '-')
+        file = Path.cwd() / 'Decks' / self._deck.name / (now + '.csv')
+        with file.open(mode='w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow('match', 'win')
+            writer.writerows(enumerate(self._match_result))
+        self._match_result.clear()
+
