@@ -1,7 +1,7 @@
 import asyncio
 import random
 from collections.abc import Coroutine
-from typing import Callable, Tuple
+from typing import Callable
 
 from util import LaunchInfo, print_message
 from pyYGO.duel import Duel
@@ -40,7 +40,8 @@ class GameClient:
 
     async def main(self) -> Coroutine[None, None, None]:
         await self.connection.connect()
-        self.on_connected()
+        if self.connection.is_connected:
+            self.on_connected()
         # concurrent tasks
         response_task: asyncio.Task = asyncio.create_task(self.main_loop())
         listen_task: asyncio.Task = asyncio.create_task(self.connection.listen())
@@ -63,10 +64,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_connected(self) -> None:
-        if not self.connection.is_connected:
-            return
-            
+    def on_connected(self) -> None:            
         packet: Packet = Packet(CtosMessage.PLAYER_INFO)
         packet.write(self.info.name, byte_size=40)
         self.connection.send(packet)
@@ -660,7 +658,7 @@ class GameClient:
             index: int = packet.read_int(4)
             card: Card = self.duel.get_card(controller, location, index)
             card.id = card_id
-            values: Tuple(int, int) = (packet.read_int(2), packet.read_int(2))
+            values: tuple(int, int) = (packet.read_int(2), packet.read_int(2))
             must_selected.append(card)
             sum_value -= max(values)
 
@@ -671,7 +669,7 @@ class GameClient:
             index: int = packet.read_int(4)
             card: Card = self.duel.get_card(controller, location, index)
             card.id = card_id
-            values: Tuple(int, int) = (packet.read_int(2), packet.read_int(2))
+            values: tuple(int, int) = (packet.read_int(2), packet.read_int(2))
             choices.append((card, values))
 
         selected: list[int] = self.agent.select_sum(choices, sum_value, min_, max_, must_just, self.select_hint)
