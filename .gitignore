@@ -3,6 +3,7 @@
 *.brain
 *.decision
 
+Decks
 cards.cdb
 .vscode
 
