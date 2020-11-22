@@ -89,7 +89,7 @@ class DecisionRecorder:
         file = Path.cwd() / 'Decks' / self._deck.name / (now + '.csv')
         with file.open(mode='w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow('match', 'win')
+            writer.writerow(('match', 'win'))
             writer.writerows(enumerate(self._match_result))
         self._match_result.clear()
 
