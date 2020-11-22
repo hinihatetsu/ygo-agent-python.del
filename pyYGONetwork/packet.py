@@ -5,11 +5,10 @@ from pyYGO.wrapper import Location
 
 
 class Packet:
-    first_is_me: bool
-    
+    first_is_me: bool  
     def __init__(self, msg_id: int=None):
         self._msg_id_bytes: bytes = b'' 
-        self.content: bytes = b''
+        self._content: bytes = b''
         self._position: int = 0
         if msg_id is not None:
             self.msg_id = msg_id
@@ -23,8 +22,12 @@ class Packet:
         self._msg_id_bytes = msg_id.to_bytes(1, byteorder='little')
 
     @property
+    def content(self) -> bytes:
+        return self._content
+
+    @property
     def data(self) -> bytes:
-        return self._msg_id_bytes + self.content
+        return self._msg_id_bytes + self._content
 
 
     def write(self, content: Union[str, int, bytes, bytearray, bool, Player], * , byte_size: int=4) -> None:
@@ -37,31 +40,31 @@ class Packet:
             content = str(content)
             encoded = content.encode(encoding='utf-16-le')
             if len(encoded) <= byte_size:
-                self.content += encoded + bytes(byte_size-len(encoded))
+                self._content += encoded + bytes(byte_size-len(encoded))
             else:
-                self.content += encoded[:byte_size]
+                self._content += encoded[:byte_size]
         
         elif type_ == int:
             content = int(content)
             if content < 0:
                 content += 1 << (byte_size * 8)
-            self.content += content.to_bytes(byte_size, byteorder='little')
+            self._content += content.to_bytes(byte_size, byteorder='little')
 
         elif type_ == bytes:
-            self.content += content
+            self._content += content
         
         elif type_ == bytearray:
-            self.content += bytes(content)
+            self._content += bytes(content)
 
         elif type_ == bool:
-            self.content += int(content).to_bytes(1, byteorder='little')
+            self._content += int(content).to_bytes(1, byteorder='little')
 
         else:
             raise ValueError('invalid type')
             
     
     def read_bytes(self, byte: int) -> bytes:
-        res: bytes = self.content[self._position:self._position+byte]
+        res: bytes = self._content[self._position:self._position+byte]
         self._position += byte
         return res
 
@@ -107,7 +110,7 @@ class Packet:
 
 
     def __repr__(self) -> str:
-        return f'<msg_id: {self.msg_id}>' + self.content.hex(' ')
+        return f'<msg_id: {self.msg_id}>' + self._content.hex(' ')
 
 
     

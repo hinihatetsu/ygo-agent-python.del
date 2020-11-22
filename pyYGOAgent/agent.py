@@ -16,11 +16,15 @@ from pyYGOAgent.flags import UsedFlag
 class DuelAgent:
     TRAINING_INTERVAL: int = 5
     def __init__(self, deck_name: str, duel: Duel) -> None:
-        self.deck: Deck = Deck(deck_name)
+        self._deck: Deck = Deck(deck_name)
         self._duel: Duel = duel
-        self._usedflag: UsedFlag = UsedFlag(self.deck)
-        self._recorder: DecisionRecorder = DecisionRecorder(self.deck)
-        self._brain: AgentBrain = AgentBrain(self.deck)
+        self._usedflag: UsedFlag = UsedFlag(self._deck)
+        self._recorder: DecisionRecorder = DecisionRecorder(self._deck)
+        self._brain: AgentBrain = AgentBrain(self._deck)
+
+    @property
+    def deck(self) -> Deck:
+        self._deck
 
     
     def on_start(self) -> None:
