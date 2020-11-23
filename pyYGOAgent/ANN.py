@@ -26,7 +26,7 @@ class ActionNetwork(ABC):
         self._deck_list: list[int] = deck.main + deck.extra # ToDo: add side deck
         self._deck_list.sort()
         size: int = self._input_size
-        self._network: Network = Network([size, size * 2 // 3, 1])
+        self._network: Network = Network([size, size * 2 // 3, 200, 100, 1])
 
     @property
     @abstractclassmethod
