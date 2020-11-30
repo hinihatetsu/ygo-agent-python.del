@@ -1,5 +1,5 @@
 import numpy as np
-
+from typing import List
 
 def sigmoid(x: np.ndarray) -> np.ndarray:
     return 1 / (1 + np.exp(-x))
@@ -19,7 +19,7 @@ def derivative_linear(x: np.ndarray) -> np.ndarray:
 def ReLU(x: np.ndarray) -> np.ndarray:
     return np.where(x < 0, 0, x)
 
-def derivative_ReLU(x: float) -> float:
+def derivative_ReLU(x: np.ndarray) -> np.ndarray:
     return np.where(x < 0, 0, 1)
 
 
@@ -30,7 +30,7 @@ def softmax(x: np.ndarray) -> np.ndarray:
     return exp / total
 
 def derivative_softmax(x: np.ndarray) -> np.ndarray:
-    return 1
+    return np.ones(x.shape)
 
 
 def tanh(x: np.ndarray) -> np.ndarray:
@@ -40,8 +40,8 @@ def derivative_tanh(x: np.ndarray) -> np.ndarray:
     return 1 / (np.cosh(x))**2
  
 
-def normalize_vector(vector: list[float]) -> list[float]:
-    v: np.ndarray = np.array(vector)
+def normalize_vector(vector: List[float]) -> List[float]:
+    v: np.ndarray[float] = np.array(vector)
     norm: float = np.linalg.norm(v)
     return v / norm if norm != 0 else v
 

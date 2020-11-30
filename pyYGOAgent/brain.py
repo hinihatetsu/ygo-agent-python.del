@@ -1,15 +1,19 @@
 import random
 import pickle
 from pathlib import Path
+import time
+from typing import NamedTuple
 import numpy as np
 
 from pyYGO.duel import Duel 
-from pyYGOAgent.deck import Deck
-from pyYGOAgent.action import Action
-from pyYGOAgent.flags import UsedFlag
-from pyYGOAgent.ANN import ActionNetwork, SummonNetwork, SpecialSummonNetwork, RepositionNetwork, SetNetwork
-from pyYGOAgent.ANN import ActivateNetwork, AttackNetwork, ChainNetwork, SelectNetwork, PhaseNetwork
-from pyYGOAgent.recorder import Decision
+from .deck import Deck
+from .action import Action
+from .flags import UsedFlag
+from .ANN import (
+    ActionNetwork, SummonNetwork, SpecialSummonNetwork, RepositionNetwork, SetNetwork,
+    ActivateNetwork, AttackNetwork, ChainNetwork, SelectNetwork, PhaseNetwork
+)
+from .recorder import Decision
 
 
 
@@ -60,7 +64,7 @@ class AgentBrain:
         self._select_network = SelectNetwork(self._deck)
         self._attack_network = AttackNetwork(self._deck)
         self._phase_network = PhaseNetwork(self._deck)
-        self._save_networks()
+        #self._save_networks()
 
 
     def _save_networks(self) -> None:
@@ -85,85 +89,133 @@ class AgentBrain:
 
 
     def evaluate_summon(self, card_id: int) -> float:
-        value: float = self._summon_network.outputs(card_id, self._duel, self._usedflag)
-        return value
+        input_: np.ndarray = self._summon_network.create_input(card_id, None, self._duel, self._usedflag)
+        return self._summon_network.outputs(input_)
 
 
     def evaluate_special_summon(self, card_id: int) -> float:
-        value: float = self._special_summon_network.outputs(card_id, self._duel, self._usedflag)
-        return value
+        input_: np.ndarray = self._special_summon_network.create_input(card_id, None, self._duel, self._usedflag)
+        return self._special_summon_network.outputs(input_)
 
     
     def evaluate_reposition(self, card_id: int) -> float:
-        value: float = self._reposition_network.outputs(card_id, self._duel, self._usedflag)
-        return value
-
+        input_: np.ndarray = self._reposition_network.create_input(card_id, None, self._duel, self._usedflag)
+        return self._reposition_network.outputs(input_)
     
+
     def evaluate_set(self, card_id: int) -> float:
-        value: float = self._set_network.outputs(card_id, self._duel, self._usedflag)
-        return value
+        input_: np.ndarray = self._set_network.create_input(card_id, None, self._duel, self._usedflag)
+        return self._set_network.outputs(input_)
 
 
     def evaluate_activate(self, card_id: int, activation_desc: int) -> float:
-        value: float = self._activate_network.outputs(card_id, activation_desc, self._duel, self._usedflag)
-        return value
+        input_: np.ndarray = self._activate_network.create_input(card_id, activation_desc, self._duel, self._usedflag)
+        return self._activate_network.outputs(input_)
     
 
     def evaluate_phase(self) -> float:
-        value: float = self._phase_network.outputs(self._duel, self._usedflag)
-        return value
+        input_: np.ndarray = self._phase_network.create_input(None, None, self._duel, self._usedflag)
+        return  self._phase_network.outputs(input_)
 
 
     def evaluate_attack(self, card_id: int) -> float:
-        value: float = self._attack_network.outputs(card_id, self._duel, self._usedflag)
-        return value
+        input_: np.ndarray = self._attack_network.create_input(card_id, None, self._duel, self._usedflag)
+        return self._attack_network.outputs(input_)
         
 
     def evaluate_chain(self, card_id: int, activation_desc: int) -> float:
-        value: float = self._chain_network.outputs(card_id, activation_desc, self._duel, self._usedflag)
-        return value
+        input_: np.ndarray = self._chain_network.create_input(card_id, activation_desc, self._duel, self._usedflag)
+        return self._chain_network.outputs(input_)
 
 
     def evaluate_selection(self, card_id: int, select_hint: int) -> float:
-        value: float = self._select_network.outputs(card_id, select_hint, self._duel, self._usedflag)
-        return value
+        input_: np.ndarray = self._select_network.create_input(card_id, select_hint, self._duel, self._usedflag)
+        return self._select_network.outputs(input_)
     
 
     def train(self, decisions: list[Decision]) -> None:
         random.shuffle(decisions)
-        expecteds: list[np.ndarray] = [np.array([dc.value], dtype='float64') for dc in decisions]
-        for _ in range(self.EPOCH):    
-            for dc, expected in zip(decisions, expecteds):  
-                if dc.action == Action.SUMMON:
-                    self._summon_network.train(dc.card_id, dc.duel, dc.usedflag, expected)
+        expecteds: list[np.ndarray] = [np.array([dc.value]) for dc in decisions]
+        learning_info: dict[Action, LearningInfo] = {
+            Action.SUMMON: LearningInfo(self._summon_network, [], []),
+            Action.SP_SUMMON: LearningInfo(self._special_summon_network, [], []),
+            Action.REPOSITION: LearningInfo(self._reposition_network, [], []),
+            Action.SET_MONSTER: LearningInfo(self._set_network, [], []),
+            Action.ACTIVATE: LearningInfo(self._activate_network, [], []),
+            Action.CHAIN: LearningInfo(self._chain_network, [], []),
+            Action.SELECT: LearningInfo(self._select_network, [], []),
+            Action.ATTACK: LearningInfo(self._attack_network, [], []),
+            Action.BATTLE: LearningInfo(self._phase_network, [], []),
+        }
+        for dc, expected in zip(decisions, expecteds):  
+            if dc.action == Action.SUMMON:
+                action = Action.SUMMON
+                network = learning_info[action].network
+                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
+                learning_info[action].expecteds.append(expected)
 
-                elif dc.action == Action.SP_SUMMON:
-                    self._special_summon_network.train(dc.card_id, dc.duel, dc.usedflag, expected)
+            elif dc.action == Action.SP_SUMMON:
+                action = Action.SP_SUMMON
+                network = learning_info[action].network
+                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
+                learning_info[action].expecteds.append(expected)
 
-                elif dc.action == Action.REPOSITION:
-                    self._reposition_network.train(dc.card_id, dc.duel, dc.usedflag, expected)
+            elif dc.action == Action.REPOSITION:
+                action = Action.REPOSITION
+                network = learning_info[action].network
+                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
+                learning_info[action].expecteds.append(expected)
 
-                elif dc.action == Action.SET_MONSTER or dc.action == Action.SET_SPELL:
-                    self._set_network.train(dc.card_id, dc.duel, dc.usedflag, expected)
+            elif dc.action == Action.SET_MONSTER or dc.action == Action.SET_SPELL:
+                action = Action.SET_MONSTER
+                network = learning_info[action].network
+                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
+                learning_info[action].expecteds.append(expected)
 
-                elif dc.action == Action.ACTIVATE or dc.action == Action.ACTIVATE_IN_BATTLE:
-                    self._activate_network.train(dc.card_id, dc.option, dc.duel, dc.usedflag, expected)
+            elif dc.action == Action.ACTIVATE or dc.action == Action.ACTIVATE_IN_BATTLE:
+                action = Action.ACTIVATE
+                network = learning_info[action].network
+                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
+                learning_info[action].expecteds.append(expected)
 
-                elif dc.action == Action.CHAIN:
-                    self._chain_network.train(dc.card_id, dc.option, dc.duel, dc.usedflag, expected)
+            elif dc.action == Action.CHAIN:
+                action = Action.CHAIN
+                network = learning_info[action].network
+                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
+                learning_info[action].expecteds.append(expected)
 
-                elif dc.action == Action.SELECT:
-                    self._select_network.train(dc.card_id, dc.option, dc.duel, dc.usedflag, expected)
+            elif dc.action == Action.SELECT:
+                action = Action.SELECT
+                network = learning_info[action].network
+                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
+                learning_info[action].expecteds.append(expected)
 
-                elif dc.action == Action.ATTACK:
-                    self._attack_network.train(dc.card_id, dc.duel, dc.usedflag, expected)
+            elif dc.action == Action.ATTACK:
+                action = Action.ATTACK
+                network = learning_info[action].network
+                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
+                learning_info[action].expecteds.append(expected)
 
-                elif dc.action == Action.BATTLE or dc.action == Action.END or dc.action == Action.MAIN2:
-                    self._phase_network.train(dc.duel, dc.usedflag, expected)
+            elif dc.action == Action.BATTLE or dc.action == Action.END or dc.action == Action.MAIN2:
+                action = Action.BATTLE
+                network = learning_info[action].network
+                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
+                learning_info[action].expecteds.append(expected)
 
-                else:
-                    assert True, 'elif　not coveraged'
-    
-        self._save_networks()
+            else:
+                assert True, 'elif　not coveraged'
+
+        t0 = time.time()
+        for key in learning_info.keys():
+            learning_info[key].network.train(learning_info[key].inputs, learning_info[key].expecteds, self.EPOCH)
+        t1 = time.time()
+        print('train time: {}[s]'.format(t1-t0))
+        #self._save_networks()
+
+
+class LearningInfo(NamedTuple):
+    network: ActionNetwork
+    inputs: list[np.ndarray]
+    expecteds: list[np.ndarray]
 
 

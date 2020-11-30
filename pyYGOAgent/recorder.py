@@ -4,11 +4,10 @@ import csv
 from pathlib import Path
 from typing import Any, NamedTuple
 
-from pyYGO.duel import Duel
-from pyYGO.enums import Player
-from pyYGOAgent.deck import Deck
-from pyYGOAgent.action import Action
-from pyYGOAgent.flags import UsedFlag
+from pyYGO.duel import Duel, Player
+from .deck import Deck
+from .action import Action
+from .flags import UsedFlag
 
 
 class Decision(NamedTuple):

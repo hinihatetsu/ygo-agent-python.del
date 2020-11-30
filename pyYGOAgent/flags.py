@@ -1,6 +1,6 @@
 from typing import ValuesView
 
-from pyYGOAgent.deck import Deck
+from .deck import Deck
 
 
 class UsedFlag:

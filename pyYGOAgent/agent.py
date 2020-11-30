@@ -1,20 +1,18 @@
 import random
 import copy
 
-from pyYGO.duel import Duel
-from pyYGO.card import Card
-from pyYGO.zone import Zone
+from pyYGO.duel import Duel, Card, Zone
 from pyYGO.phase import MainPhase, BattlePhase
 from pyYGO.enums import CardPosition, Player, CardLocation, Attribute, Race
-from pyYGOAgent.deck import Deck
-from pyYGOAgent.action import Action, ChainAction, MainAction, BattleAction, SelectAction
-from pyYGOAgent.brain import AgentBrain
-from pyYGOAgent.recorder import Decision, DecisionRecorder
-from pyYGOAgent.flags import UsedFlag
+from .deck import Deck
+from .action import Action, ChainAction, MainAction, BattleAction, SelectAction
+from .brain import AgentBrain
+from .recorder import Decision, DecisionRecorder
+from .flags import UsedFlag
 
 
 class DuelAgent:
-    _MAX_MATCH: int = 200
+    _MAX_MATCH: int = 2000
     _TRAINING_INTERVAL: int = 5
     def __init__(self, deck_name: str, duel: Duel) -> None:
         self._deck: Deck = Deck(deck_name)

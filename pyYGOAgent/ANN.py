@@ -1,12 +1,12 @@
 from abc import ABC, abstractclassmethod
+from typing import Any
 import numpy as np
 
-from pyYGO.duel import Duel
-from pyYGO.field import HalfField
-from pyYGO.enums import Player, CardPosition
-from pyYGOAgent.deck import Deck
-from pyYGOAgent.flags import UsedFlag
-from pyYGOAgent.networkbase import Network
+from pyYGO.duel import Duel, HalfField, Player
+from pyYGO.enums import CardPosition
+from .deck import Deck
+from .flags import UsedFlag
+from .cnetworkbase import Network
 
 
 _LOCATION_BIT: int = 10
@@ -26,35 +26,38 @@ class ActionNetwork(ABC):
         self._deck_list: list[int] = deck.main + deck.extra # ToDo: add side deck
         self._deck_list.sort()
         size: int = self._input_size
-        self._network: Network = Network([size, size * 2 // 3, 200, 100, 1])
+        self._network: Network = Network([size, size * 2 // 3, 200, 100, 1], learning_rate=0.01)
 
     @property
     @abstractclassmethod
     def _input_size(self) -> int:
         pass
 
+    @abstractclassmethod
+    def create_input(self, card_id: int, option: Any, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
+        pass
+
+
+    def outputs(self, input_: np.ndarray) -> float:
+        return self._network.outputs(input_)[0]
+
+
+    def train(self, inputs: list[np.ndarray], expecteds: list[np.ndarray], epoch: int) -> None:
+        self._network.train(inputs, expecteds, epoch)
+
+
+
 
 
 class CardIDNetwork(ActionNetwork):
-    def outputs(self, card_id: int, duel: Duel, usedflag: UsedFlag) -> float:
-        inputs: np.ndarray = self._create_inputs(card_id, duel, usedflag)
-        value: float = self._network._outputs(inputs)[0]
-        return value
-
-
-    def train(self, card_id: int, duel: Duel, usedflag: UsedFlag, expected: np.ndarray) -> None:
-        self.outputs(card_id, duel, usedflag)
-        self._network._backpropagate(expected)
-        self._network._update()
-
     @property
     def _input_size(self) -> int:
-        return len(self._create_inputs(0, Duel(), UsedFlag(self._deck)))
+        return len(self.create_input(0, 0, Duel(), UsedFlag(self._deck)))
 
     
-    def _create_inputs(self, card_id: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
+    def create_input(self, card_id: int, not_used: Any, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
         id: np.ndarray = _create_card_id_array(card_id)
-        inputs: np.ndarray = np.concatenate((id, _create_inputs_base(self, duel, usedflag)))
+        inputs: np.ndarray = np.concatenate((id, _create_input_base(self, duel, usedflag)))
         return inputs
 
 
@@ -80,26 +83,15 @@ class SetNetwork(CardIDNetwork):
 
 
 class ActivateNetwork(ActionNetwork):
-    def outputs(self, card_id: int, activation_desc: int, duel: Duel, usedflag: UsedFlag) -> float:
-        inputs: np.ndarray = self._create_inputs(card_id, activation_desc, duel, usedflag)
-        value: float = self._network._outputs(inputs)[0]
-        return value
-
-
-    def train(self, card_id: int, activation_desc: int, duel: Duel, usedflag: UsedFlag, expected: np.ndarray) -> None:
-        self.outputs(card_id, activation_desc, duel, usedflag)
-        self._network._backpropagate(expected)
-        self._network._update()
-
     @property
     def _input_size(self) -> int:
-        return len(self._create_inputs(0, 0, Duel(), UsedFlag(self._deck)))
+        return len(self.create_input(0, 0, Duel(), UsedFlag(self._deck)))
     
 
-    def _create_inputs(self, card_id: int,activation_desc: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
+    def create_input(self, card_id: int,activation_desc: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
         id: np.ndarray = _create_card_id_array(card_id)
         desc: np.ndarray = np.array([(activation_desc >> i) & 1 for i in range(64)], dtype='float64')
-        inputs: np.ndarray = np.concatenate((id, desc, _create_inputs_base(self, duel, usedflag)))
+        inputs: np.ndarray = np.concatenate((id, desc, _create_input_base(self, duel, usedflag)))
         return inputs
     
     
@@ -110,23 +102,12 @@ class AttackNetwork(CardIDNetwork):
 
 
 class ChainNetwork(ActionNetwork):
-    def outputs(self, card_id: int, activation_desc: int, duel: Duel, usedflag: UsedFlag) -> float:
-        inputs: np.ndarray = self._create_inputs(card_id, activation_desc, duel, usedflag)
-        value: float = self._network._outputs(inputs)[0]
-        return value
-
-    
-    def train(self, card_id: int, activation_desc: int, duel: Duel, usedflag: UsedFlag, expected: np.ndarray) -> None:
-        self.outputs(card_id, activation_desc, duel, usedflag)
-        self._network._backpropagate(expected)
-        self._network._update()
-
     @property
     def _input_size(self) -> int:
-        return len(self._create_inputs(0, 0, Duel(), UsedFlag(self._deck)))
+        return len(self.create_input(0, 0, Duel(), UsedFlag(self._deck)))
 
 
-    def _create_inputs(self, card_id: int, activation_desc: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
+    def create_input(self, card_id: int, activation_desc: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
         id: np.ndarray = _create_card_id_array(card_id)
         desc: np.ndarray = np.array([(activation_desc >> i) & 1 for i in range(64)], dtype='float64')
         is_chain_target: np.ndarray = np.array([any([card.id == card_id for card in duel.chain_targets])], dtype='float64')
@@ -134,59 +115,37 @@ class ChainNetwork(ActionNetwork):
         chain: list[np.ndarray] = [np.zeros((32,)) for _ in range(2)]
         for i, card in enumerate(duel.current_chain):
             if i < 2: chain[i] = _create_card_id_array(card.id)
-        inputs: np.ndarray = np.concatenate((id, desc, is_chain_target, chain_player, chain[0], chain[1], _create_inputs_base(self, duel, usedflag)))
+        inputs: np.ndarray = np.concatenate((id, desc, is_chain_target, chain_player, chain[0], chain[1], _create_input_base(self, duel, usedflag)))
         return inputs
 
 
 
 class SelectNetwork(ActionNetwork):
-    def outputs(self, card_id: int, select_hint: int, duel: Duel, usedflag: UsedFlag) -> float:
-        inputs: np.ndarray = self._create_inputs(card_id, select_hint, duel, usedflag)
-        value: float = self._network._outputs(inputs)[0]
-        return value
-
-
-    def train(self, card_id: int, select_hint: int, duel: Duel, usedflag: UsedFlag, expected: np.ndarray) -> None:
-        self.outputs(card_id, select_hint, duel, usedflag)
-        self._network._backpropagate(expected)
-        self._network._update()
-
     @property
     def _input_size(self) -> int:
-        return len(self._create_inputs(0, 0, Duel(), UsedFlag(self._deck)))
+        return len(self.create_input(0, 0, Duel(), UsedFlag(self._deck)))
     
 
-    def _create_inputs(self, card_id: int, select_hint: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
+    def create_input(self, card_id: int, select_hint: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
         id: np.ndarray = _create_card_id_array(card_id)
         hint: np.ndarray = np.array([(select_hint >> i) & 1 for i in range(10)], dtype='float64')
-        inputs: np.ndarray = np.concatenate((id, hint, _create_inputs_base(self, duel, usedflag)))
+        inputs: np.ndarray = np.concatenate((id, hint, _create_input_base(self, duel, usedflag)))
         return inputs
 
 
 
 class PhaseNetwork(ActionNetwork):
-    def outputs(self, duel: Duel, usedflag: UsedFlag) -> float:
-        inputs: np.ndarray = self._create_inputs(duel, usedflag)
-        value: float = self._network._outputs(inputs)[0]
-        return value
-
-    
-    def train(self, duel: Duel, usedflag: UsedFlag, expected: np.ndarray) -> None:
-        self.outputs(duel, usedflag)
-        self._network._backpropagate(expected)
-        self._network._update()
-
     @property
     def _input_size(self) -> int:
-        return len(self._create_inputs(Duel(), UsedFlag(self._deck)))
+        return len(self.create_input(0, 0, Duel(), UsedFlag(self._deck)))
 
     
-    def _create_inputs(self, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
-        return _create_inputs_base(self, duel, usedflag)
+    def create_input(self, not_used: int, not_used_2: Any, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
+        return _create_input_base(self, duel, usedflag)
         
 
 
-def _create_inputs_base(network: ActionNetwork, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
+def _create_input_base(network: ActionNetwork, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
     basic: np.ndarray = _create_basic(duel)
     loc: np.ndarray = _create_locations(network, duel.field.myside)
     flag: np.ndarray = _create_usedflag(usedflag)

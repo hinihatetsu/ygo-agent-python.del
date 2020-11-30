@@ -1,6 +1,6 @@
 from functools import reduce
 from typing import Callable
-from pyYGOAgent.util import linear, derivative_linear, sigmoid, derivative_sigmoid, ReLU, derivative_ReLU, softmax, derivative_softmax, tanh, derivative_tanh
+from .util import linear, derivative_linear, sigmoid, derivative_sigmoid, ReLU, derivative_ReLU, softmax, derivative_softmax, tanh, derivative_tanh
 import numpy as np
 
 der_act_funcs = {sigmoid: derivative_sigmoid,
@@ -10,7 +10,7 @@ der_act_funcs = {sigmoid: derivative_sigmoid,
                  tanh: derivative_tanh}
 
 class Layer:
-    def __init__(self, num_inputs: int, num_neurons: int, learning_rate: float, act_func: Callable[[np.ndarray], np.ndarray], is_input_layer: bool=False) -> None:
+    def __init__(self, num_inputs: int, num_neurons: int, learning_rate: float, act_func: Callable[[np.ndarray], np.ndarray]) -> None:
         self.learning_rate: float = learning_rate
         self.weight: np.ndarray = np.random.randn(num_neurons, num_inputs) / np.sqrt(num_inputs)
         self.bias: np.ndarray = np.random.randn(num_neurons) / np.sqrt(num_neurons)
@@ -18,7 +18,8 @@ class Layer:
         self.input_cache: np.ndarray = np.zeros(num_neurons)
         self.output_cache: np.ndarray = np.zeros(num_neurons)
         self.activation_func = act_func
-        self.is_input_layer: bool = is_input_layer
+        self.is_input_layer: bool = False
+        self.is_output_layer: bool = False
 
 
     @property
@@ -44,21 +45,26 @@ class Layer:
         return self.output_cache
 
 
-    def _calculate_deltas_for_output_layer(self, expected: np.ndarray) -> None:
-        self.delta = self.derivative_activation_func(self.input_cache) * (self.output_cache - expected)
+    def calculate_deltas(self, x: np.ndarray) -> np.ndarray:
+        if self.is_output_layer:
+            self.delta = self.derivative_activation_func(self.input_cache) * (self.output_cache - x)
+        elif self.is_input_layer:
+            return x
+        else:
+            self.delta = self.derivative_activation_func(self.input_cache) * x
+        return self.delta @ self.weight
 
-    
-    def _calculate_deltas_for_hidden_layer(self, delta: np.ndarray) -> None:
-        self.delta = self.derivative_activation_func(self.input_cache) * delta
 
 
 class Network:
     def __init__(self, layer_structure: list[int], learning_rate: float=0.01, act_func: Callable[[np.ndarray], np.ndarray]=tanh) -> None:      
         self._layer_structure: list[int] = layer_structure
         self._size: int = len(self._layer_structure)
-        self._layers: list[Layer] = [Layer(0, layer_structure[0], learning_rate, act_func, is_input_layer=True)]
+        self._layers: list[Layer] = [Layer(0, layer_structure[0], learning_rate, act_func)]
         for n, m in zip(layer_structure, layer_structure[1:]):
             self._layers.append(Layer(n, m, learning_rate, act_func))
+        self._layers[0].is_input_layer = True
+        self._layers[self._size-1].is_output_layer = True
         
     @property
     def _layers_weights(self) -> list[np.ndarray]:
@@ -73,15 +79,14 @@ class Network:
         return layer.outputs(inputs)
 
 
-    def _outputs(self, inputs: np.ndarray) -> np.ndarray:
+    def outputs(self, inputs: np.ndarray) -> np.ndarray:
         return reduce(self._activate, self._layers, inputs)
 
 
     def _backpropagate(self, expected: np.ndarray) -> None:
-        self._output_layer._calculate_deltas_for_output_layer(expected)
-        for i in range(self._size-2, 0, -1):
-            delta = self._layers[i+1].delta @ self._layers[i+1].weight
-            self._layers[i]._calculate_deltas_for_hidden_layer(delta)
+        x = expected
+        for layer in reversed(self._layers):
+            x = layer.calculate_deltas(x)
 
 
     def _update(self) -> None:
@@ -90,16 +95,18 @@ class Network:
             layer.bias += -layer.delta * layer.learning_rate
 
     
-    def train(self, inputs: list[np.ndarray], expecteds: list[np.ndarray]) -> None:
-        for _input, expected in zip(inputs, expecteds):
-            self._outputs(_input)
-            self._backpropagate(expected)
-            self._update()
+    def train(self, inputs: list[np.ndarray], expecteds: list[np.ndarray], epoch: int=1) -> None:
+        for _ in range(epoch):
+            for _input, expected in zip(inputs, expecteds):
+                self.outputs(_input)
+                self._backpropagate(expected)
+                self._update()
 
 
     def load_weights(self, weights: list[np.ndarray]) -> None:
         for layer, weight in zip(self._layers, weights):
             layer.weight = weight
-    
-    
+
+
+ 
 
