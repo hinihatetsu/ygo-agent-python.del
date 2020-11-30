@@ -1,4 +1,4 @@
-from pyYGO.card import Card
+from .card import Card
 
 class MainPhase:
     def __init__(self):

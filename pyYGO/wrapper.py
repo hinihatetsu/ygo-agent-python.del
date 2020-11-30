@@ -1,4 +1,4 @@
-from pyYGO.enums import CardLocation
+from .enums import CardLocation
 
 class Location(int):
     """

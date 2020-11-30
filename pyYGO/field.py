@@ -1,7 +1,7 @@
-from pyYGO.wrapper import Location
-from pyYGO.card import Card
-from pyYGO.zone import Zone, MonsterZone, SpellZone
-from pyYGO.enums import CardLocation, CardType
+from .wrapper import Location
+from .card import Card
+from .zone import Zone, MonsterZone, SpellZone
+from .enums import CardLocation, CardType
 
 
 

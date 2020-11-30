@@ -1,8 +1,8 @@
 
 
-from pyYGO.enums import Player, CardPosition, CardType, Attribute, Race, Query
-from pyYGO.wrapper import Location
-from pyYGONetwork.packet import Packet
+from .enums import Player, CardPosition, CardType, Attribute, Race, Query
+from .wrapper import Location
+from pyYGONetwork import Packet
 
 
 class Card:

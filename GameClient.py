@@ -4,23 +4,18 @@ from collections.abc import Coroutine
 from typing import Callable
 
 from util import LaunchInfo, print_message
-from pyYGO.duel import Duel
-from pyYGO.card import Card
-from pyYGO.zone import Zone
+from pyYGO.duel import Duel, Card, Zone, Location
 from pyYGO.phase import MainPhase, BattlePhase
 from pyYGO.enums import Phase, Player, CardLocation, CardPosition, Attribute, Race
-from pyYGO.wrapper import Location
-from pyYGOAgent.agent import DuelAgent
-from pyYGONetwork.network import YGOConnection
-from pyYGONetwork.packet import Packet
-from pyYGONetwork.enums import CtosMessage, StocMessage, GameMessage
+from pyYGOAgent import DuelAgent
+from pyYGONetwork import YGOConnection, Packet, CtosMessage, StocMessage, GameMessage
 
 
 class GameClient:
     SERVER_HANDSHAKE: int = 4043399681
     def __init__(self, info: LaunchInfo) -> None:
         self.info: LaunchInfo = info
-        self.connection = YGOConnection(info.host, info.port)
+        self.connection: YGOConnection = YGOConnection(info.host, info.port)
         self.duel: Duel = Duel()
         self.agent: DuelAgent = DuelAgent(info.deck, self.duel)
 
@@ -63,7 +58,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_connected(self) -> None:            
+    def on_connected(self) -> None:          
         packet: Packet = Packet(CtosMessage.PLAYER_INFO)
         packet.write(self.info.name, byte_size=40)
         self.connection.send(packet)
@@ -379,7 +374,7 @@ class GameClient:
         self.connection.send(reply)
 
 
-    def on_select_battle_cmd(self, packet:Packet) -> None:
+    def on_select_battle_cmd(self, packet: Packet) -> None:
         player_msg_sent_to: Player = packet.read_player()
         battle: BattlePhase = BattlePhase()
 

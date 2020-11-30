@@ -1,10 +1,10 @@
 from typing import NamedTuple
 
-from pyYGO.field import HalfField
-from pyYGO.card import Card
-from pyYGO.zone import Zone
-from pyYGO.enums import CardLocation, Phase, Player
-from pyYGO.wrapper import Location
+from .field import HalfField
+from .card import Card
+from .zone import Zone
+from .enums import CardLocation, Phase, Player
+from .wrapper import Location
 
 
 

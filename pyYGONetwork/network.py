@@ -1,7 +1,7 @@
 import asyncio
 import asyncio.streams
 
-from pyYGONetwork.packet import Packet
+from .packet import Packet
 
 
 class YGOConnection:
