@@ -19,6 +19,6 @@ setup(
     include_dirs = [
         numpy.get_include(),
         ".\\include\\",
-        #/path/to/Eigen,
+        "C:\\Users\\Shuhei\\dev\\C_C++\\include\\",
     ]
 )

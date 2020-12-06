@@ -12,7 +12,6 @@ using namespace Eigen;
 
 class Network {
     public:
-        Network();
         Network(const vector<int> &layerStructure, double learningRate);
         vector<double> outputs(vector<double> &input);
         void trainForEpoch(vector<vector<double>> &inputs, vector<vector<double>> &outputs, int epoch);

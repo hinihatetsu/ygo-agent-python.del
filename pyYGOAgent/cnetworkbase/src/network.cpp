@@ -9,9 +9,6 @@ using std::cout;
 using std::endl; 
 using std::vector;
 
-Network::Network() {
-    _size = 0;
-}
 
 Network::Network(const vector<int> &layerStructure, double learningRate) {
     _size = static_cast<int>(layerStructure.size());
