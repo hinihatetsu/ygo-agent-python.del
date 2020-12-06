@@ -13,5 +13,4 @@ std::vector<VectorXd> toEigenVecs(std::vector<std::vector<double>> &vecs);
 std::vector<double> toSTDVec(const VectorXd &vec);
 
 
-
 #endif

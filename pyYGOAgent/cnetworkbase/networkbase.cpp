@@ -4,6 +4,10 @@
 {
     "distutils": {
         "depends": [],
+        "extra_compile_args": [
+            "/openmp",
+            "-DEIGEN_NO_DEBUG"
+        ],
         "language": "c++",
         "name": "networkbase",
         "sources": [
@@ -1074,8 +1078,8 @@ typedef npy_double __pyx_t_5numpy_double_t;
  */
 typedef npy_longdouble __pyx_t_5numpy_longdouble_t;
 
-/* "networkbase.pyx":5
- * cimport numpy as np
+/* "networkbase.pyx":7
+ * 
  * DTYPE = np.float64
  * ctypedef np.float64_t DTYPE_t             # <<<<<<<<<<<<<<
  * 
@@ -1146,7 +1150,7 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
  */
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
 
-/* "networkbase.pyx":14
+/* "networkbase.pyx":16
  * 
  * 
  * cdef class cNetwork:             # <<<<<<<<<<<<<<
@@ -1673,6 +1677,8 @@ static PyTypeObject *__pyx_ptype_5numpy_broadcast = 0;
 static PyTypeObject *__pyx_ptype_5numpy_ndarray = 0;
 static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 
+/* Module declarations from 'cython' */
+
 /* Module declarations from 'networkbase' */
 static PyTypeObject *__pyx_ptype_11networkbase_cNetwork = 0;
 static std::vector<int>  __pyx_convert_vector_from_py_int(PyObject *); /*proto*/
@@ -1765,7 +1771,7 @@ static PyObject *__pyx_tuple__3;
 static PyObject *__pyx_tuple__4;
 /* Late includes */
 
-/* "networkbase.pyx":16
+/* "networkbase.pyx":18
  * cdef class cNetwork:
  *     cdef Network* network
  *     def __init__(self, vector[int] layer_structure: list[int], double learning_rate: float) -> None:             # <<<<<<<<<<<<<<
@@ -1807,11 +1813,11 @@ static int __pyx_pw_11networkbase_8cNetwork_1__init__(PyObject *__pyx_v_self, Py
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_learning_rate)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(1, 16, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(1, 18, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 16, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 18, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -1819,12 +1825,12 @@ static int __pyx_pw_11networkbase_8cNetwork_1__init__(PyObject *__pyx_v_self, Py
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_layer_structure = __pyx_convert_vector_from_py_int(values[0]); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 16, __pyx_L3_error)
-    __pyx_v_learning_rate = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_learning_rate == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 16, __pyx_L3_error)
+    __pyx_v_layer_structure = __pyx_convert_vector_from_py_int(values[0]); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 18, __pyx_L3_error)
+    __pyx_v_learning_rate = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_learning_rate == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 18, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 16, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 18, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("networkbase.cNetwork.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1842,7 +1848,7 @@ static int __pyx_pf_11networkbase_8cNetwork___init__(struct __pyx_obj_11networkb
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "networkbase.pyx":17
+  /* "networkbase.pyx":19
  *     cdef Network* network
  *     def __init__(self, vector[int] layer_structure: list[int], double learning_rate: float) -> None:
  *         self.network = new Network(layer_structure, learning_rate)             # <<<<<<<<<<<<<<
@@ -1851,7 +1857,7 @@ static int __pyx_pf_11networkbase_8cNetwork___init__(struct __pyx_obj_11networkb
  */
   __pyx_v_self->network = new Network(__pyx_v_layer_structure, __pyx_v_learning_rate);
 
-  /* "networkbase.pyx":16
+  /* "networkbase.pyx":18
  * cdef class cNetwork:
  *     cdef Network* network
  *     def __init__(self, vector[int] layer_structure: list[int], double learning_rate: float) -> None:             # <<<<<<<<<<<<<<
@@ -1865,7 +1871,7 @@ static int __pyx_pf_11networkbase_8cNetwork___init__(struct __pyx_obj_11networkb
   return __pyx_r;
 }
 
-/* "networkbase.pyx":20
+/* "networkbase.pyx":22
  * 
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -1890,7 +1896,7 @@ static void __pyx_pf_11networkbase_8cNetwork_2__dealloc__(struct __pyx_obj_11net
   Network *__pyx_t_2;
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "networkbase.pyx":21
+  /* "networkbase.pyx":23
  * 
  *     def __dealloc__(self):
  *         if self.network != NULL:             # <<<<<<<<<<<<<<
@@ -1900,16 +1906,16 @@ static void __pyx_pf_11networkbase_8cNetwork_2__dealloc__(struct __pyx_obj_11net
   __pyx_t_1 = ((__pyx_v_self->network != NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "networkbase.pyx":22
+    /* "networkbase.pyx":24
  *     def __dealloc__(self):
  *         if self.network != NULL:
  *             del *self.network             # <<<<<<<<<<<<<<
  * 
- * 
+ *     @cython.boundscheck(False)
  */
     delete __pyx_t_2;
 
-    /* "networkbase.pyx":21
+    /* "networkbase.pyx":23
  * 
  *     def __dealloc__(self):
  *         if self.network != NULL:             # <<<<<<<<<<<<<<
@@ -1918,7 +1924,7 @@ static void __pyx_pf_11networkbase_8cNetwork_2__dealloc__(struct __pyx_obj_11net
  */
   }
 
-  /* "networkbase.pyx":20
+  /* "networkbase.pyx":22
  * 
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -1930,17 +1936,16 @@ static void __pyx_pf_11networkbase_8cNetwork_2__dealloc__(struct __pyx_obj_11net
   __Pyx_RefNannyFinishContext();
 }
 
-/* "networkbase.pyx":25
- * 
- * 
- *     cpdef np.ndarray[DTYPE_t, ndim=1] outputs(self, np.ndarray[DTYPE_t, ndim=1] input_: np.ndarray):             # <<<<<<<<<<<<<<
- *         cdef vector[double] vin = input_
- *         cdef vector[double] x = self.network.outputs(vin)
+/* "networkbase.pyx":28
+ *     @cython.boundscheck(False)
+ *     @cython.wraparound(False)
+ *     cpdef np.ndarray[DTYPE_t, ndim=1] outputs(self, vector[double] input_: np.ndarray):             # <<<<<<<<<<<<<<
+ *         cdef vector[double] x = self.network.outputs(input_)
+ *         return np.asarray(x, dtype=DTYPE)
  */
 
 static PyObject *__pyx_pw_11networkbase_8cNetwork_5outputs(PyObject *__pyx_v_self, PyObject *__pyx_v_input_); /*proto*/
 static PyArrayObject *__pyx_f_11networkbase_8cNetwork_outputs(struct __pyx_obj_11networkbase_cNetwork *__pyx_v_self, PyArrayObject *__pyx_v_input_, int __pyx_skip_dispatch) {
-  std::vector<double>  __pyx_v_vin;
   std::vector<double>  __pyx_v_x;
   PyArrayObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -1962,7 +1967,7 @@ static PyArrayObject *__pyx_f_11networkbase_8cNetwork_outputs(struct __pyx_obj_1
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_type_dict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_outputs); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 25, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_outputs); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 28, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_11networkbase_8cNetwork_5outputs)) {
         __Pyx_XDECREF(((PyObject *)__pyx_r));
@@ -1979,10 +1984,10 @@ static PyArrayObject *__pyx_f_11networkbase_8cNetwork_outputs(struct __pyx_obj_1
         }
         __pyx_t_2 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_4, ((PyObject *)__pyx_v_input_)) : __Pyx_PyObject_CallOneArg(__pyx_t_3, ((PyObject *)__pyx_v_input_));
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-        if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 25, __pyx_L1_error)
+        if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 28, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 25, __pyx_L1_error)
+        if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 28, __pyx_L1_error)
         __pyx_r = ((PyArrayObject *)__pyx_t_2);
         __pyx_t_2 = 0;
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -2001,67 +2006,58 @@ static PyArrayObject *__pyx_f_11networkbase_8cNetwork_outputs(struct __pyx_obj_1
     #endif
   }
 
-  /* "networkbase.pyx":26
- * 
- *     cpdef np.ndarray[DTYPE_t, ndim=1] outputs(self, np.ndarray[DTYPE_t, ndim=1] input_: np.ndarray):
- *         cdef vector[double] vin = input_             # <<<<<<<<<<<<<<
- *         cdef vector[double] x = self.network.outputs(vin)
- *         return np.asarray(x, dtype=DTYPE)
- */
-  __pyx_t_5 = __pyx_convert_vector_from_py_double(((PyObject *)__pyx_v_input_)); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 26, __pyx_L1_error)
-  __pyx_v_vin = __pyx_t_5;
-
-  /* "networkbase.pyx":27
- *     cpdef np.ndarray[DTYPE_t, ndim=1] outputs(self, np.ndarray[DTYPE_t, ndim=1] input_: np.ndarray):
- *         cdef vector[double] vin = input_
- *         cdef vector[double] x = self.network.outputs(vin)             # <<<<<<<<<<<<<<
+  /* "networkbase.pyx":29
+ *     @cython.wraparound(False)
+ *     cpdef np.ndarray[DTYPE_t, ndim=1] outputs(self, vector[double] input_: np.ndarray):
+ *         cdef vector[double] x = self.network.outputs(input_)             # <<<<<<<<<<<<<<
  *         return np.asarray(x, dtype=DTYPE)
  * 
  */
-  __pyx_v_x = __pyx_v_self->network->outputs(__pyx_v_vin);
+  __pyx_t_5 = __pyx_convert_vector_from_py_double(((PyObject *)__pyx_v_input_)); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 29, __pyx_L1_error)
+  __pyx_v_x = __pyx_v_self->network->outputs(__pyx_t_5);
 
-  /* "networkbase.pyx":28
- *         cdef vector[double] vin = input_
- *         cdef vector[double] x = self.network.outputs(vin)
+  /* "networkbase.pyx":30
+ *     cpdef np.ndarray[DTYPE_t, ndim=1] outputs(self, vector[double] input_: np.ndarray):
+ *         cdef vector[double] x = self.network.outputs(input_)
  *         return np.asarray(x, dtype=DTYPE)             # <<<<<<<<<<<<<<
  * 
- * 
+ *     @cython.boundscheck(False)
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 28, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_asarray); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 28, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_asarray); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __pyx_convert_vector_to_py_double(__pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 28, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_to_py_double(__pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 28, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 28, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_DTYPE); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 28, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_DTYPE); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 28, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 30, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 28, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 28, __pyx_L1_error)
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 30, __pyx_L1_error)
   __pyx_r = ((PyArrayObject *)__pyx_t_4);
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "networkbase.pyx":25
- * 
- * 
- *     cpdef np.ndarray[DTYPE_t, ndim=1] outputs(self, np.ndarray[DTYPE_t, ndim=1] input_: np.ndarray):             # <<<<<<<<<<<<<<
- *         cdef vector[double] vin = input_
- *         cdef vector[double] x = self.network.outputs(vin)
+  /* "networkbase.pyx":28
+ *     @cython.boundscheck(False)
+ *     @cython.wraparound(False)
+ *     cpdef np.ndarray[DTYPE_t, ndim=1] outputs(self, vector[double] input_: np.ndarray):             # <<<<<<<<<<<<<<
+ *         cdef vector[double] x = self.network.outputs(input_)
+ *         return np.asarray(x, dtype=DTYPE)
  */
 
   /* function exit code */
@@ -2087,7 +2083,7 @@ static PyObject *__pyx_pw_11networkbase_8cNetwork_5outputs(PyObject *__pyx_v_sel
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("outputs (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_input_), __pyx_ptype_5numpy_ndarray, 1, "input_", 0))) __PYX_ERR(1, 25, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_input_), __pyx_ptype_5numpy_ndarray, 1, "input_", 0))) __PYX_ERR(1, 28, __pyx_L1_error)
   __pyx_r = __pyx_pf_11networkbase_8cNetwork_4outputs(((struct __pyx_obj_11networkbase_cNetwork *)__pyx_v_self), ((PyArrayObject *)__pyx_v_input_));
 
   /* function exit code */
@@ -2108,7 +2104,7 @@ static PyObject *__pyx_pf_11networkbase_8cNetwork_4outputs(struct __pyx_obj_11ne
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("outputs", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = ((PyObject *)__pyx_f_11networkbase_8cNetwork_outputs(__pyx_v_self, __pyx_v_input_, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 25, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_11networkbase_8cNetwork_outputs(__pyx_v_self, __pyx_v_input_, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -2125,9 +2121,9 @@ static PyObject *__pyx_pf_11networkbase_8cNetwork_4outputs(struct __pyx_obj_11ne
   return __pyx_r;
 }
 
-/* "networkbase.pyx":31
- * 
- * 
+/* "networkbase.pyx":34
+ *     @cython.boundscheck(False)
+ *     @cython.wraparound(False)
  *     cpdef trainForEpoch(self, vector[vector[double]] inputs: list[np.ndarray], vector[vector[double]] expecteds: list[np.ndarray], int epoch):             # <<<<<<<<<<<<<<
  *         self.network.trainForEpoch(inputs, expecteds, epoch)
  * 
@@ -2159,15 +2155,15 @@ static PyObject *__pyx_f_11networkbase_8cNetwork_trainForEpoch(struct __pyx_obj_
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_type_dict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_trainForEpoch); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 31, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_trainForEpoch); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 34, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_11networkbase_8cNetwork_7trainForEpoch)) {
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_3 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c_double_3e___(__pyx_v_inputs); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 31, __pyx_L1_error)
+        __pyx_t_3 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c_double_3e___(__pyx_v_inputs); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 34, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_4 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c_double_3e___(__pyx_v_expecteds); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 31, __pyx_L1_error)
+        __pyx_t_4 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c_double_3e___(__pyx_v_expecteds); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 34, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_epoch); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 31, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_epoch); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 34, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_INCREF(__pyx_t_1);
         __pyx_t_6 = __pyx_t_1; __pyx_t_7 = NULL;
@@ -2185,7 +2181,7 @@ static PyObject *__pyx_f_11networkbase_8cNetwork_trainForEpoch(struct __pyx_obj_
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_6)) {
           PyObject *__pyx_temp[4] = {__pyx_t_7, __pyx_t_3, __pyx_t_4, __pyx_t_5};
-          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 31, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 34, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -2196,7 +2192,7 @@ static PyObject *__pyx_f_11networkbase_8cNetwork_trainForEpoch(struct __pyx_obj_
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
           PyObject *__pyx_temp[4] = {__pyx_t_7, __pyx_t_3, __pyx_t_4, __pyx_t_5};
-          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 31, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 34, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -2205,7 +2201,7 @@ static PyObject *__pyx_f_11networkbase_8cNetwork_trainForEpoch(struct __pyx_obj_
         } else
         #endif
         {
-          __pyx_t_9 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 31, __pyx_L1_error)
+          __pyx_t_9 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 34, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           if (__pyx_t_7) {
             __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_7); __pyx_t_7 = NULL;
@@ -2219,7 +2215,7 @@ static PyObject *__pyx_f_11networkbase_8cNetwork_trainForEpoch(struct __pyx_obj_
           __pyx_t_3 = 0;
           __pyx_t_4 = 0;
           __pyx_t_5 = 0;
-          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 31, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 34, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         }
@@ -2242,8 +2238,8 @@ static PyObject *__pyx_f_11networkbase_8cNetwork_trainForEpoch(struct __pyx_obj_
     #endif
   }
 
-  /* "networkbase.pyx":32
- * 
+  /* "networkbase.pyx":35
+ *     @cython.wraparound(False)
  *     cpdef trainForEpoch(self, vector[vector[double]] inputs: list[np.ndarray], vector[vector[double]] expecteds: list[np.ndarray], int epoch):
  *         self.network.trainForEpoch(inputs, expecteds, epoch)             # <<<<<<<<<<<<<<
  * 
@@ -2251,9 +2247,9 @@ static PyObject *__pyx_f_11networkbase_8cNetwork_trainForEpoch(struct __pyx_obj_
  */
   __pyx_v_self->network->trainForEpoch(__pyx_v_inputs, __pyx_v_expecteds, __pyx_v_epoch);
 
-  /* "networkbase.pyx":31
- * 
- * 
+  /* "networkbase.pyx":34
+ *     @cython.boundscheck(False)
+ *     @cython.wraparound(False)
  *     cpdef trainForEpoch(self, vector[vector[double]] inputs: list[np.ndarray], vector[vector[double]] expecteds: list[np.ndarray], int epoch):             # <<<<<<<<<<<<<<
  *         self.network.trainForEpoch(inputs, expecteds, epoch)
  * 
@@ -2316,17 +2312,17 @@ static PyObject *__pyx_pw_11networkbase_8cNetwork_7trainForEpoch(PyObject *__pyx
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_expecteds)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("trainForEpoch", 1, 3, 3, 1); __PYX_ERR(1, 31, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("trainForEpoch", 1, 3, 3, 1); __PYX_ERR(1, 34, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_epoch)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("trainForEpoch", 1, 3, 3, 2); __PYX_ERR(1, 31, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("trainForEpoch", 1, 3, 3, 2); __PYX_ERR(1, 34, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "trainForEpoch") < 0)) __PYX_ERR(1, 31, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "trainForEpoch") < 0)) __PYX_ERR(1, 34, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -2335,13 +2331,13 @@ static PyObject *__pyx_pw_11networkbase_8cNetwork_7trainForEpoch(PyObject *__pyx
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
     }
-    __pyx_v_inputs = __pyx_convert_vector_from_py_std_3a__3a_vector_3c_double_3e___(values[0]); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 31, __pyx_L3_error)
-    __pyx_v_expecteds = __pyx_convert_vector_from_py_std_3a__3a_vector_3c_double_3e___(values[1]); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 31, __pyx_L3_error)
-    __pyx_v_epoch = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_epoch == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 31, __pyx_L3_error)
+    __pyx_v_inputs = __pyx_convert_vector_from_py_std_3a__3a_vector_3c_double_3e___(values[0]); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 34, __pyx_L3_error)
+    __pyx_v_expecteds = __pyx_convert_vector_from_py_std_3a__3a_vector_3c_double_3e___(values[1]); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 34, __pyx_L3_error)
+    __pyx_v_epoch = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_epoch == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 34, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("trainForEpoch", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 31, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("trainForEpoch", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 34, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("networkbase.cNetwork.trainForEpoch", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2363,7 +2359,7 @@ static PyObject *__pyx_pf_11networkbase_8cNetwork_6trainForEpoch(struct __pyx_ob
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("trainForEpoch", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_11networkbase_8cNetwork_trainForEpoch(__pyx_v_self, __pyx_v_inputs, __pyx_v_expecteds, __pyx_v_epoch, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 31, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_11networkbase_8cNetwork_trainForEpoch(__pyx_v_self, __pyx_v_inputs, __pyx_v_expecteds, __pyx_v_epoch, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -4106,16 +4102,16 @@ static int __Pyx_modinit_type_init_code(void) {
   __pyx_vtabptr_11networkbase_cNetwork = &__pyx_vtable_11networkbase_cNetwork;
   __pyx_vtable_11networkbase_cNetwork.outputs = (PyArrayObject *(*)(struct __pyx_obj_11networkbase_cNetwork *, PyArrayObject *, int __pyx_skip_dispatch))__pyx_f_11networkbase_8cNetwork_outputs;
   __pyx_vtable_11networkbase_cNetwork.trainForEpoch = (PyObject *(*)(struct __pyx_obj_11networkbase_cNetwork *, std::vector<std::vector<double> > , std::vector<std::vector<double> > , int, int __pyx_skip_dispatch))__pyx_f_11networkbase_8cNetwork_trainForEpoch;
-  if (PyType_Ready(&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 14, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 16, __pyx_L1_error)
   #if PY_VERSION_HEX < 0x030800B1
   __pyx_type_11networkbase_cNetwork.tp_print = 0;
   #endif
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_11networkbase_cNetwork.tp_dictoffset && __pyx_type_11networkbase_cNetwork.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_11networkbase_cNetwork.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (__Pyx_SetVtable(__pyx_type_11networkbase_cNetwork.tp_dict, __pyx_vtabptr_11networkbase_cNetwork) < 0) __PYX_ERR(1, 14, __pyx_L1_error)
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_cNetwork, (PyObject *)&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 14, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 14, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_11networkbase_cNetwork.tp_dict, __pyx_vtabptr_11networkbase_cNetwork) < 0) __PYX_ERR(1, 16, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_cNetwork, (PyObject *)&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 16, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 16, __pyx_L1_error)
   __pyx_ptype_11networkbase_cNetwork = &__pyx_type_11networkbase_cNetwork;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -4387,26 +4383,26 @@ if (!__Pyx_RefNanny) {
  * from libcpp.vector cimport vector
  * import numpy as np             # <<<<<<<<<<<<<<
  * cimport numpy as np
- * DTYPE = np.float64
+ * cimport cython
  */
   __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "networkbase.pyx":4
- * import numpy as np
- * cimport numpy as np
+  /* "networkbase.pyx":6
+ * cimport cython
+ * 
  * DTYPE = np.float64             # <<<<<<<<<<<<<<
  * ctypedef np.float64_t DTYPE_t
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float64); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float64); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_DTYPE, __pyx_t_2) < 0) __PYX_ERR(1, 4, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_DTYPE, __pyx_t_2) < 0) __PYX_ERR(1, 6, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "networkbase.pyx":1

@@ -1,6 +1,6 @@
 from setuptools import setup, Extension
-import numpy
 from Cython.Build import cythonize
+import numpy
 
 ext = Extension('networkbase',
                 sources=[
@@ -10,7 +10,7 @@ ext = Extension('networkbase',
                     "src\\translate.cpp",
                 ],
                 language = "c++",
-                extra_compile_args=[],
+                extra_compile_args=["/openmp", "-DEIGEN_NO_DEBUG"],
             )
 
 setup(
@@ -18,7 +18,7 @@ setup(
     ext_modules = cythonize(ext,  language_level = "3"),
     include_dirs = [
         numpy.get_include(),
-        ".\\src\\",
+        ".\\include\\",
         "C:\\Users\\Shuhei\\dev\\C_C++\\include\\",
     ]
 )

@@ -15,8 +15,8 @@ std::vector<VectorXd> toEigenVecs(std::vector<std::vector<double>> &vecs) {
     }
     size_t vec_size = vecs[0].size();
     res.reserve(size);
-    for (size_t i = 0; i < size; ++i) {
-        res.push_back(toEigenVec(vec_size, vecs[i]));
+    for (std::vector<double> &vec : vecs) {
+        res.emplace_back(toEigenVec(vec_size, vec));
     }
     return res;
 }

@@ -1,1 +1,1 @@
-from .main import *
+from pyYGOAgent.cnetworkbase.main import *

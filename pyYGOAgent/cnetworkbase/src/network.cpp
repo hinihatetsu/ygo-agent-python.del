@@ -7,7 +7,7 @@ using std::cout;
 using std::endl; 
 using std::vector;
 
-Network::Network(vector<int> layerStructure, double learningRate) {
+Network::Network(const vector<int> &layerStructure, double learningRate) {
     _size = static_cast<int>(layerStructure.size());
     _layerStructure = layerStructure;
     _layers.push_back(Layer(layerStructure[0], 1, learningRate));
