@@ -1,11 +1,8 @@
-# ydk / brain / decision
-*.ydk
-*.brain
-*.decision
-
 Decks
 cards.cdb
 .vscode
+
+setup.py
 
 # for test of network
 iris.csv
