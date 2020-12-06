@@ -8,6 +8,7 @@ from .deck import Deck
 from .flags import UsedFlag
 from .cnetworkbase import Network
 
+import time
 
 _LOCATION_BIT: int = 10
 _IN_DECK: np.ndarray     = np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype='float64')
@@ -26,7 +27,7 @@ class ActionNetwork(ABC):
         self._deck_list: list[int] = deck.main + deck.extra # ToDo: add side deck
         self._deck_list.sort()
         size: int = self._input_size
-        self._network: Network = Network([size, size * 2 // 3, 200, 100, 1], learning_rate=0.01)
+        self._network: Network = Network([size, size * 2 // 3, 200, 1], learning_rate=0.05)
 
     @property
     @abstractclassmethod
@@ -44,6 +45,7 @@ class ActionNetwork(ABC):
 
     def train(self, inputs: list[np.ndarray], expecteds: list[np.ndarray], epoch: int) -> None:
         self._network.train(inputs, expecteds, epoch)
+        
 
 
 
@@ -56,8 +58,8 @@ class CardIDNetwork(ActionNetwork):
 
     
     def create_input(self, card_id: int, not_used: Any, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
-        id: np.ndarray = _create_card_id_array(card_id)
-        inputs: np.ndarray = np.concatenate((id, _create_input_base(self, duel, usedflag)))
+        id = _create_card_id_array(card_id)
+        inputs = np.concatenate((id, _create_input_base(self, duel, usedflag)))
         return inputs
 
 
@@ -89,9 +91,9 @@ class ActivateNetwork(ActionNetwork):
     
 
     def create_input(self, card_id: int,activation_desc: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
-        id: np.ndarray = _create_card_id_array(card_id)
-        desc: np.ndarray = np.array([(activation_desc >> i) & 1 for i in range(64)], dtype='float64')
-        inputs: np.ndarray = np.concatenate((id, desc, _create_input_base(self, duel, usedflag)))
+        id = _create_card_id_array(card_id)
+        desc = np.unpackbits(np.array([activation_desc], dtype=np.uint64).view(np.uint8), bitorder='little')
+        inputs = np.concatenate((id, desc, _create_input_base(self, duel, usedflag)))
         return inputs
     
     
@@ -108,10 +110,10 @@ class ChainNetwork(ActionNetwork):
 
 
     def create_input(self, card_id: int, activation_desc: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
-        id: np.ndarray = _create_card_id_array(card_id)
-        desc: np.ndarray = np.array([(activation_desc >> i) & 1 for i in range(64)], dtype='float64')
-        is_chain_target: np.ndarray = np.array([any([card.id == card_id for card in duel.chain_targets])], dtype='float64')
-        chain_player: np.ndarray = np.array([int(duel.last_chain_player)], dtype='float64')
+        id = _create_card_id_array(card_id)
+        desc = np.unpackbits(np.array([activation_desc], dtype=np.uint64).view(np.uint8), bitorder='little')
+        is_chain_target = np.array([any([card.id == card_id for card in duel.chain_targets])], dtype='float64')
+        chain_player = np.array([float(duel.last_chain_player)])
         chain: list[np.ndarray] = [np.zeros((32,)) for _ in range(2)]
         for i, card in enumerate(duel.current_chain):
             if i < 2: chain[i] = _create_card_id_array(card.id)
@@ -127,9 +129,9 @@ class SelectNetwork(ActionNetwork):
     
 
     def create_input(self, card_id: int, select_hint: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
-        id: np.ndarray = _create_card_id_array(card_id)
-        hint: np.ndarray = np.array([(select_hint >> i) & 1 for i in range(10)], dtype='float64')
-        inputs: np.ndarray = np.concatenate((id, hint, _create_input_base(self, duel, usedflag)))
+        id = _create_card_id_array(card_id)
+        hint = np.unpackbits(np.array([select_hint], dtype=np.uint64).view(np.uint8), bitorder='little')
+        inputs = np.concatenate((id, hint, _create_input_base(self, duel, usedflag)))
         return inputs
 
 
@@ -156,10 +158,10 @@ def _create_input_base(network: ActionNetwork, duel: Duel, usedflag: UsedFlag) -
 
 def _create_basic(duel: Duel) -> np.ndarray:
     """create ndarray from basic duel state"""
-    turn_player: list[float] = [float(duel.turn_player)]
-    phase: list[float] = [(duel.phase >> i) & 1 for i in range(10)]
-    life: list[float] = [duel.life[Player.ME] / 8000, duel.life[Player.OPPONENT] / 8000]
-    return np.array(turn_player + phase + life, dtype='float64')
+    turn_player: np.ndarray = np.array([duel.turn_player])
+    phase: np.ndarray = np.unpackbits(np.array([duel.phase], dtype=np.uint16).view(np.uint8), count=-6, bitorder='little')
+    life: np.ndarray = np.array([duel.life[Player.ME] / 8000, duel.life[Player.OPPONENT] / 8000], dtype='float64')
+    return np.concatenate((turn_player, phase, life))
 
 
 def _create_locations(network: ActionNetwork, my_field: HalfField) -> np.ndarray:
@@ -222,7 +224,7 @@ def _get_index(deck_list: list[int], inputs: np.ndarray, card_id: int) -> int:
 
 def _create_position_array(pos: CardPosition) -> np.ndarray:
     """create 4 bits array of position"""
-    return np.array([(pos >> i) & 1 for i in range(4)], dtype='float64')
+    return np.unpackbits(np.array([pos], dtype=np.uint8), count=-4, bitorder='little')
 
 
 def _create_usedflag(flag: UsedFlag) -> np.ndarray:
@@ -233,11 +235,11 @@ def _create_usedflag(flag: UsedFlag) -> np.ndarray:
 def _create_opfield(op_field: HalfField) -> np.ndarray:
     """create ndarray from opponent field state"""
     num_cards: np.ndarray = np.zeros((5,), dtype='float64')
-    num_cards[0] = len(op_field.deck)
-    num_cards[1] = len(op_field.hand)
-    num_cards[2] = len(op_field.graveyard)
-    num_cards[3] = len(op_field.banished) 
-    num_cards[4] = len(op_field.extradeck)
+    num_cards[0] = len(op_field.deck) / 40
+    num_cards[1] = len(op_field.hand) / 5
+    num_cards[2] = len(op_field.graveyard) / 10
+    num_cards[3] = len(op_field.banished) / 10
+    num_cards[4] = len(op_field.extradeck) / 15
 
     zones: np.ndarray = np.zeros((36 * 13), dtype='float64')
     for i, zone in enumerate(op_field.monster_zones):
@@ -254,6 +256,6 @@ def _create_opfield(op_field: HalfField) -> np.ndarray:
 
 
 def _create_card_id_array(card_id: int) -> np.ndarray:
-    return np.array([(card_id >> i) & 1 for i in range(32)], dtype='float64')
+    return np.unpackbits(np.array([card_id], dtype=np.uint32).view(np.uint8), bitorder='little')
 
 

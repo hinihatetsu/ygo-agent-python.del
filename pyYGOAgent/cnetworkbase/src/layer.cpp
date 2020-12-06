@@ -32,14 +32,13 @@ VectorXd Layer::outputCache() {
     return _outputCache;
 }
 
-VectorXd Layer::outputs(const VectorXd &input) {
+void Layer::outputs(const VectorXd &input) {
     if (_isInputLayer) {
         _outputCache = input;
     } else {
         _inputCache = (_weight * input) + _bias;
         _outputCache = _activationFunc(_inputCache);
     }
-    return _outputCache;
 }
 
 VectorXd Layer::calcDelta(const VectorXd &x) {

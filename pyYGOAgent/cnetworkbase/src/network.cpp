@@ -2,10 +2,16 @@
 #include <iostream>
 #include "translate.hpp"
 
+#include <chrono>
+
 using namespace Eigen;
 using std::cout;
 using std::endl; 
 using std::vector;
+
+Network::Network() {
+    _size = 0;
+}
 
 Network::Network(const vector<int> &layerStructure, double learningRate) {
     _size = static_cast<int>(layerStructure.size());
@@ -20,16 +26,15 @@ Network::Network(const vector<int> &layerStructure, double learningRate) {
 
 vector<double> Network::outputs(vector<double> &input) {
     VectorXd in = toEigenVec(input.size(), input);
-    VectorXd out = _outputs(in);
-    return toSTDVec(out);
+    _outputs(in);
+    return toSTDVec(_layers[_size-1].outputCache());
 }
 
-inline VectorXd Network::_outputs(const VectorXd &input) {
-    VectorXd res = input;
-    for (int i = 0; i < _size; ++i) {
-        res = _layers[i].outputs(res);
+inline void Network::_outputs(const VectorXd &input) {
+    _layers[0].outputs(input);
+    for (int i = 1; i < _size; ++i) {
+        _layers[i].outputs(_layers[i-1].outputCache());
     }
-    return res;
 }
 
 void Network::_update(const VectorXd &expected) {

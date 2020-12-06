@@ -1150,17 +1150,17 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
  */
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
 
-/* "networkbase.pyx":16
+/* "networkbase.pyx":17
  * 
  * 
  * cdef class cNetwork:             # <<<<<<<<<<<<<<
- *     cdef Network* network
+ *     cdef Network network
  *     def __init__(self, vector[int] layer_structure: list[int], double learning_rate: float) -> None:
  */
 struct __pyx_obj_11networkbase_cNetwork {
   PyObject_HEAD
   struct __pyx_vtabstruct_11networkbase_cNetwork *__pyx_vtab;
-  Network *network;
+  Network network;
 };
 
 
@@ -1512,6 +1512,9 @@ static void __pyx_insert_code_object(int code_line, PyCodeObject* code_object);
 static void __Pyx_AddTraceback(const char *funcname, int c_line,
                                int py_line, const char *filename);
 
+/* None.proto */
+#include <new>
+
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
@@ -1759,7 +1762,7 @@ static PyObject *__pyx_n_s_setstate_cython;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_trainForEpoch;
 static int __pyx_pf_11networkbase_8cNetwork___init__(struct __pyx_obj_11networkbase_cNetwork *__pyx_v_self, std::vector<int>  __pyx_v_layer_structure, double __pyx_v_learning_rate); /* proto */
-static void __pyx_pf_11networkbase_8cNetwork_2__dealloc__(struct __pyx_obj_11networkbase_cNetwork *__pyx_v_self); /* proto */
+static void __pyx_pf_11networkbase_8cNetwork_2__dealloc__(CYTHON_UNUSED struct __pyx_obj_11networkbase_cNetwork *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_11networkbase_8cNetwork_4outputs(struct __pyx_obj_11networkbase_cNetwork *__pyx_v_self, PyArrayObject *__pyx_v_input_); /* proto */
 static PyObject *__pyx_pf_11networkbase_8cNetwork_6trainForEpoch(struct __pyx_obj_11networkbase_cNetwork *__pyx_v_self, std::vector<std::vector<double> >  __pyx_v_inputs, std::vector<std::vector<double> >  __pyx_v_expecteds, int __pyx_v_epoch); /* proto */
 static PyObject *__pyx_pf_11networkbase_8cNetwork_8__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_11networkbase_cNetwork *__pyx_v_self); /* proto */
@@ -1771,11 +1774,11 @@ static PyObject *__pyx_tuple__3;
 static PyObject *__pyx_tuple__4;
 /* Late includes */
 
-/* "networkbase.pyx":18
+/* "networkbase.pyx":19
  * cdef class cNetwork:
- *     cdef Network* network
+ *     cdef Network network
  *     def __init__(self, vector[int] layer_structure: list[int], double learning_rate: float) -> None:             # <<<<<<<<<<<<<<
- *         self.network = new Network(layer_structure, learning_rate)
+ *         self.network = Network(layer_structure, learning_rate)
  * 
  */
 
@@ -1813,11 +1816,11 @@ static int __pyx_pw_11networkbase_8cNetwork_1__init__(PyObject *__pyx_v_self, Py
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_learning_rate)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(1, 18, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(1, 19, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 18, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 19, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -1825,12 +1828,12 @@ static int __pyx_pw_11networkbase_8cNetwork_1__init__(PyObject *__pyx_v_self, Py
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_layer_structure = __pyx_convert_vector_from_py_int(values[0]); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 18, __pyx_L3_error)
-    __pyx_v_learning_rate = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_learning_rate == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 18, __pyx_L3_error)
+    __pyx_v_layer_structure = __pyx_convert_vector_from_py_int(values[0]); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 19, __pyx_L3_error)
+    __pyx_v_learning_rate = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_learning_rate == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 19, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 18, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 19, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("networkbase.cNetwork.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1848,20 +1851,20 @@ static int __pyx_pf_11networkbase_8cNetwork___init__(struct __pyx_obj_11networkb
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "networkbase.pyx":19
- *     cdef Network* network
+  /* "networkbase.pyx":20
+ *     cdef Network network
  *     def __init__(self, vector[int] layer_structure: list[int], double learning_rate: float) -> None:
- *         self.network = new Network(layer_structure, learning_rate)             # <<<<<<<<<<<<<<
+ *         self.network = Network(layer_structure, learning_rate)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_v_self->network = new Network(__pyx_v_layer_structure, __pyx_v_learning_rate);
+  __pyx_v_self->network = Network(__pyx_v_layer_structure, __pyx_v_learning_rate);
 
-  /* "networkbase.pyx":18
+  /* "networkbase.pyx":19
  * cdef class cNetwork:
- *     cdef Network* network
+ *     cdef Network network
  *     def __init__(self, vector[int] layer_structure: list[int], double learning_rate: float) -> None:             # <<<<<<<<<<<<<<
- *         self.network = new Network(layer_structure, learning_rate)
+ *         self.network = Network(layer_structure, learning_rate)
  * 
  */
 
@@ -1871,12 +1874,12 @@ static int __pyx_pf_11networkbase_8cNetwork___init__(struct __pyx_obj_11networkb
   return __pyx_r;
 }
 
-/* "networkbase.pyx":22
+/* "networkbase.pyx":23
  * 
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
- *         if self.network != NULL:
- *             del *self.network
+ *         pass
+ * 
  */
 
 /* Python wrapper */
@@ -1890,47 +1893,9 @@ static void __pyx_pw_11networkbase_8cNetwork_3__dealloc__(PyObject *__pyx_v_self
   __Pyx_RefNannyFinishContext();
 }
 
-static void __pyx_pf_11networkbase_8cNetwork_2__dealloc__(struct __pyx_obj_11networkbase_cNetwork *__pyx_v_self) {
+static void __pyx_pf_11networkbase_8cNetwork_2__dealloc__(CYTHON_UNUSED struct __pyx_obj_11networkbase_cNetwork *__pyx_v_self) {
   __Pyx_RefNannyDeclarations
-  int __pyx_t_1;
-  Network *__pyx_t_2;
   __Pyx_RefNannySetupContext("__dealloc__", 0);
-
-  /* "networkbase.pyx":23
- * 
- *     def __dealloc__(self):
- *         if self.network != NULL:             # <<<<<<<<<<<<<<
- *             del *self.network
- * 
- */
-  __pyx_t_1 = ((__pyx_v_self->network != NULL) != 0);
-  if (__pyx_t_1) {
-
-    /* "networkbase.pyx":24
- *     def __dealloc__(self):
- *         if self.network != NULL:
- *             del *self.network             # <<<<<<<<<<<<<<
- * 
- *     @cython.boundscheck(False)
- */
-    delete __pyx_t_2;
-
-    /* "networkbase.pyx":23
- * 
- *     def __dealloc__(self):
- *         if self.network != NULL:             # <<<<<<<<<<<<<<
- *             del *self.network
- * 
- */
-  }
-
-  /* "networkbase.pyx":22
- * 
- * 
- *     def __dealloc__(self):             # <<<<<<<<<<<<<<
- *         if self.network != NULL:
- *             del *self.network
- */
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
@@ -2014,7 +1979,7 @@ static PyArrayObject *__pyx_f_11networkbase_8cNetwork_outputs(struct __pyx_obj_1
  * 
  */
   __pyx_t_5 = __pyx_convert_vector_from_py_double(((PyObject *)__pyx_v_input_)); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 29, __pyx_L1_error)
-  __pyx_v_x = __pyx_v_self->network->outputs(__pyx_t_5);
+  __pyx_v_x = __pyx_v_self->network.outputs(__pyx_t_5);
 
   /* "networkbase.pyx":30
  *     cpdef np.ndarray[DTYPE_t, ndim=1] outputs(self, vector[double] input_: np.ndarray):
@@ -2245,7 +2210,7 @@ static PyObject *__pyx_f_11networkbase_8cNetwork_trainForEpoch(struct __pyx_obj_
  * 
  * 
  */
-  __pyx_v_self->network->trainForEpoch(__pyx_v_inputs, __pyx_v_expecteds, __pyx_v_epoch);
+  __pyx_v_self->network.trainForEpoch(__pyx_v_inputs, __pyx_v_expecteds, __pyx_v_epoch);
 
   /* "networkbase.pyx":34
  *     @cython.boundscheck(False)
@@ -3816,10 +3781,12 @@ static PyObject *__pyx_tp_new_11networkbase_cNetwork(PyTypeObject *t, CYTHON_UNU
   if (unlikely(!o)) return 0;
   p = ((struct __pyx_obj_11networkbase_cNetwork *)o);
   p->__pyx_vtab = __pyx_vtabptr_11networkbase_cNetwork;
+  new((void*)&(p->network)) Network();
   return o;
 }
 
 static void __pyx_tp_dealloc_11networkbase_cNetwork(PyObject *o) {
+  struct __pyx_obj_11networkbase_cNetwork *p = (struct __pyx_obj_11networkbase_cNetwork *)o;
   #if CYTHON_USE_TP_FINALIZE
   if (unlikely(PyType_HasFeature(Py_TYPE(o), Py_TPFLAGS_HAVE_FINALIZE) && Py_TYPE(o)->tp_finalize) && (!PyType_IS_GC(Py_TYPE(o)) || !_PyGC_FINALIZED(o))) {
     if (PyObject_CallFinalizerFromDealloc(o)) return;
@@ -3833,6 +3800,7 @@ static void __pyx_tp_dealloc_11networkbase_cNetwork(PyObject *o) {
     __Pyx_SET_REFCNT(o, Py_REFCNT(o) - 1);
     PyErr_Restore(etype, eval, etb);
   }
+  __Pyx_call_destructor(p->network);
   (*Py_TYPE(o)->tp_free)(o);
 }
 
@@ -4102,16 +4070,16 @@ static int __Pyx_modinit_type_init_code(void) {
   __pyx_vtabptr_11networkbase_cNetwork = &__pyx_vtable_11networkbase_cNetwork;
   __pyx_vtable_11networkbase_cNetwork.outputs = (PyArrayObject *(*)(struct __pyx_obj_11networkbase_cNetwork *, PyArrayObject *, int __pyx_skip_dispatch))__pyx_f_11networkbase_8cNetwork_outputs;
   __pyx_vtable_11networkbase_cNetwork.trainForEpoch = (PyObject *(*)(struct __pyx_obj_11networkbase_cNetwork *, std::vector<std::vector<double> > , std::vector<std::vector<double> > , int, int __pyx_skip_dispatch))__pyx_f_11networkbase_8cNetwork_trainForEpoch;
-  if (PyType_Ready(&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 16, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 17, __pyx_L1_error)
   #if PY_VERSION_HEX < 0x030800B1
   __pyx_type_11networkbase_cNetwork.tp_print = 0;
   #endif
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_11networkbase_cNetwork.tp_dictoffset && __pyx_type_11networkbase_cNetwork.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_11networkbase_cNetwork.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (__Pyx_SetVtable(__pyx_type_11networkbase_cNetwork.tp_dict, __pyx_vtabptr_11networkbase_cNetwork) < 0) __PYX_ERR(1, 16, __pyx_L1_error)
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_cNetwork, (PyObject *)&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 16, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 16, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_11networkbase_cNetwork.tp_dict, __pyx_vtabptr_11networkbase_cNetwork) < 0) __PYX_ERR(1, 17, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_cNetwork, (PyObject *)&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 17, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_11networkbase_cNetwork) < 0) __PYX_ERR(1, 17, __pyx_L1_error)
   __pyx_ptype_11networkbase_cNetwork = &__pyx_type_11networkbase_cNetwork;
   __Pyx_RefNannyFinishContext();
   return 0;

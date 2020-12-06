@@ -16,7 +16,7 @@ class Layer {
         void setAsInputLayer();
         void setAsOutputLayer();
         VectorXd outputCache();
-        VectorXd outputs(const VectorXd &input);
+        void outputs(const VectorXd &input);
         VectorXd calcDelta(const VectorXd &x);
         void update(const VectorXd &lastInput);
         void printStatus();  

@@ -1,7 +1,7 @@
 import random
 import pickle
 from pathlib import Path
-import time
+import concurrent.futures as concurrent
 from typing import NamedTuple
 import numpy as np
 
@@ -15,10 +15,12 @@ from .ANN import (
 )
 from .recorder import Decision
 
+import time
+
 
 
 class AgentBrain:
-    EPOCH: int = 30
+    EPOCH: int = 20
     def __init__(self, deck: Deck) -> None:
         self._deck: Deck = deck
         self._brain_path: Path = Path.cwd() / 'Decks' / self._deck.name / (self._deck.name + '.brain')
@@ -206,10 +208,10 @@ class AgentBrain:
                 assert True, 'elif　not coveraged'
 
         t0 = time.time()
-        for key in learning_info.keys():
-            learning_info[key].network.train(learning_info[key].inputs, learning_info[key].expecteds, self.EPOCH)
-        t1 = time.time()
-        print('train time: {}[s]'.format(t1-t0))
+        for info in learning_info.values():
+            _train(info)
+        t = time.time() - t0
+        print('\ntotal: {:.2f} [s], {:.3f} per epoch\n'.format(t, t/self.EPOCH))
         #self._save_networks()
 
 
@@ -219,3 +221,9 @@ class LearningInfo(NamedTuple):
     expecteds: list[np.ndarray]
 
 
+def _train(info: LearningInfo) -> None:
+    print(f"\n{type(info.network)}")
+    t0 = time.time()
+    info.network.train(info.inputs, info.expecteds, AgentBrain.EPOCH)
+    t1 = time.time()
+    print("time: {:.2f} [s]".format(t1-t0))

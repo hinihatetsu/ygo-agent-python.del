@@ -10,7 +10,7 @@ ext = Extension('networkbase',
                     "src\\translate.cpp",
                 ],
                 language = "c++",
-                extra_compile_args=["/openmp", "-DEIGEN_NO_DEBUG"],
+                extra_compile_args=["-DEIGEN_NO_DEBUG"],
             )
 
 setup(
@@ -19,6 +19,6 @@ setup(
     include_dirs = [
         numpy.get_include(),
         ".\\include\\",
-        "C:\\Users\\Shuhei\\dev\\C_C++\\include\\",
+        #/path/to/Eigen,
     ]
 )
