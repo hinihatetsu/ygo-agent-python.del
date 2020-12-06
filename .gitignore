@@ -9,7 +9,8 @@ cards.cdb
 
 # for test of network
 iris.csv
-iris_test.py
+iris_testcpp.py
+test.ps1
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
