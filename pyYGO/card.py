@@ -1,8 +1,5 @@
-
-
-from .enums import Player, CardPosition, CardType, Attribute, Race, Query
+from .enums import Player, CardPosition, CardType, Attribute, Race
 from .wrapper import Location
-from pyYGONetwork import Packet
 
 
 class Card:
@@ -53,88 +50,6 @@ class Card:
     @property
     def is_defence(self) -> bool:
         return bool(self.position & CardPosition.DEFENCE)
-
-
-    def update(self, packet: Packet) -> None:
-        while True:
-            size: int = packet.read_int(2)
-            if size == 0:
-                return
-
-            query: int = packet.read_int(4)
-            if query == Query.ID:
-                self.id = packet.read_int(4)
-    
-            elif query == Query.POSITION:
-                pos = packet.read_int(4)
-                self.position = self.POSITION[pos] if pos in self.POSITION else pos
-
-            elif query == Query.ALIAS:
-                self.arias = packet.read_int(4)
-
-            elif query == Query.TYPE:
-                type_ = packet.read_int(4)
-                self.type.clear()
-                for t in CardType:
-                    if type_ & t:
-                        self.type.append(t)
-
-            elif query == Query.LEVEL:
-                self.level = packet.read_int(4)
-
-            elif query == Query.RANK:
-                self.rank = packet.read_int(4)
-
-            elif query == Query.ATTRIBUTE:
-                attr = packet.read_int(4)
-                self.atrribute = self.ATTRIBUTE[attr] if attr in self.ATTRIBUTE else attr
-
-            elif query == Query.RACE:
-                race = packet.read_int(4)
-                self.race = self.RASE[race] if race in self.RASE else race 
-
-            elif query == Query.ATTACK:
-                self.attack = packet.read_int(4)
-
-            elif query == Query.DEFENCE:
-                self.defence = packet.read_int(4)
-
-            elif query == Query.BASE_ATTACK:
-                self.base_attack = packet.read_int(4)
-
-            elif query == Query.BASE_DEFENCE:
-                self.base_defence = packet.read_int(4)
-
-            elif query == Query.OVERLAY_CARD:
-                num_of_overlay: int = packet.read_int(4)
-                for _ in range(num_of_overlay):
-                    self.overlays.append(packet.read_id())
-
-            elif query == Query.CONTROLLER:
-                self.controller = packet.read_player()
-
-            elif query == Query.STATUS:
-                DISABLED = 0x0001
-                PROC_COMPLETE = 0x0008
-                status: int = packet.read_int(4)
-                self.disabled = bool(status & DISABLED)
-                self.proc_complete = bool(status & PROC_COMPLETE)
-
-            elif query == Query.LSCALE:
-                self.lscale = packet.read_int(4)
-
-            elif query == Query.RSCALE:
-                self.rscale = packet.read_int(4)
-
-            elif query == Query.LINK:
-                self.links = packet.read_int(4)
-                self.linkmarker = packet.read_int(4)
-
-            elif query == Query.END:
-                return
-
-            else:
-                packet.read_bytes(size - 4) # 4 is bytesize of 'query'
 
 
     def __repr__(self) -> str:

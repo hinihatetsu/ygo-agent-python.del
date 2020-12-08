@@ -1,11 +1,14 @@
 from util import LaunchInfo, load_args
-from GameClient import GameClient
+from pyYGOenvironment import GameClient
+from pyYGOagent import DuelAgent
 
 
 def main():
-    launch_info: LaunchInfo = load_args()
-    client = GameClient(launch_info)
-    client.start()
+    info: LaunchInfo = load_args()
+    agent = DuelAgent(info.deck)
+    client = GameClient(info.host, info.port, info.version, info.name)
+    agent.set_client(client)
+    agent.run()
 
 
 if __name__ == '__main__':
