@@ -1,30 +1,43 @@
 import random
 import copy
 
-from pyYGO.duel import Duel, Card, Zone
+from pyYGO import Duel, Card, Zone, Deck
 from pyYGO.phase import MainPhase, BattlePhase
 from pyYGO.enums import CardPosition, Player, CardLocation, Attribute, Race
-from .deck import Deck
+from pyYGOenvironment import GameClient, GamePlayer
 from .action import Action, ChainAction, MainAction, BattleAction, SelectAction
 from .brain import AgentBrain
-from .recorder import Decision, DecisionRecorder
 from .flags import UsedFlag
+from .recorder import DecisionRecorder, Decision
 
 
-class DuelAgent:
+class DuelAgent(GamePlayer):
     _MAX_MATCH: int = 2000
     _TRAINING_INTERVAL: int = 5
-    def __init__(self, deck_name: str, duel: Duel) -> None:
+    def __init__(self, deck_name: str) -> None:
         self._deck: Deck = Deck(deck_name)
-        self._duel: Duel = duel
+        self._brain: AgentBrain = AgentBrain(self._deck)
         self._usedflag: UsedFlag = UsedFlag(self._deck)
         self._recorder: DecisionRecorder = DecisionRecorder(self._deck)
-        self._brain: AgentBrain = AgentBrain(self._deck)
-        self._match_count: int = 0
 
-    @property
-    def deck(self) -> Deck:
-        return self._deck
+        self._duel: Duel = None
+        self._match_count: int = 0
+        self._wins: int = 0
+
+
+    def set_client(self, client: GameClient) -> None:
+        """ set client where agent play """
+        self._client = client
+        client.set_gameplayer(self)
+        self._duel = client.get_duel()
+
+
+    def run(self):
+        """ agent starts to run """
+        if self._client is None:
+            raise Exception('GameClient not set. Call DuelAgent.set_client().')
+        self._client.set_deck(self._deck)
+        self._client.start()
 
     
     def on_start(self) -> None:
@@ -40,19 +53,22 @@ class DuelAgent:
 
     def on_win(self, win: bool) -> None:
         self._recorder.calculate_reward(self._duel)
-        print(f'Match {self._match_count}: ' + ('win' if win else 'lose'))
-        self._recorder.save_match_result(self._match_count, win)
-
+        self._recorder.add_winner_bonus(win, self._duel.turn)
+        
     
-    def on_rematch(self) -> bool:
+    def on_rematch(self, win_on_match: bool) -> bool:
         self._match_count += 1
+        self._recorder.save_match_result(self._match_count, win_on_match)
+        self._wins += 1 if win_on_match else 0
+        print('Match {:4d}: {},  {:%}'.format(self._match_count, ' win' if win_on_match else 'lose', self._wins/self._match_count)) 
         if self._match_count % self._TRAINING_INTERVAL == 0:
-            self.train()    
+            self.train()   
         return True if self._match_count <= self._MAX_MATCH else False
 
 
-    def on_finish(self) -> None:
+    def on_client_close(self) -> None:
         self._recorder.dump_match_result()
+        self._brain.save_networks()
   
     
     def update_usedflag(self, card_id: int) -> None:
@@ -250,7 +266,7 @@ class DuelAgent:
 
     
     def train(self) -> None:
-        decisions: list[Decision] = self._recorder.load()
+        decisions: list[Decision] = self._recorder.dump()
         self._recorder.clear()
         self._brain.train(decisions)
         

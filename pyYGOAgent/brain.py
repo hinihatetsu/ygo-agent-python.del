@@ -1,12 +1,13 @@
 import random
 import pickle
 from pathlib import Path
-import concurrent.futures as concurrent
+import enum
+import concurrent.futures
 from typing import NamedTuple
 import numpy as np
 
-from pyYGO.duel import Duel 
-from .deck import Deck
+from util import error
+from pyYGO import Duel, Deck 
 from .action import Action
 from .flags import UsedFlag
 from .ANN import (
@@ -17,6 +18,29 @@ from .recorder import Decision
 
 import time
 
+_VALID_NETWORK: list[type] = [
+                    SummonNetwork,
+                    SpecialSummonNetwork,
+                    RepositionNetwork,
+                    SetNetwork,
+                    ActivateNetwork,
+                    AttackNetwork,
+                    ChainNetwork,
+                    SelectNetwork,
+                    PhaseNetwork
+                ]
+
+
+class NetworkKey(enum.Enum):
+    SUMMON     = enum.auto()
+    SPSUMMON   = enum.auto()
+    REPOSITION = enum.auto()
+    SET        = enum.auto()
+    ACTIVATE   = enum.auto()
+    CHAIN      = enum.auto()
+    SELECT     = enum.auto()
+    ATTACK     = enum.auto()
+    PHASE      = enum.auto()
 
 
 class AgentBrain:
@@ -24,15 +48,7 @@ class AgentBrain:
     def __init__(self, deck: Deck) -> None:
         self._deck: Deck = deck
         self._brain_path: Path = Path.cwd() / 'Decks' / self._deck.name / (self._deck.name + '.brain')
-        self._summon_network: SummonNetwork = None
-        self._special_summon_network: SpecialSummonNetwork = None
-        self._reposition_network: RepositionNetwork = None
-        self._set_network: SetNetwork = None
-        self._activate_network: ActivateNetwork = None
-        self._chain_network: ChainNetwork = None
-        self._select_network: SelectNetwork = None
-        self._attack_network: AttackNetwork = None
-        self._phase_network: PhaseNetwork = None
+        self._networks: dict[NetworkKey, ActionNetwork] = {} 
         self._load_networks()
 
 
@@ -42,48 +58,34 @@ class AgentBrain:
             return
 
         with open(self._brain_path, mode='rb') as f:
-            networks: list[ActionNetwork] = pickle.load(f)
-        [
-            self._summon_network,
-            self._special_summon_network,
-            self._reposition_network,
-            self._set_network,
-            self._activate_network,
-            self._chain_network,
-            self._select_network,
-            self._attack_network,
-            self._phase_network
-        ] = networks
-
+            networks: dict[NetworkKey, ActionNetwork] = pickle.load(f)
+        broken: bool = type(networks) != dict
+        if not broken:
+            for key, network in networks.items():
+                broken = key not in NetworkKey
+                broken = type(network) not in _VALID_NETWORK
+        if broken:
+            error(f'{self._brain_path} file is broken. Delete it')
+        
+        self._networks = networks
+                
     
     def _create_networks(self) -> None:
-        self._summon_network = SummonNetwork(self._deck)
-        self._special_summon_network = SpecialSummonNetwork(self._deck)
-        self._reposition_network = RepositionNetwork(self._deck)
-        self._set_network = SetNetwork(self._deck)
-        self._activate_network = ActivateNetwork(self._deck)
-        self._chain_network = ChainNetwork(self._deck)
-        self._select_network = SelectNetwork(self._deck)
-        self._attack_network = AttackNetwork(self._deck)
-        self._phase_network = PhaseNetwork(self._deck)
-        #self._save_networks()
+        self._networks[NetworkKey.SUMMON]     = SummonNetwork(self._deck)
+        self._networks[NetworkKey.SPSUMMON]   = SpecialSummonNetwork(self._deck)
+        self._networks[NetworkKey.REPOSITION] = RepositionNetwork(self._deck)
+        self._networks[NetworkKey.SET]        = SetNetwork(self._deck)
+        self._networks[NetworkKey.ACTIVATE]   = ActivateNetwork(self._deck)
+        self._networks[NetworkKey.CHAIN]      = ChainNetwork(self._deck)
+        self._networks[NetworkKey.SELECT]     = SelectNetwork(self._deck)
+        self._networks[NetworkKey.ATTACK]     = AttackNetwork(self._deck)
+        self._networks[NetworkKey.PHASE]      = PhaseNetwork(self._deck)
 
 
-    def _save_networks(self) -> None:
-        info: list = [
-            self._summon_network,
-            self._special_summon_network,
-            self._reposition_network,
-            self._set_network,
-            self._activate_network,
-            self._chain_network,
-            self._select_network,
-            self._attack_network,
-            self._phase_network
-        ]
+    def save_networks(self) -> None:
         with open(self._brain_path, mode='wb') as f:
-            pickle.dump(info, f)
-
+            pickle.dump(self._networks, f)
+        
 
     def on_start(self, duel: Duel, usedflag: UsedFlag) -> None:
         self._duel = duel
@@ -91,139 +93,104 @@ class AgentBrain:
 
 
     def evaluate_summon(self, card_id: int) -> float:
-        input_: np.ndarray = self._summon_network.create_input(card_id, None, self._duel, self._usedflag)
-        return self._summon_network.outputs(input_)
+        input_ = self._networks[NetworkKey.SUMMON].create_input(card_id, None, self._duel, self._usedflag)
+        return self._networks[NetworkKey.SUMMON].outputs(input_)
 
 
     def evaluate_special_summon(self, card_id: int) -> float:
-        input_: np.ndarray = self._special_summon_network.create_input(card_id, None, self._duel, self._usedflag)
-        return self._special_summon_network.outputs(input_)
+        input_ = self._networks[NetworkKey.SPSUMMON].create_input(card_id, None, self._duel, self._usedflag)
+        return self._networks[NetworkKey.SPSUMMON].outputs(input_)
 
     
     def evaluate_reposition(self, card_id: int) -> float:
-        input_: np.ndarray = self._reposition_network.create_input(card_id, None, self._duel, self._usedflag)
-        return self._reposition_network.outputs(input_)
+        input_ = self._networks[NetworkKey.REPOSITION].create_input(card_id, None, self._duel, self._usedflag)
+        return self._networks[NetworkKey.REPOSITION].outputs(input_)
     
 
     def evaluate_set(self, card_id: int) -> float:
-        input_: np.ndarray = self._set_network.create_input(card_id, None, self._duel, self._usedflag)
-        return self._set_network.outputs(input_)
+        input_ = self._networks[NetworkKey.SET].create_input(card_id, None, self._duel, self._usedflag)
+        return self._networks[NetworkKey.SET].outputs(input_)
 
 
     def evaluate_activate(self, card_id: int, activation_desc: int) -> float:
-        input_: np.ndarray = self._activate_network.create_input(card_id, activation_desc, self._duel, self._usedflag)
-        return self._activate_network.outputs(input_)
+        input_ = self._networks[NetworkKey.ACTIVATE].create_input(card_id, activation_desc, self._duel, self._usedflag)
+        return self._networks[NetworkKey.ACTIVATE].outputs(input_)
     
 
     def evaluate_phase(self) -> float:
-        input_: np.ndarray = self._phase_network.create_input(None, None, self._duel, self._usedflag)
-        return  self._phase_network.outputs(input_)
+        input_ = self._networks[NetworkKey.PHASE].create_input(None, None, self._duel, self._usedflag)
+        return  self._networks[NetworkKey.PHASE].outputs(input_)
 
 
     def evaluate_attack(self, card_id: int) -> float:
-        input_: np.ndarray = self._attack_network.create_input(card_id, None, self._duel, self._usedflag)
-        return self._attack_network.outputs(input_)
+        input_ = self._networks[NetworkKey.ATTACK].create_input(card_id, None, self._duel, self._usedflag)
+        return self._networks[NetworkKey.ATTACK].outputs(input_)
         
 
     def evaluate_chain(self, card_id: int, activation_desc: int) -> float:
-        input_: np.ndarray = self._chain_network.create_input(card_id, activation_desc, self._duel, self._usedflag)
-        return self._chain_network.outputs(input_)
+        input_ = self._networks[NetworkKey.CHAIN].create_input(card_id, activation_desc, self._duel, self._usedflag)
+        return self._networks[NetworkKey.CHAIN].outputs(input_)
 
 
     def evaluate_selection(self, card_id: int, select_hint: int) -> float:
-        input_: np.ndarray = self._select_network.create_input(card_id, select_hint, self._duel, self._usedflag)
-        return self._select_network.outputs(input_)
+        input_ = self._networks[NetworkKey.SELECT].create_input(card_id, select_hint, self._duel, self._usedflag)
+        return self._networks[NetworkKey.SELECT].outputs(input_)
     
 
     def train(self, decisions: list[Decision]) -> None:
         random.shuffle(decisions)
         expecteds: list[np.ndarray] = [np.array([dc.value]) for dc in decisions]
-        learning_info: dict[Action, LearningInfo] = {
-            Action.SUMMON: LearningInfo(self._summon_network, [], []),
-            Action.SP_SUMMON: LearningInfo(self._special_summon_network, [], []),
-            Action.REPOSITION: LearningInfo(self._reposition_network, [], []),
-            Action.SET_MONSTER: LearningInfo(self._set_network, [], []),
-            Action.ACTIVATE: LearningInfo(self._activate_network, [], []),
-            Action.CHAIN: LearningInfo(self._chain_network, [], []),
-            Action.SELECT: LearningInfo(self._select_network, [], []),
-            Action.ATTACK: LearningInfo(self._attack_network, [], []),
-            Action.BATTLE: LearningInfo(self._phase_network, [], []),
-        }
+        learning_data: dict[NetworkKey, LearningData] = {key: LearningData([], []) for key in NetworkKey}
         for dc, expected in zip(decisions, expecteds):  
             if dc.action == Action.SUMMON:
-                action = Action.SUMMON
-                network = learning_info[action].network
-                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
-                learning_info[action].expecteds.append(expected)
+                key = NetworkKey.SUMMON
 
             elif dc.action == Action.SP_SUMMON:
-                action = Action.SP_SUMMON
-                network = learning_info[action].network
-                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
-                learning_info[action].expecteds.append(expected)
+                key = NetworkKey.SPSUMMON
 
             elif dc.action == Action.REPOSITION:
-                action = Action.REPOSITION
-                network = learning_info[action].network
-                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
-                learning_info[action].expecteds.append(expected)
+                key = NetworkKey.REPOSITION
 
             elif dc.action == Action.SET_MONSTER or dc.action == Action.SET_SPELL:
-                action = Action.SET_MONSTER
-                network = learning_info[action].network
-                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
-                learning_info[action].expecteds.append(expected)
+                key = NetworkKey.SET
 
             elif dc.action == Action.ACTIVATE or dc.action == Action.ACTIVATE_IN_BATTLE:
-                action = Action.ACTIVATE
-                network = learning_info[action].network
-                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
-                learning_info[action].expecteds.append(expected)
+                key = NetworkKey.ACTIVATE
 
             elif dc.action == Action.CHAIN:
-                action = Action.CHAIN
-                network = learning_info[action].network
-                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
-                learning_info[action].expecteds.append(expected)
+                key = NetworkKey.CHAIN
 
             elif dc.action == Action.SELECT:
-                action = Action.SELECT
-                network = learning_info[action].network
-                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
-                learning_info[action].expecteds.append(expected)
+                key = NetworkKey.SELECT
 
             elif dc.action == Action.ATTACK:
-                action = Action.ATTACK
-                network = learning_info[action].network
-                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
-                learning_info[action].expecteds.append(expected)
+                key = NetworkKey.ATTACK
 
             elif dc.action == Action.BATTLE or dc.action == Action.END or dc.action == Action.MAIN2:
-                action = Action.BATTLE
-                network = learning_info[action].network
-                learning_info[action].inputs.append(network.create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
-                learning_info[action].expecteds.append(expected)
-
+                key = NetworkKey.PHASE
+                
             else:
-                assert True, 'elif　not coveraged'
+                assert False, 'elif　not coveraged'
+            
+            learning_data[key].inputs.append(self._networks[key].create_input(dc.card_id, dc.option, dc.duel, dc.usedflag))
+            learning_data[key].expecteds.append(expected)
 
+        sorted_pair = sorted(learning_data.items(), key=lambda x:len(x[1].inputs), reverse=True)
         t0 = time.time()
-        for info in learning_info.values():
-            _train(info)
+        with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
+            future_to_NetworkKey = {executor.submit(_train, self._networks[key], data): key for key, data in sorted_pair}
+            for future in concurrent.futures.as_completed(future_to_NetworkKey):
+                key = future_to_NetworkKey[future]
+                self._networks[key] = future.result()
         t = time.time() - t0
-        print('\ntotal: {:.2f} [s], {:.3f} per epoch\n'.format(t, t/self.EPOCH))
-        #self._save_networks()
+        print('\ntotal: {:.2f} [s], {:.3f} [s] per epoch\n'.format(t, t/self.EPOCH))
 
 
-class LearningInfo(NamedTuple):
-    network: ActionNetwork
+class LearningData(NamedTuple):
     inputs: list[np.ndarray]
     expecteds: list[np.ndarray]
 
 
-def _train(info: LearningInfo) -> None:
-    print(f"\n{type(info.network)}")
-    t0 = time.time()
-    info.network.train(info.inputs, info.expecteds, AgentBrain.EPOCH)
-    t1 = time.time()
-    print("time: {:.2f} [s]".format(t1-t0))
+def _train(network: ActionNetwork, data: LearningData) -> ActionNetwork:
+    network.train(data.inputs, data.expecteds, AgentBrain.EPOCH)
+    return network

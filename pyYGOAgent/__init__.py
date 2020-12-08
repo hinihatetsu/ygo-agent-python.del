@@ -1,1 +1,1 @@
-from pyYGOAgent.agent import *
+from pyYGOagent.agent import DuelAgent

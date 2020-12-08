@@ -1,6 +1,6 @@
 from typing import ValuesView
 
-from .deck import Deck
+from pyYGO import Deck
 
 
 class UsedFlag:

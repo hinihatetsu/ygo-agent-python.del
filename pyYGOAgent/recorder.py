@@ -4,8 +4,8 @@ import csv
 from pathlib import Path
 from typing import Any, NamedTuple
 
-from pyYGO.duel import Duel, Player
-from .deck import Deck
+from pyYGO import Duel, Deck
+from pyYGO.enums import Player
 from .action import Action
 from .flags import UsedFlag
 
@@ -29,6 +29,7 @@ class DecisionRecorder:
         self._deck: Deck = deck
         self._decisions: list[Decision] = []
         self._evaluated_decisions: list[Decision] = []
+        self._memory: list[Decision] = []
         self._hand_cache: list[int] = None
         self._field_cache: list[int] = None
         self._deck_cache: list[int] = None
@@ -40,12 +41,12 @@ class DecisionRecorder:
         self._decisions.append(decision)
 
 
-    def load(self) -> list[Decision]:
-        return [dc for dc in self._evaluated_decisions]
+    def dump(self) -> list[Decision]:
+        return [dc for dc in self._memory]
 
     
     def clear(self) -> None:
-        self._evaluated_decisions.clear()
+        self._memory.clear()
 
 
     def calculate_reward(self, duel: Duel) -> None:
@@ -58,6 +59,7 @@ class DecisionRecorder:
             score[p] = 1 / (1 + math.exp(-(hand + field + deck + life))) # sigmoid
             self._deck_cache[p] = duel.field[p].deck_count
             self._life_cache[p^1] = duel.life[p^1]
+
         reward: float = score[Player.ME] - score[Player.OPPONENT]
 
         for i, dc in enumerate(reversed(self._decisions)):
@@ -65,6 +67,18 @@ class DecisionRecorder:
             self._evaluated_decisions.append(dc)
         
         self._decisions.clear()
+
+
+    def add_winner_bonus(self, win: bool, turn: int) -> None:
+        base = 100
+        discount_rate = 0.9
+        bonus = base * (discount_rate**turn)
+        for dc in self._evaluated_decisions:
+            dc = Decision(dc.action, dc.card_id, dc.option, dc.duel, dc.usedflag, dc.value + bonus if win else dc.value)
+            self._memory.append(dc)
+        self._evaluated_decisions.clear()
+
+
 
 
     def reset_cache(self) -> None:
@@ -75,12 +89,8 @@ class DecisionRecorder:
 
 
     def save_match_result(self, match_count: int, win: bool):
-        size = len(self._match_result)
-        if size >= match_count:
-            self._match_result = self._match_result[:match_count]
-        for _ in range(match_count - size - 1):
-            self._match_result.append(None)
         self._match_result.append(win)
+        assert len(self._match_result) == match_count, "len(self._match_result) != match_count"
 
 
     def dump_match_result(self) -> None:

@@ -2,13 +2,11 @@ from abc import ABC, abstractclassmethod
 from typing import Any
 import numpy as np
 
-from pyYGO.duel import Duel, HalfField, Player
-from pyYGO.enums import CardPosition
-from .deck import Deck
+from pyYGO import Duel, Deck, HalfField
+from pyYGO.enums import Player, CardPosition
 from .flags import UsedFlag
-from .cnetworkbase import Network
+from cnetworkbase import Network
 
-import time
 
 _LOCATION_BIT: int = 10
 _IN_DECK: np.ndarray     = np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype='float64')
