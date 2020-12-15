@@ -11,17 +11,18 @@ using namespace Eigen;
 
 class Layer {
     public:
-        Layer(int numNeurons, int numInputs, double learningRate);
+        Layer(int numNeurons, int numInputs, double learningRate, int activationFuncCode);
         void setAsInputLayer();
         void setAsOutputLayer();
+        void setActivationFunc(int activationFuncCode);
+        void setWeight(vector<double> &weight);
+        void setBias(vector<double> &bias);
         VectorXd outputCache();
         void outputs(const VectorXd &input);
         VectorXd calcDelta(const VectorXd &x);
         void update(const VectorXd &lastInput);
         vector<double> getWeight();
         vector<double> getBias();
-        void setWeight(vector<double> &weight);
-        void setBias(vector<double> &bias);
         void printStatus();  
     
     private:

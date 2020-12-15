@@ -2,7 +2,6 @@
 #include <iostream>
 #include "translate.hpp"
 
-#include <chrono>
 
 using namespace Eigen;
 using std::cout;
@@ -10,12 +9,12 @@ using std::endl;
 using std::vector;
 
 
-Network::Network(const vector<int> &layerStructure, double learningRate) {
+Network::Network(const vector<int> &layerStructure, double learningRate, vector<int> activationFuncCodes) {
     _size = static_cast<int>(layerStructure.size());
     _layerStructure = layerStructure;
-    _layers.push_back(Layer(layerStructure[0], 1, learningRate));
+    _layers.push_back(Layer(layerStructure[0], 1, learningRate, activationFuncCodes[0]));
     for (int i = 1; i < _size; ++i) {
-        _layers.push_back(Layer(layerStructure[i], layerStructure[i-1], learningRate));
+        _layers.push_back(Layer(layerStructure[i], layerStructure[i-1], learningRate, activationFuncCodes[i]));
     }
     _layers[0].setAsInputLayer();
     _layers[_size-1].setAsOutputLayer();
@@ -58,7 +57,7 @@ void Network::trainForEpoch(vector<vector<double>> &inputs, vector<vector<double
     vector<VectorXd> vinputs = toEigenVecs(inputs);
     vector<VectorXd> vexpecteds = toEigenVecs(expecteds);
     size_t size = vinputs.size();
-    for (int i = 0; i < epoch; ++i) {
+    for (int i = 0; i < epoch; i++) {
         _train(size, vinputs, vexpecteds);
     }
 }

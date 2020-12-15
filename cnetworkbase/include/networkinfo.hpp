@@ -8,7 +8,7 @@ class NetworkInfo {
     public:
         NetworkInfo();
         vector<vector<double>> weights;
-        vector<vector<double>> biases;    
+        vector<vector<double>> biases;
 };
 
 #endif // NETWORKINFO_H

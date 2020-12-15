@@ -13,7 +13,7 @@ using namespace Eigen;
 
 class Network {
     public:
-        Network(const vector<int> &layerStructure, double learningRate);
+        Network(const vector<int> &layerStructure, double learningRate, vector<int> activtionFuncCodes);
         vector<double> outputs(vector<double> &input);
         void trainForEpoch(vector<vector<double>> &inputs, vector<vector<double>> &outputs, int epoch);
         NetworkInfo* dump();

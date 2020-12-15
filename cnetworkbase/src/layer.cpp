@@ -8,15 +8,14 @@ using std::cout;
 using std::endl; 
 using std::vector;
 
-Layer::Layer(int numNeurons, int numInputs, double learningRate) {
+Layer::Layer(int numNeurons, int numInputs, double learningRate, int activationFuncCode) {
     _learningRate = learningRate;
     _weight = MatrixXd::Random(numNeurons, numInputs).array() / sqrt(numInputs);
     _bias = VectorXd::Random(numNeurons).array() / sqrt(numNeurons);
     _delta = VectorXd::Zero(numNeurons);
     _inputCache = VectorXd::Zero(numNeurons);
     _outputCache = VectorXd::Zero(numNeurons);
-    _activationFunc = tanh;
-    _derivativeActivationFunc = derTanh;
+    setActivationFunc(activationFuncCode);
     _isInputLayer = false;
     _isOutputLayer = false;
 }
@@ -29,6 +28,37 @@ void Layer::setAsInputLayer() {
 
 void Layer::setAsOutputLayer() {
     _isOutputLayer = true;
+}
+
+
+void Layer::setActivationFunc(int activationFuncCode) {
+    switch (activationFuncCode) {
+        case TANH:
+            _activationFunc = tanh;
+            _derivativeActivationFunc = derTanh;
+            break;
+        case SIGMOID:
+            _activationFunc = sigmoid;
+            _derivativeActivationFunc = derSigmoid;
+            break;
+        case LINEAR:
+            _activationFunc = linear;
+            _derivativeActivationFunc = derLinear;
+            break;
+        default:
+            std::cout << "invalid activationFuncCode, Layer::setActivationFunc\n";
+            exit(1);
+    }
+}
+
+
+void Layer::setWeight(vector<double> &weight) {
+    _weight = Map<MatrixXd>(&weight[0], _weight.rows(), _weight.cols()); 
+}
+
+
+void Layer::setBias(vector<double> &bias) {
+    _bias = Map<VectorXd>(&bias[0], bias.size());
 }
 
 
@@ -79,16 +109,6 @@ vector<double> Layer::getWeight() {
 
 vector<double> Layer::getBias() {
     return toSTDVec(_bias);
-}
-
-
-void Layer::setWeight(vector<double> &weight) {
-    _weight = Map<MatrixXd>(&weight[0], _weight.rows(), _weight.cols()); 
-}
-
-
-void Layer::setBias(vector<double> &bias) {
-    _bias = Map<VectorXd>(&bias[0], bias.size());
 }
 
 
