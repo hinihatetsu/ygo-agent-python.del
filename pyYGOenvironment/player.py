@@ -1,7 +1,7 @@
 from abc import ABC, abstractclassmethod
 from pyYGO.enums import Player
 
-from pyYGO import Card, Deck, Location
+from pyYGO import Card, Location
 from pyYGO.enums import Player, CardPosition, Attribute, Race
 from pyYGO.phase import MainPhase, BattlePhase
 
@@ -14,8 +14,14 @@ class GamePlayer(ABC):
 
 
     @abstractclassmethod
-    def on_new_turn(self, is_my_turn: bool) -> None:
+    def on_new_turn(self) -> None:
         """ Called when a new turn starts. """
+        pass
+
+
+    @abstractclassmethod
+    def on_new_phase(self) -> None:
+        """ Called when a new phase starts. """
         pass
 
 
@@ -26,14 +32,14 @@ class GamePlayer(ABC):
 
     
     @abstractclassmethod
-    def on_rematch(self) -> bool:
+    def on_rematch(self, win_on_match: bool) -> bool:
         """ Called when a match ends.\n
         Return True if you want to rematch. """
         pass
 
 
     @abstractclassmethod
-    def on_client_close(self) -> None:
+    def on_close(self) -> None:
         """ Called when the client close """
         pass
 
@@ -69,9 +75,14 @@ class GamePlayer(ABC):
 
 
     @abstractclassmethod
-    def select_card(self, choices: list[int], max_: int, cancelable: bool, select_hint: int) -> list[int]:
+    def select_card(self, choices: list[Card], min_: int, max_: int, cancelable: bool, select_hint: int) -> list[int]:
         pass
 
+    
+    @abstractclassmethod
+    def select_tribute(self, choices: list[Card], min_: int, max_: int, cancelable: bool, select_hint: int) -> list[int]:
+        pass
+    
 
     @abstractclassmethod
     def select_chain(self, choices: list[Card], descriptions: list[int], forced: bool) -> int:
@@ -89,7 +100,7 @@ class GamePlayer(ABC):
 
 
     @abstractclassmethod
-    def select_sum(self, choices: list[Card], min_: int, max_: int, cancelable: bool, select_hint: int):
+    def select_sum(self, choices: list[tuple[Card, int, int]], sum_value: int, min_: int, max_: int, must_just: bool, select_hint: int) -> list[int]:
         pass
 
 
@@ -99,7 +110,7 @@ class GamePlayer(ABC):
 
 
     @abstractclassmethod
-    def select_counter(self, counter_type: int, quantity: int, cards: list[int], counters: list[int]) -> list[int]:
+    def select_counter(self, counter_type: int, quantity: int, cards: list[Card], counters: list[int]) -> list[int]:
         pass
 
 
