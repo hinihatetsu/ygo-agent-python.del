@@ -1,104 +1,64 @@
-import math
-import datetime
-import csv
-from pathlib import Path
-from typing import Any, NamedTuple
+import random
+import copy
+from typing import NamedTuple
 
 from pyYGO import Duel, Deck
-from pyYGO.enums import Player
-from .action import Action
+from .action import Choice
 from .flags import UsedFlag
+from debug_tools import measure_time
+
+
+class State(NamedTuple):
+    duel: Duel
+    usedflag: UsedFlag
 
 
 class Decision(NamedTuple):
-    action: Action
-    card_id: int
-    option: Any
-    duel: Duel
-    usedflag: UsedFlag
-    value: float
+    selected: Choice
+    choices: list[Choice]
+    state: State
 
     def __repr__(self) -> str:
-        return f'<Action:{repr(self.action)}; value:{self.value}>'
+        return f'<Action:{repr(self.selected.action)}>'
 
 
+class Memory(NamedTuple):
+    decision: Decision
+    next_state: State
+    next_choices: list[Choice]
+    reward: float
 
-class DecisionRecorder:
-    DISCOUNT_RATE = 0.8
+
+class ActionRecorder:
+    THRESHOLD   = 250
     def __init__(self, deck: Deck) -> None:
         self._deck: Deck = deck
         self._decisions: list[Decision] = []
-        self._evaluated_decisions: list[Decision] = []
-        self._memory: list[Decision] = []
-        self._hand_cache: list[int] = None
-        self._field_cache: list[int] = None
-        self._deck_cache: list[int] = None
-        self._life_cache: list[int] = None
-        self._match_result: list[bool] = []
+        self._memories: list[Memory] = []
+        self._decision_cache: Decision = None
 
     
-    def save(self, decision: Decision) -> None:
-        self._decisions.append(decision)
+    def save(self, selected: Choice, choices: list[Choice], duel: Duel, usedflag: UsedFlag) -> None:
+        state = State(copy.deepcopy(duel), copy.deepcopy(usedflag))
+        self._decisions.append(Decision(selected, choices, state))
 
 
-    def dump(self) -> list[Decision]:
-        return [dc for dc in self._memory]
-
-    
-    def clear(self) -> None:
-        self._memory.clear()
-
-
-    def calculate_reward(self, duel: Duel) -> None:
-        score: list[float] = [0, 0]
-        for p in (Player.ME, Player.OPPONENT):
-            hand = (duel.field[p].hand_count - self._hand_cache[p]) / 2
-            field = (duel.field[p].field_count - self._field_cache[p]) 
-            deck = (self._deck_cache[p] - duel.field[p].deck_count) / 8
-            life = (self._life_cache[p^1] - duel.life[p^1]) / 1000
-            score[p] = 1 / (1 + math.exp(-(hand + field + deck + life))) # sigmoid
-            self._deck_cache[p] = duel.field[p].deck_count
-            self._life_cache[p^1] = duel.life[p^1]
-
-        reward: float = score[Player.ME] - score[Player.OPPONENT]
-
+    def reward(self, reward: float) -> None:
         for i, dc in enumerate(reversed(self._decisions)):
-            dc = Decision(dc.action, dc.card_id, dc.option, dc.duel, dc.usedflag, dc.value + reward * self.DISCOUNT_RATE**i)
-            self._evaluated_decisions.append(dc)
-        
+            self._memories.append(Memory(dc, None,  None, reward))
         self._decisions.clear()
 
 
-    def add_winner_bonus(self, win: bool, turn: int) -> None:
-        base = 100
-        discount_rate = 0.9
-        bonus = base * (discount_rate**turn)
-        for dc in self._evaluated_decisions:
-            dc = Decision(dc.action, dc.card_id, dc.option, dc.duel, dc.usedflag, dc.value + bonus if win else dc.value)
-            self._memory.append(dc)
-        self._evaluated_decisions.clear()
+    def sample(self) -> list[Memory]:
+        if len(self._memories) < self.THRESHOLD:
+            return []
+        sample = random.sample(self._memories, len(self._memories)-self.THRESHOLD//2)
+        for mem in sample:
+            self._memories.remove(mem)
+        return sample
 
+    
+    def clear(self) -> None:
+        self._memories.clear()
 
-
-
-    def reset_cache(self) -> None:
-        self._hand_cache = [5, 5]
-        self._field_cache = [0, 0]
-        self._deck_cache = [35, 35]
-        self._life_cache = [8000, 8000]
-
-
-    def save_match_result(self, match_count: int, win: bool):
-        self._match_result.append(win)
-        assert len(self._match_result) == match_count, "len(self._match_result) != match_count"
-
-
-    def dump_match_result(self) -> None:
-        now = datetime.datetime.now().isoformat(timespec='seconds').replace(':', '-')
-        file = Path.cwd() / 'Decks' / self._deck.name / (now + '.csv')
-        with file.open(mode='w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(('match', 'win'))
-            writer.writerows(enumerate(self._match_result))
-        self._match_result.clear()
 

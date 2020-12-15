@@ -25,12 +25,14 @@ class ActionNetwork(ABC):
         self._deck_list: list[int] = deck.main + deck.extra # ToDo: add side deck
         self._deck_list.sort()
         size: int = self._input_size
-        self._network: Network = Network([size, size * 2 // 3, 200, 1], learning_rate=0.05)
+        layer_structure = [size, size * 2 // 3, 200, 1]
+        activation_funcs = [None, None, None, 'linear']
+        self._network: Network = Network(layer_structure, learning_rate=0.01, activation_funcs=activation_funcs)
 
     @property
-    @abstractclassmethod
     def _input_size(self) -> int:
-        pass
+        return len(self.create_input(0, 0, Duel(), UsedFlag(self._deck)))
+
 
     @abstractclassmethod
     def create_input(self, card_id: int, option: Any, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
@@ -50,11 +52,6 @@ class ActionNetwork(ABC):
 
 
 class CardIDNetwork(ActionNetwork):
-    @property
-    def _input_size(self) -> int:
-        return len(self.create_input(0, 0, Duel(), UsedFlag(self._deck)))
-
-    
     def create_input(self, card_id: int, not_used: Any, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
         id = _create_card_id_array(card_id)
         inputs = np.concatenate((id, _create_input_base(self, duel, usedflag)))
@@ -83,11 +80,6 @@ class SetNetwork(CardIDNetwork):
 
 
 class ActivateNetwork(ActionNetwork):
-    @property
-    def _input_size(self) -> int:
-        return len(self.create_input(0, 0, Duel(), UsedFlag(self._deck)))
-    
-
     def create_input(self, card_id: int,activation_desc: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
         id = _create_card_id_array(card_id)
         desc = np.unpackbits(np.array([activation_desc], dtype=np.uint64).view(np.uint8), bitorder='little')
@@ -102,11 +94,6 @@ class AttackNetwork(CardIDNetwork):
 
 
 class ChainNetwork(ActionNetwork):
-    @property
-    def _input_size(self) -> int:
-        return len(self.create_input(0, 0, Duel(), UsedFlag(self._deck)))
-
-
     def create_input(self, card_id: int, activation_desc: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
         id = _create_card_id_array(card_id)
         desc = np.unpackbits(np.array([activation_desc], dtype=np.uint64).view(np.uint8), bitorder='little')
@@ -121,11 +108,6 @@ class ChainNetwork(ActionNetwork):
 
 
 class SelectNetwork(ActionNetwork):
-    @property
-    def _input_size(self) -> int:
-        return len(self.create_input(0, 0, Duel(), UsedFlag(self._deck)))
-    
-
     def create_input(self, card_id: int, select_hint: int, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
         id = _create_card_id_array(card_id)
         hint = np.unpackbits(np.array([select_hint], dtype=np.uint64).view(np.uint8), bitorder='little')
@@ -135,11 +117,6 @@ class SelectNetwork(ActionNetwork):
 
 
 class PhaseNetwork(ActionNetwork):
-    @property
-    def _input_size(self) -> int:
-        return len(self.create_input(0, 0, Duel(), UsedFlag(self._deck)))
-
-    
     def create_input(self, not_used: int, not_used_2: Any, duel: Duel, usedflag: UsedFlag) -> np.ndarray:
         return _create_input_base(self, duel, usedflag)
         
@@ -168,34 +145,34 @@ def _create_locations(network: ActionNetwork, my_field: HalfField) -> np.ndarray
     inputs: np.ndarray = np.concatenate([_IN_DECK for _ in range(len(network._deck_list))], axis=0)
 
     for card in my_field.hand:
-        index: int = _get_index(network._deck_list, inputs, card.id)
+        index = _get_index(network._deck_list, inputs, card.id)
         if index != -1:
             inputs[index:index+_LOCATION_BIT] = _IN_HAND
 
-    for zone in my_field.monster_zones:
-        if not zone.has_card:
+    for mzone in my_field.monster_zones:
+        if not mzone.has_card:
             continue
-        index: int = _get_index(network._deck_list, inputs, zone.card.id)
+        index = _get_index(network._deck_list, inputs, mzone.card.id)
         if index != -1:
             inputs[index:index+_LOCATION_BIT] = _ON_FIELD
-            inputs[index+6:index+_LOCATION_BIT] = _create_position_array(zone.card.position)
+            inputs[index+6:index+_LOCATION_BIT] = _create_position_array(mzone.card.position)
         
-    for zone in my_field.spell_zones:
-        if not zone.has_card:
+    for szone in my_field.spell_zones:
+        if not szone.has_card:
             continue
-        index: int = _get_index(network._deck_list, inputs, zone.card.id)
+        index = _get_index(network._deck_list, inputs, szone.card.id)
         if index != -1:
             inputs[index:index+_LOCATION_BIT] = _ON_FIELD
-            inputs[index+6:index+_LOCATION_BIT] = _create_position_array(zone.card.position)
+            inputs[index+6:index+_LOCATION_BIT] = _create_position_array(szone.card.position)
 
     for card in my_field.graveyard:
-        index: int = _get_index(network._deck_list, inputs, card.id)
+        index = _get_index(network._deck_list, inputs, card.id)
         if index != -1:
             inputs[index:index+_LOCATION_BIT] = _IN_GY
             inputs[index+6:index+_LOCATION_BIT] = _create_position_array(card.position)
 
     for card in my_field.banished:
-        index: int = _get_index(network._deck_list, inputs, card.id)
+        index = _get_index(network._deck_list, inputs, card.id)
         if index != -1:
             inputs[index:index+_LOCATION_BIT] = _IN_BANISHED
             inputs[index+6:index+_LOCATION_BIT] = _create_position_array(card.position)
@@ -240,15 +217,15 @@ def _create_opfield(op_field: HalfField) -> np.ndarray:
     num_cards[4] = len(op_field.extradeck) / 15
 
     zones: np.ndarray = np.zeros((36 * 13), dtype='float64')
-    for i, zone in enumerate(op_field.monster_zones):
-        if zone.has_card:
-            zones[36*i:36*(i+1)-4] = _create_card_id_array(zone.card.id)
-            zones[36*i+32:36*(i+1)] = _create_position_array(zone.card.position)
+    for i, mzone in enumerate(op_field.monster_zones):
+        if mzone.has_card:
+            zones[36*i:36*(i+1)-4] = _create_card_id_array(mzone.card.id)
+            zones[36*i+32:36*(i+1)] = _create_position_array(mzone.card.position)
         
-    for i, zone in enumerate(op_field.spell_zones):
-        if zone.has_card:
-            zones[36*(i+7):36*(i+8)-4] = _create_card_id_array(zone.card.id)
-            zones[36*(i+7)+32:36*(i+8)] = _create_position_array(zone.card.position)
+    for i, szone in enumerate(op_field.spell_zones):
+        if szone.has_card:
+            zones[36*(i+7):36*(i+8)-4] = _create_card_id_array(szone.card.id)
+            zones[36*(i+7)+32:36*(i+8)] = _create_position_array(szone.card.position)
 
     return np.concatenate((num_cards, zones))
 

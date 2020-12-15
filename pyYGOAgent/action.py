@@ -1,66 +1,38 @@
 import enum
-from typing import NamedTuple, Any
+from typing import Any, NamedTuple
 
 
-class Action(enum.IntEnum):
-    SUMMON = 0
-    SP_SUMMON = 1
-    REPOSITION = 2
-    SET_MONSTER = 3
-    SET_SPELL = 4
-    ACTIVATE = 5
-    BATTLE = 6
-    END = 7
+class Action(enum.Enum):
+    SUMMON      = enum.auto()
+    SP_SUMMON   = enum.auto()
+    REPOSITION  = enum.auto()
+    SET_MONSTER = enum.auto()
+    SET_SPELL   = enum.auto()
+    ACTIVATE    = enum.auto()
+    BATTLE      = enum.auto()
+    END         = enum.auto()
 
-    ACTIVATE_IN_BATTLE = 10
-    ATTACK = 11
-    MAIN2 = 12
-    END_IN_BATTLE = 13
+    ACTIVATE_IN_BATTLE = enum.auto()
+    ATTACK             = enum.auto()
+    MAIN2              = enum.auto()
+    END_IN_BATTLE      = enum.auto()
 
-    CHAIN = 20
-    SELECT = 21
+    CHAIN  = enum.auto()
+    SELECT = enum.auto()
 
 
-
-class MainAction(NamedTuple):
-    value: float
+class Choice(NamedTuple):
     action: Action
     index: int = 0
-    card_id: int = None
+    card_id: int = 0
     option: Any = None
 
-    def to_int(self) -> int:
-        return (self.index << 16) + int(self.action)
 
-
-
-class BattleAction(NamedTuple):
+class EvaluatedChoice(NamedTuple):
+    choice: Choice
     value: float
-    action: Action
-    index: int = 0
-    card_id: int = None
-    option: Any = None
 
-    def to_int(self) -> int:
-        return (self.index << 16) + int(self.action - 10)
+    
+   
 
 
-
-class ChainAction(NamedTuple):
-    value: float
-    index: int
-    card_id: int
-    desc: int
-    action: Action = Action.CHAIN
-
-    def to_int(self) -> int:
-        return self.index
-
-
-
-class SelectAction(NamedTuple):
-    value: float
-    index: int
-    card_id: int
-    hint: int
-    action: Action = Action.SELECT
