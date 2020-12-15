@@ -34,7 +34,7 @@ class Packet:
         type_: type = type(content)
 
         if type_ == Player:
-            self.write(int(content) if self.first_is_me else int(content ^ 1), byte_size=1)
+            self.write(int(content) if self.first_is_me else int(content) ^ 1, byte_size=1)
 
         elif type_ == str:
             content = str(content)
