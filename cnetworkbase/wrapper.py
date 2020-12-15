@@ -2,8 +2,6 @@ from .networkbase_cpp import cNetwork
 import numpy as np
 
 
-
-
 class Network(cNetwork):
     _ActivationFuncCode = {
         'tanh':    1,
