@@ -8,7 +8,7 @@ class MainPhase:
         self.moster_settable: list[Card] = []
         self.spell_settable: list[Card] = []
         self.activatable: list[Card] = []
-        self.activation_descs: list[Card] = []
+        self.activation_descs: list[int] = []
 
         self.can_battle: bool = None
         self.can_end: bool = None

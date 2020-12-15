@@ -13,22 +13,22 @@ class DuelField(NamedTuple):
     opside: HalfField
 
     def set_zone_id(self) -> None:
-        for i, zone in enumerate(self.myside.monster_zones):
-            zone.id = Zone.ID.MZONE_0 << i
-        for i, zone in enumerate(self.myside.spell_zones):
-            zone.id = Zone.ID.SZONE_0 << i
-        for i, zone in enumerate(self.opside.monster_zones):
-            zone.id = Zone.ID.MZONE_0 << i << Zone.ID.OPPONENT
-        for i, zone in enumerate(self.opside.spell_zones):
-            zone.id = Zone.ID.SZONE_0 << i << Zone.ID.OPPONENT
+        for i, mzone in enumerate(self.myside.monster_zones):
+            mzone.id = Zone.ID.MZONE_0 << i
+        for i, szone in enumerate(self.myside.spell_zones):
+            szone.id = Zone.ID.SZONE_0 << i
+        for i, mzone in enumerate(self.opside.monster_zones):
+            mzone.id = Zone.ID.MZONE_0 << i << Zone.ID.OPPONENT
+        for i, szone in enumerate(self.opside.spell_zones):
+            szone.id = Zone.ID.SZONE_0 << i << Zone.ID.OPPONENT
 
 
 class Duel:
     def __init__(self) -> None:
         self._field: DuelField = DuelField(HalfField(), HalfField())
-        self._first: Player = None
-        self._second: Player = None
-        self._turn_player: Player = Player.ME
+        self._first: Player = Player.NONE
+        self._second: Player = Player.NONE
+        self._turn_player: Player = Player.NONE
         self._turn: int = 0
         self._phase: Phase = Phase.DRAW
         self._life: list[int] = [8000, 8000]
@@ -36,10 +36,10 @@ class Duel:
         self._mainphase_end: bool = False
         self._summoning: list[Card] = []
         self._last_summoned: list[Card] = []
-        self._last_summon_player: Player = None
+        self._last_summon_player: Player = Player.NONE
 
         self._current_chain: list[Card] = []
-        self._last_chain_player: Player = -1
+        self._last_chain_player: Player = Player.NONE
         self._chain_targets: list[Card] = []
         self._current_chain_target: list[Card] = []
 
@@ -47,8 +47,8 @@ class Duel:
 
 
     @property
-    def players(self) -> tuple[Player]:
-        return (self._first, self._second)
+    def players(self) -> tuple[Player, Player]:
+        return self._first, self._second
 
     @property
     def turn_player(self) -> Player:
@@ -107,7 +107,7 @@ class Duel:
             cards: list[Card] = [zone.card for zone in zones]
 
         else:
-            cards: list[Card] = self._field[controller].where(location)
+            cards = self._field[controller].where(location)
 
         return cards 
     
@@ -158,7 +158,7 @@ class Duel:
     
     def on_chaining(self, last_chain_player: Player, card: Card) -> None:
         self._last_chain_player = last_chain_player
-        self._last_summon_player = -1
+        self._last_summon_player = Player.NONE
         self._current_chain.append(card)
         self._current_chain_target.clear()
 
@@ -178,7 +178,7 @@ class Duel:
 
     def on_draw(self, player: Player) -> None:
         self._field[player].deck.pop()
-        self._field[player].hand.append(Card(location=CardLocation.HAND))
+        self._field[player].hand.append(Card(location=Location(CardLocation.HAND)))
 
 
     def on_damage(self, player: Player, damage: int) -> None:

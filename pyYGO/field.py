@@ -69,8 +69,7 @@ class HalfField():
     def deck_count(self) -> int:
         return len(self.deck)
 
-    @property
-    def columncard_count(self, column: int) -> None:
+    def columncard_count(self, column: int) -> int:
         return sum(int(zone.has_card) for zone in self.column_zones[column])
 
     @property
@@ -100,7 +99,7 @@ class HalfField():
             zone: Zone = where[index]
             card: Card = zone.card        
         else:
-            card: Card = where[index]
+            card = where[index]
 
         return card
 
@@ -121,7 +120,7 @@ class HalfField():
             return
         
         if location.is_zone:
-            zone: Zone = where[index]
+            zone = where[index]
             zone.card = card
         else:
             where.insert(index, card)
