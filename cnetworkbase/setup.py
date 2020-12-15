@@ -18,7 +18,6 @@ setup(
     ext_modules = cythonize(ext,  language_level = "3"),
     include_dirs = [
         numpy.get_include(),
-        ".\\include\\",
-        "C:\\Users\\Shuhei\\dev\\C_C++\\include\\",
+        ".\\include\\"
     ]
 )
