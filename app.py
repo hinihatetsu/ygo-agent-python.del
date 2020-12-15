@@ -5,7 +5,7 @@ from pyYGOagent import DuelAgent
 
 def main():
     info: LaunchInfo = load_args()
-    agent = DuelAgent(info.deck)
+    agent = DuelAgent(info.deck, info.notrain)
     client = GameClient(info.host, info.port, info.version, info.name)
     agent.set_client(client)
     agent.run()
