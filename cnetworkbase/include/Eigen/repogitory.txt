@@ -1,1 +1,3 @@
 https://github.com/libigl/eigen
+
+if you build cnetworkbase, install Eigen from the url.
