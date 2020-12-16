@@ -195,7 +195,7 @@ class GameClient:
 
 
     def _on_select_tp(self, packet: Packet) -> None:
-        select_first: bool = False
+        select_first: bool = self._gameplayer.select_tp()
         reply: Packet = Packet(CtosMessage.TP_RESULT)
         reply.write(select_first)
         self._connection.send(reply)
