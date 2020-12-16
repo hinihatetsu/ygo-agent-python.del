@@ -20,7 +20,7 @@ def load_args() -> LaunchInfo:
     parser.add_argument('--host', type=str, help='host adress (default: %(default)s)')
     parser.add_argument('--port', type=int, help='port (default: %(default)s)')
     parser.add_argument('--version', type=int, help='version (default: %(default)s)')
-    parser.add_argument('--notrain', action='store_true', help='no train mode (default: %(default)s')
+    parser.add_argument('--notrain', action='store_true', help='no train mode (default: %(default)s)')
     args: argparse.Namespace = parser.parse_args()
     return LaunchInfo(args.name, args.deck, args.host, args.port, args.version, args.notrain)
 
