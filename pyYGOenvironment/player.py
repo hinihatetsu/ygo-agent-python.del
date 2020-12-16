@@ -45,6 +45,11 @@ class GamePlayer(ABC):
 
 
     @abstractclassmethod
+    def select_tp(self) -> bool:
+        """ Return True if you go first """
+        pass
+
+    @abstractclassmethod
     def select_mainphase_action(self, main: MainPhase) -> int:
         pass
 
