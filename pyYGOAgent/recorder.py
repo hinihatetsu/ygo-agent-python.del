@@ -30,7 +30,7 @@ class Memory(NamedTuple):
 
 
 class ActionRecorder:
-    THRESHOLD   = 250
+    THRESHOLD   = 500
     def __init__(self, deck: Deck) -> None:
         self._deck: Deck = deck
         self._decisions: list[Decision] = []
