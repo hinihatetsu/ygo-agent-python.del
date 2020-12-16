@@ -124,6 +124,10 @@ class DuelAgent(GamePlayer):
     
     def _update_usedflag(self, card_id: int) -> None:
         self._usedflag.used(card_id)
+
+
+    def select_tp(self) -> bool:
+        return True
         
 
     def select_mainphase_action(self, main: MainPhase) -> int:
