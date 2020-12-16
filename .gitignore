@@ -2,7 +2,7 @@ Decks
 .vscode
 analyze.py
 run.ps1
-validate.ps1
+evaluate.ps1
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
