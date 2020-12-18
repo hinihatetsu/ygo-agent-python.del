@@ -1,6 +1,6 @@
 #include "network.hpp"
 #include <iostream>
-#include "translate.hpp"
+#include "transduce.hpp"
 
 
 using namespace Eigen;

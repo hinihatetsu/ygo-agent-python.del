@@ -1,7 +1,7 @@
 #include "layer.hpp"
 #include <cmath>
 #include <iostream>
-#include "translate.hpp"
+#include "transduce.hpp"
 
 using namespace Eigen;
 using std::cout;
