@@ -141,7 +141,6 @@ class GameClient:
             packet: Packet = await self._connection.receive_pending_packet()
             self._on_recieved(packet)
             await self._connection.drain()
-        self._gameplayer.on_close()
 
     
     def _chat(self, content: str) -> None:
