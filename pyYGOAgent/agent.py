@@ -47,7 +47,7 @@ class DuelAgent(GamePlayer):
 
     
     def on_start(self) -> None:
-        pass
+        self._duel_cache = None
 
     
     def on_new_turn(self) -> None:
@@ -95,9 +95,9 @@ class DuelAgent(GamePlayer):
             field = (self._duel.field[p].field_count - self._duel_cache.field[p].field_count) 
             life = -(self._duel.life[p^1] - self._duel_cache.life[p^1]) / 1000
 
-            score[p] = 1 / (1 + math.exp(-(field + life))) # sigmoid
+            score[p] = 1 / (1 + math.exp(-(life + field)))
 
-        reward: float = (score[Player.ME] - score[Player.OPPONENT])
+        reward: float = score[Player.ME] - score[Player.OPPONENT]
         self._duel_cache = copy.deepcopy(self._duel_cache)
         return reward
 

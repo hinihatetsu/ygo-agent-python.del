@@ -1,5 +1,5 @@
 import random
-import copy
+import pickle
 from typing import NamedTuple
 
 from pyYGO import Duel, Deck
@@ -22,6 +22,13 @@ class Decision(NamedTuple):
         return f'<Action:{repr(self.selected.action)}>'
 
 
+class PickledMemory(NamedTuple):
+    decision_bytes: bytes
+    next_state_bytes: bytes
+    next_choices_bytes: bytes
+    reward: float
+
+
 class Memory(NamedTuple):
     decision: Decision
     next_state: State
@@ -31,21 +38,20 @@ class Memory(NamedTuple):
 
 class ActionRecorder:
     THRESHOLD   = 500
-    def __init__(self, deck: Deck) -> None:
-        self._deck: Deck = deck
-        self._decisions: list[Decision] = []
-        self._memories: list[Memory] = []
+    def __init__(self) -> None:
+        self._decisions: list[bytes] = []
+        self._memories: list[PickledMemory] = []
         self._decision_cache: Decision = None
 
     
     def save(self, selected: Choice, choices: list[Choice], duel: Duel, usedflag: UsedFlag) -> None:
-        state = State(copy.deepcopy(duel), copy.deepcopy(usedflag))
-        self._decisions.append(Decision(selected, choices, state))
+        state = State(duel, usedflag)
+        self._decisions.append(pickle.dumps(Decision(selected, choices, state)))
 
 
     def reward(self, reward: float) -> None:
         for i, dc in enumerate(reversed(self._decisions)):
-            self._memories.append(Memory(dc, None,  None, reward))
+            self._memories.append(PickledMemory(dc, pickle.dumps(None), pickle.dumps(None), reward))
         self._decisions.clear()
 
 
@@ -55,7 +61,7 @@ class ActionRecorder:
         sample = random.sample(self._memories, len(self._memories)-self.THRESHOLD//2)
         for mem in sample:
             self._memories.remove(mem)
-        return sample
+        return [Memory(pickle.loads(mem.decision_bytes), pickle.loads(mem.next_state_bytes), pickle.loads(mem.next_choices_bytes), mem.reward) for mem in sample]
 
     
     def clear(self) -> None:

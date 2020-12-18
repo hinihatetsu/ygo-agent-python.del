@@ -20,7 +20,7 @@ from .recorder import ActionRecorder, Memory
 from debug_tools import measure_time
 
 
-_VALID_NETWORK: list[type] = [
+_VALID_NETWORK: set[type] = {
                     SummonNetwork,
                     SpecialSummonNetwork,
                     RepositionNetwork,
@@ -30,7 +30,7 @@ _VALID_NETWORK: list[type] = [
                     ChainNetwork,
                     SelectNetwork,
                     PhaseNetwork
-                ]
+                }
 
 
 class NetworkKey(enum.Enum):
@@ -58,7 +58,7 @@ class AgentBrain:
         self._brain_path: Path = Path.cwd() / 'Decks' / self._deck.name / (self._deck.name + '.brain')
         self._networks: dict[NetworkKey, ActionNetwork] = {} 
         self._target_networks: dict[NetworkKey, ActionNetwork] = {}
-        self._recorder: ActionRecorder = ActionRecorder(deck)
+        self._recorder: ActionRecorder = ActionRecorder()
         self._load_networks()
         self._count_for_DDQN: int = 0
 
