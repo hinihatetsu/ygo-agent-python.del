@@ -15,7 +15,7 @@ ext = Extension('networkbase_cpp',
             )
 
 setup(
-    ext_modules = cythonize(ext,  language_level = "3"),
+    ext_modules = cythonize(ext, language_level = "3"),
     include_dirs = [
         numpy.get_include(),
         ".\\include\\"
