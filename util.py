@@ -2,7 +2,7 @@ import argparse
 from typing import NamedTuple
 
 
-VERSION: int = 38 | 1<<8 | 8<<16
+VERSION: int = 39 | 0<<8 | 3<<16
 class LaunchInfo(NamedTuple):
     name: str
     deck: str
