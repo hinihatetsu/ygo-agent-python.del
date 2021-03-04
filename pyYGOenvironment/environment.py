@@ -6,7 +6,7 @@ from pyYGO import Duel, Card, Zone, Location, Deck
 from pyYGO.phase import MainPhase, BattlePhase
 from pyYGO.enums import Phase, Player, CardLocation, CardPosition, CardType, Attribute, Query, Race
 from .player import GamePlayer
-from .pyYGOnetwork import YGOConnection, Packet, CtosMessage, StocMessage, GameMessage
+from .pyYGOnetwork import YGOConnection, Packet, CtosMessage, StocMessage, GameMessage, ErrorType
 from debug_tools import print_message
 
 
@@ -139,7 +139,7 @@ class GameClient:
     async def _main_loop(self) -> Coroutine[None, None, None]:
         while self._connection.is_connected:
             packet: Packet = await self._connection.receive_pending_packet()
-            self._on_recieved(packet)
+            self._on_received(packet)
             await self._connection.drain()
 
     
@@ -164,7 +164,7 @@ class GameClient:
         self._connection.send(packet)
 
 
-    def _on_recieved(self, packet: Packet) -> None:
+    def _on_received(self, packet: Packet) -> None:
         if packet.msg_id == StocMessage.GAME_MSG:
             id: int = packet.read_int(1)
             if id in self._GameMessage_to_func:
@@ -182,8 +182,30 @@ class GameClient:
 
 
     def _on_error_msg(self, packet: Packet) -> None:
-        print('error on server')
+        error_type: ErrorType = ErrorType(packet.read_int(1))
+        if error_type is ErrorType.JOINERROR:
+            print(error_type)
+
+        elif error_type is ErrorType.DECKERROR:
+            print(error_type)
+
+        elif error_type is ErrorType.SIDEERROR:
+            print(error_type)
+        
+        elif error_type is ErrorType.VERSIONERROR:
+            print(error_type)
+
+        elif error_type is ErrorType.VERSIONERROR2:
+            print('Version Error')
+            unknown = packet.read_int(3)
+            version = packet.read_int(4)
+            print(f'Host Version: {version & 0xff}.{(version >> 8) & 0xff}.{(version >> 16) & 0xff}.{(version >> 24) & 0xff}')
+            print(f'Your Version: {self._version & 0xff}.{(self._version >> 8) & 0xff}.{(self._version >> 16) & 0xff}.{(self._version >> 24) & 0xff}')
+        
+        else:
+            assert 'unknown ErrorType'
         self._connection.close()
+
 
 
     def _on_select_hand(self, packet: Packet) -> None:
@@ -301,7 +323,7 @@ class GameClient:
     
     def _on_retry(self, packet: Packet) -> None:
         # retry means we send an invalid message
-        print_message(self._connection.last_recieved.msg_id, self._connection.last_recieved.content)
+        print_message(self._connection.last_received.msg_id, self._connection.last_received.content)
         print_message(self._connection.last_send.msg_id, self._connection.last_send.content, send=True)
         raise Exception('sent invalid message')
 

@@ -11,13 +11,13 @@ class YGOConnection:
     def __init__(self, hostIP: str, port: int) -> None:
         self._hostIP: str = hostIP
         self._port: int = port
-        self._recieved_data: asyncio.Queue[bytes] = None
+        self._received_data: asyncio.Queue[bytes] = None
 
         self._reader: asyncio.StreamReader = None
         self._writer: asyncio.StreamWriter = None
 
         # for debug
-        self.last_recieved: Packet = None
+        self.last_received: Packet = None
         self.last_send: Packet = None
         
         
@@ -29,7 +29,7 @@ class YGOConnection:
    
 
     async def connect(self) -> None:
-        self._recieved_data = asyncio.Queue()
+        self._received_data = asyncio.Queue()
         try:
             self._reader, self._writer = await asyncio.streams.open_connection(self._hostIP, self._port)
         except ConnectionRefusedError:
@@ -54,18 +54,18 @@ class YGOConnection:
                 data_size: int = int.from_bytes(header, byteorder='little')
                 if data_size == 0:
                     self.close()
-                    await self._recieved_data.put(b'\x00')
+                    await self._received_data.put(b'\x00')
                 data = await self._reader.read(data_size)
-                await self._recieved_data.put(data)
+                await self._received_data.put(data)
             except ConnectionAbortedError:
                 self.close()
 
 
     async def receive_pending_packet(self) -> Packet:
-        pending: bytes = await self._recieved_data.get()
+        pending: bytes = await self._received_data.get()
         packet: Packet = Packet(int.from_bytes(pending[0:1], 'little'))
         packet.write(pending[1:]) 
-        self.last_recieved = packet
+        self.last_received = packet
         return packet
 
 

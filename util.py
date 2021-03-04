@@ -2,7 +2,7 @@ import argparse
 from typing import NamedTuple
 
 
-VERSION: int = 39 | 0<<8 | 3<<16
+VERSION: int = 39 | 0<<8 | 9<<16 | 0<<24
 class LaunchInfo(NamedTuple):
     name: str
     deck: str
@@ -26,7 +26,7 @@ def load_args() -> LaunchInfo:
 
 
 def error(message: str, exit_code: int=1) -> None:
-    """ show message to user and close app"""
+    """ show message to user and close app """
     print(message)
     exit(exit_code)
 

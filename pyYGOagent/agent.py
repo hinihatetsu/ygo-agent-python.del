@@ -44,6 +44,9 @@ class DuelAgent(GamePlayer):
             raise Exception('GameClient not set. Call DuelAgent.set_client().')
         self._client.set_deck(self._deck)
         self._client.start()
+        self._dump_match_result()
+        if not self._no_train:
+            self._brain.save_networks()
 
     
     def on_start(self) -> None:
@@ -78,12 +81,6 @@ class DuelAgent(GamePlayer):
         else:
             self._brain.train()
         return True if self._match_count < self._MAX_MATCH else False
-
-
-    def on_close(self) -> None:
-        self._dump_match_result()
-        if not self._no_train:
-            self._brain.save_networks()
 
     
     def _calculate_reward(self) -> float:

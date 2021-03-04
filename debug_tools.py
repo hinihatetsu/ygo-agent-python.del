@@ -33,12 +33,12 @@ def print_message(msg_id: int, data: bytes, send: bool=False) -> None:
         if msg_id == StocMessage.GAME_MSG:
             gid = int.from_bytes(data[0:1], byteorder='little')
             if gid in notshow_gm: return
-            print(f'\nBot recieved: {size} bytes')
+            print(f'\nBot received: {size} bytes')
             print(repr(stcmsgs[msg_id]))
             print(repr(gmmsgs[gid]))
             print(data[1:].hex(' '))
         else:
-            print(f'\nBot recieved: {size} bytes')
+            print(f'\nBot received: {size} bytes')
             print(repr(stcmsgs[msg_id]))
             print(data.hex(' '))
 

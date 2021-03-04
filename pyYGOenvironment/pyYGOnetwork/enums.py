@@ -147,3 +147,10 @@ class GameMessage(enum.IntEnum):
     CUSTOM_MSG        = 180
     DUEL_WINNER       = 200
 
+
+class ErrorType(enum.IntEnum):
+    JOINERROR     = 1
+    DECKERROR     = 2
+    SIDEERROR     = 3
+    VERSIONERROR  = 4
+    VERSIONERROR2 = 5
