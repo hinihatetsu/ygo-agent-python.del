@@ -1,8 +1,6 @@
 Decks
 .vscode
-analyze.py
-run.ps1
-evaluate.ps1
+.devcontainer
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
