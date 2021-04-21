@@ -1,10 +1,10 @@
-from typing import NamedTuple
+from typing import NamedTuple, List, Tuple
 
 from .field import HalfField
 from .card import Card
 from .zone import Zone
 from .enums import CardLocation, Phase, Player
-from .wrapper import Location
+from .cardstatus import Location
 
 
 
@@ -26,29 +26,28 @@ class DuelField(NamedTuple):
 class Duel:
     def __init__(self) -> None:
         self._field: DuelField = DuelField(HalfField(), HalfField())
-        self._first: Player = Player.NONE
-        self._second: Player = Player.NONE
+        self._players: Tuple[Player, Player] = (Player.NONE, Player.NONE)
         self._turn_player: Player = Player.NONE
         self._turn: int = 0
         self._phase: Phase = Phase.DRAW
-        self._life: list[int] = [8000, 8000]
+        self._life: List[int] = [8000, 8000]
 
         self._mainphase_end: bool = False
-        self._summoning: list[Card] = []
-        self._last_summoned: list[Card] = []
+        self._summoning: List[Card] = []
+        self._last_summoned: List[Card] = []
         self._last_summon_player: Player = Player.NONE
 
-        self._current_chain: list[Card] = []
+        self._current_chain: List[Card] = []
         self._last_chain_player: Player = Player.NONE
-        self._chain_targets: list[Card] = []
-        self._current_chain_target: list[Card] = []
+        self._chain_targets: List[Card] = []
+        self._current_chain_target: List[Card] = []
 
         self._field.set_zone_id()
 
 
     @property
-    def players(self) -> tuple[Player, Player]:
-        return self._first, self._second
+    def players(self) -> Tuple[Player, Player]:
+        return self._players
 
     @property
     def turn_player(self) -> Player:
@@ -63,7 +62,7 @@ class Duel:
         return self._phase
 
     @property
-    def life(self) -> list[int]:
+    def life(self) -> List[int]:
         return self._life
     
     @property 
@@ -71,7 +70,7 @@ class Duel:
         return self._field
 
     @property
-    def current_chain(self) -> list[Card]:
+    def current_chain(self) -> List[Card]:
         return self._current_chain
 
     @property
@@ -79,7 +78,7 @@ class Duel:
         return self._last_chain_player
 
     @property
-    def chain_targets(self) -> list[Card]:
+    def chain_targets(self) -> List[Card]:
         return self._chain_targets
 
 
@@ -101,10 +100,10 @@ class Duel:
         self._field[controller].remove_card(card, location, index)
 
     
-    def get_cards(self, controller: Player, location: Location) -> list[Card]:
-        if location.is_zone:
-            zones: list[Zone] = self._field[controller].where(location)
-            cards: list[Card] = [zone.card for zone in zones]
+    def get_cards(self, controller: Player, location: Location) -> List[Card]:
+        if location.is_zone():
+            zones: List[Zone] = self._field[controller].where(location)
+            cards: List[Card] = [zone.card for zone in zones]
 
         else:
             cards = self._field[controller].where(location)
@@ -118,8 +117,7 @@ class Duel:
 
     def on_start(self, first_player: Player) -> None:
         self.__init__()
-        self._first = first_player
-        self._second = Player.OPPONENT if first_player == Player.ME else Player.ME
+        self._players = (first_player, (Player.OPPONENT if first_player == Player.ME else Player.ME))
 
 
     def on_new_turn(self, turn_player: Player) -> None:

@@ -1,3 +1,5 @@
+from typing import List
+
 from pathlib import Path
 
 
@@ -5,9 +7,9 @@ class Deck:
     decks_dir: Path = Path.cwd() / 'Decks'
     def __init__(self, deck_name: str) -> None:
         self.name: str = deck_name
-        self.main: list[int] = []
-        self.extra: list[int] = []
-        self.side: list[int] = []
+        self.main: List[int] = []
+        self.extra: List[int] = []
+        self.side: List[int] = []
 
         self.load()
 
@@ -17,7 +19,7 @@ class Deck:
         if not deck.exists():
             self.create()
         
-        box: list[int] = self.main
+        box: List[int] = self.main
         with deck.open() as f:
             for line in f.readlines():
                 line = line.strip()
@@ -29,7 +31,7 @@ class Deck:
                 try:
                     id = int(line)
                     box.append(id)
-                except ValueError:
+                except ValueError as err:
                     pass
 
 

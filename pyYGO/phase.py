@@ -1,14 +1,16 @@
+from typing import List
+
 from .card import Card
 
 class MainPhase:
     def __init__(self):
-        self.summonable: list[Card] = []
-        self.special_summonable: list[Card] = []
-        self.repositionable: list[Card] = []
-        self.moster_settable: list[Card] = []
-        self.spell_settable: list[Card] = []
-        self.activatable: list[Card] = []
-        self.activation_descs: list[int] = []
+        self.summonable: List[Card] = []
+        self.special_summonable: List[Card] = []
+        self.repositionable: List[Card] = []
+        self.monster_settable: List[Card] = []
+        self.spell_settable: List[Card] = []
+        self.activatable: List[Card] = []
+        self.activation_descs: List[int] = []
 
         self.can_battle: bool = None
         self.can_end: bool = None
@@ -22,7 +24,7 @@ class MainPhase:
         yield self.summonable
         yield self.special_summonable
         yield self.repositionable
-        yield self.moster_settable
+        yield self.monster_settable
         yield self.spell_settable
         yield self.activatable
 
@@ -33,9 +35,9 @@ class MainPhase:
 
 class BattlePhase:
     def __init__(self) -> None:
-        self.attackable: list[Card] = []
-        self.activatable: list[Card] = []
-        self.activation_descs: list[int] = []
+        self.attackable: List[Card] = []
+        self.activatable: List[Card] = []
+        self.activation_descs: List[int] = []
 
         self.can_main2: bool = None
         self.can_end: bool = None

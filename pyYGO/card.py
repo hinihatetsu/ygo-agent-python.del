@@ -1,55 +1,55 @@
-from .enums import Player, CardPosition, CardType, Attribute, Race
-from .wrapper import Location
+from typing import List
+
+from .enums import Player
+from .cardstatus import Location, Type, Attribute, Race, Position
 
 
 class Card:
-    POSITION: dict[int, CardPosition] = {int(pos): pos for pos in CardPosition}
-    ATTRIBUTE: dict[int, Attribute] = {int(a): a for a in Attribute}
-    RASE: dict[int, Race] = {int(r): r for r in Race}
-    def __init__(self, card_id: int=0, location: Location=None) -> None:
+    def __init__(self, card_id: int=0, location: Location=Location(0)) -> None:
         # card info
         self.id: int = card_id
-        self.arias: int = None
-        self.type: list[CardType] = []
-        self.level: int = None
-        self.rank: int = None
-        self.attribute: Attribute = None
-        self.race: Race = None
-        self.attack: int = None
-        self.defence: int = None
-        self.base_attack: int = None
-        self.base_defence: int = None
-        self.lscale: int = None
-        self.rscale: int = None
-        self.links: int = None
-        self.linkmarker: int = None
+        self.arias: int = 0
+        self.type: Type = Type(0)
+        self.level: int = 0
+        self.rank: int = 0
+        self.attribute: Attribute = Attribute(0)
+        self.race: Race = Race(0)
+        self.attack: int = 0
+        self.defence: int = 0
+        self.base_attack: int = 0
+        self.base_defence: int = 0
+        self.lscale: int = 0
+        self.rscale: int = 0
+        self.link: int = 0
+        self.linkmarker: int = 0
 
         # status in duel
-        self.controller: Player = None
+        self.controller: Player = Player.NONE
         self.location: Location = location
-        self.position: CardPosition = None
-        self.target_cards: list[Card] = []
-        self.targeted_by: list[Card] = []
+        self.position: Position = Position(0)
+        self.target_cards: List[Card] = []
+        self.targeted_by: List[Card] = []
         self.equip_target: Card = None
-        self.equip_cards: list[Card] = []
-        self.overlays: list[int] = []
+        self.equip_cards: List[Card] = []
+        self.overlays: List[int] = []
+        self.reason: int = 0
+        self.reason_card: Card = None
+        self.counters: dict[int, int] = dict()
 
         # status flag
+        self.status: int = 0
         self.attacked: bool = False
-        self.disabled: bool = False
-        self.proc_complete: bool = False
         self.can_direct_attack: bool = False
         self.is_special_summoned: bool = False
         self.is_faceup: bool = False
 
     
-    @property
     def is_attack(self) -> bool:
-        return bool(self.position & CardPosition.ATTACK)
+        return self.position.is_attack()
 
-    @property
+
     def is_defence(self) -> bool:
-        return bool(self.position & CardPosition.DEFENCE)
+        return self.position.is_defence()
 
 
     def __repr__(self) -> str:

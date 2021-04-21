@@ -1,4 +1,6 @@
-from .wrapper import Location
+from typing import List
+
+from .cardstatus import Location
 from .card import Card
 from .zone import Zone, MonsterZone, SpellZone
 from .enums import CardLocation, CardType
@@ -7,24 +9,24 @@ from .enums import CardLocation, CardType
 
 class HalfField():
     def __init__(self) -> None:
-        self.hand: list[Card] = []
-        self.deck: list[Card] = []
-        self.extradeck: list[Card] = []
-        self.graveyard: list[Card] = []
-        self.banished: list[Card] = []
+        self.hand: List[Card] = []
+        self.deck: List[Card] = []
+        self.extradeck: List[Card] = []
+        self.graveyard: List[Card] = []
+        self.banished: List[Card] = []
         # left first
-        self.monster_zones: list[MonsterZone] = [MonsterZone() for _ in range(7)]
-        self.spell_zones: list[SpellZone] = [SpellZone() for _ in range(6)]
+        self.monster_zones: List[MonsterZone] = [MonsterZone() for _ in range(7)]
+        self.spell_zones: List[SpellZone] = [SpellZone() for _ in range(8)]
         
         self.battling_monster: Card = None
         self.under_attack: bool = False
     
     @property
-    def mainmonster_zones(self) -> list[MonsterZone]:
+    def mainmonster_zones(self) -> List[MonsterZone]:
         return self.monster_zones[0:5]
 
     @property
-    def exmonster_zones(self) -> list[MonsterZone]:
+    def exmonster_zones(self) -> List[MonsterZone]:
         return self.monster_zones[5:7]
 
     @property
@@ -32,11 +34,11 @@ class HalfField():
         return self.spell_zones[5]
 
     @property
-    def pendulum_zones(self) -> list[SpellZone]:
-        return [self.spell_zones[0], self.spell_zones[4]]
+    def pendulum_zones(self) -> List[SpellZone]:
+        return self.spell_zones[6:8]
 
     @property
-    def column_zones(self) -> list[list[Zone]]:
+    def column_zones(self) -> List[List[Zone]]:
         return [
             [self.spell_zones[0], self.mainmonster_zones[0]],
             [self.spell_zones[1], self.mainmonster_zones[1], self.exmonster_zones[0]],
@@ -86,7 +88,7 @@ class HalfField():
 
     
     def get_card(self, location: Location, index: int) -> Card:
-        if location.is_overlay:
+        if location.is_overlay():
             return Card(location=location)
 
         where: list = self.where(location)
@@ -95,7 +97,7 @@ class HalfField():
         if where is None:
             return card
         
-        if location.is_zone:
+        if location.is_zone():
             zone: Zone = where[index]
             card: Card = zone.card        
         else:
@@ -110,7 +112,7 @@ class HalfField():
             del card
             return
 
-        if location.is_overlay:
+        if location.is_overlay():
             if location.is_zone:
                 zone: Zone = where[index]
                 zone.card.overlays.append(card.id)
@@ -119,7 +121,7 @@ class HalfField():
                 pcard.overlays.append(card.id)
             return
         
-        if location.is_zone:
+        if location.is_zone():
             zone = where[index]
             zone.card = card
         else:
@@ -131,7 +133,7 @@ class HalfField():
         if where is None:
             return
         
-        if location.is_overlay:
+        if location.is_overlay():
             if location.is_zone:
                 zone: Zone = where[index]
                 zone.card.overlays.remove(card.id)
@@ -140,7 +142,7 @@ class HalfField():
                 pcard.overlays.remove(card.id)
             return
         
-        if location.is_zone:
+        if location.is_zone():
             zone: Zone = where[index]
             zone.card = None
         else:
@@ -148,25 +150,25 @@ class HalfField():
 
 
     def where(self, location: Location) -> list:
-        if location & CardLocation.DECK:
+        if location.isa(CardLocation.DECK):
             return self.deck
 
-        elif location & CardLocation.HAND:
+        elif location.isa(CardLocation.HAND):
             return self.hand
 
-        elif location & CardLocation.MONSTER_ZONE:
+        elif location.isa(CardLocation.MONSTER_ZONE):
             return self.monster_zones
 
-        elif location & CardLocation.SPELL_ZONE:
+        elif location.isa(CardLocation.SPELL_ZONE):
             return self.spell_zones
 
-        elif location & CardLocation.GRAVE:
+        elif location.isa(CardLocation.GRAVE):
             return self.graveyard
 
-        elif location & CardLocation.BANISHED:
+        elif location.isa(CardLocation.BANISHED):
             return self.banished
 
-        elif location & CardLocation.EXTRADECK:
+        elif location.isa(CardLocation.EXTRADECK):
             return self.extradeck
 
         else:
@@ -178,31 +180,31 @@ class HalfField():
         self.extradeck = [Card() for _ in range(num_of_extra)]
         
 
-    def get_mainzone_monsters(self) -> list[Card]:
+    def get_mainzone_monsters(self) -> List[Card]:
         return [zone.card for zone in self.mainmonster_zones if zone.has_card]
 
 
-    def get_exzone_monsters(self) -> list[Card]:
+    def get_exzone_monsters(self) -> List[Card]:
         return [zone.card for zone in self.exmonster_zones if zone.has_card]
     
 
-    def get_monsters(self) -> list[Card]:
+    def get_monsters(self) -> List[Card]:
         return [zone.card for zone in self.monster_zones if zone.has_card]
 
     
-    def get_graveyard_monsters(self) -> list[Card]:
+    def get_graveyard_monsters(self) -> List[Card]:
         return [card for card in self.graveyard if card.type == CardType.MONSTER]
 
 
-    def get_graveyard_spells(self) -> list[Card]:
+    def get_graveyard_spells(self) -> List[Card]:
         return [card for card in self.graveyard if card.type == CardType.SPELL]
     
     
-    def get_graveyard_traps(self) -> list[Card]:
+    def get_graveyard_traps(self) -> List[Card]:
         return [card for card in self.graveyard if card.type == CardType.TRAP]
 
     
-    def get_spells(self) -> list[Card]:
+    def get_spells(self) -> List[Card]:
         return [zone.card for zone in self.spell_zones if zone.has_card]
         
 
