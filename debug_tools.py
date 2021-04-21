@@ -1,6 +1,6 @@
 import time
-from typing import Callable, TypeVar, Any
-from pyYGOenvironment.pyYGOnetwork.enums import CtosMessage, GameMessage, StocMessage
+from typing import Callable, TypeVar, Any, Dict
+from pyYGOclient.pyYGOnetwork.enums import CtosMessage, GameMessage, StocMessage
 
 T = TypeVar('T')
 def measure_time(func: Callable[[Any], T]) -> Callable[[Any], T]:
@@ -14,30 +14,31 @@ def measure_time(func: Callable[[Any], T]) -> Callable[[Any], T]:
 
 
 def print_message(msg_id: int, data: bytes, send: bool=False) -> None:
-    ctsmsgs: dict[int, CtosMessage] = {int(cts): cts for cts in CtosMessage}
-    stcmsgs: dict[int, StocMessage] = {int(stc): stc for stc in StocMessage}
-    gmmsgs: dict[int, GameMessage] = {int(gm): gm for gm in GameMessage}
-    notshow_ctos: set[CtosMessage] = {}
-    notshow_stoc: set[StocMessage] = {}
+    ctsmsgs: Dict[int, CtosMessage] = {int(cts): cts for cts in CtosMessage}
+    stcmsgs: Dict[int, StocMessage] = {int(stc): stc for stc in StocMessage}
+    gmmsgs: Dict[int, GameMessage] = {int(gm): gm for gm in GameMessage}
+    notshow_ctos: set[CtosMessage] = {CtosMessage.TIME_CONFIRM}
+    notshow_stoc: set[StocMessage] = {StocMessage.TIMELIMIT}
     notshow_gm: set[GameMessage] = {}
 
     size = len(data)
     if send:
         if msg_id in notshow_ctos: return
-        print(f'\nBot send: {size} bytes')
-        print(repr(ctsmsgs[msg_id]))
-        print(data.hex(' '))
+        if msg_id in ctsmsgs:
+            print(f'\nBot send: {size} bytes')
+            print(repr(ctsmsgs[msg_id]))
+            print(data.hex(' '))
 
     else:
         if msg_id in notshow_stoc: return
         if msg_id == StocMessage.GAME_MSG:
-            gid = int.from_bytes(data[0:1], byteorder='little')
+            gid = int.from_bytes(data[1:2], byteorder='little')
             if gid in notshow_gm: return
             print(f'\nBot received: {size} bytes')
             print(repr(stcmsgs[msg_id]))
             print(repr(gmmsgs[gid]))
-            print(data[1:].hex(' '))
-        else:
+            print(data.hex(' '))
+        elif msg_id in stcmsgs:
             print(f'\nBot received: {size} bytes')
             print(repr(stcmsgs[msg_id]))
             print(data.hex(' '))
