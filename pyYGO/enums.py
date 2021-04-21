@@ -22,6 +22,7 @@ class Phase(enum.IntEnum):
     
 
 class CardLocation(enum.IntEnum):
+    _             = 0x0
     DECK          = 0x1
     HAND          = 0x2
     MONSTER_ZONE  = 0x4
@@ -29,7 +30,7 @@ class CardLocation(enum.IntEnum):
     GRAVE         = 0x10
     BANISHED      = 0x20
     EXTRADECK     = 0x40
-    OVERRAY       = 0x80
+    OVERLAY       = 0x80
     ONFIELD = MONSTER_ZONE | SPELL_ZONE
     FSPELL_ZONE   = 0x100
     PENDULUM_ZONE = 0x200
@@ -38,6 +39,7 @@ class CardLocation(enum.IntEnum):
 
 
 class CardType(enum.IntEnum):
+    _           = 0x0
     MONSTER     = 0x1
     SPELL       = 0x2
     TRAP        = 0x4
@@ -66,10 +68,11 @@ class CardType(enum.IntEnum):
 
 
 
-class Attribute(enum.IntEnum):
-    EARTH  = 0x01
-    WATER  = 0x02
-    FIRE   = 0x04
+class CardAttribute(enum.IntEnum):
+    _      = 0x0
+    EARTH  = 0x1
+    WATER  = 0x2
+    FIRE   = 0x4
     WIND   = 0x08
     LIGHT  = 0x10
     DARK   = 0x20
@@ -77,7 +80,8 @@ class Attribute(enum.IntEnum):
 
 
 
-class Race(enum.IntEnum):
+class CardRace(enum.IntEnum):
+    _            = 0x0
     WARRIOR      = 0x1
     SPELLCASTER  = 0x2
     FAIRY        = 0x4
@@ -140,6 +144,7 @@ class Query(enum.IntEnum):
     COUNTERS     = 0x20000
     CONTROLLER   = 0x40000
     STATUS       = 0x80000
+    IS_PUBLIC    = 0x100000
     LSCALE       = 0x200000
     RSCALE       = 0x400000
     LINK         = 0x800000
@@ -148,3 +153,13 @@ class Query(enum.IntEnum):
     END          = 0x80000000
 
 
+class LinkMarker(enum.IntEnum):
+    BOTTOM_LEFT  = 0x1
+    BOTTOM       = 0x2
+    BOTTOM_RIGHT = 0x4
+    LEFT         = 0x10
+    RIGHT        = 0x40
+    TOP_LEFT     = 0x100
+    TOP          = 0x200
+    TOP_RIGHT    = 0x400
+    
