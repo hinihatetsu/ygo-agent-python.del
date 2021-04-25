@@ -35,9 +35,6 @@ class EnvGameExecutor(GameExecutor):
         self._game_ended: Event = Event()
         self._rematch: Event = Event()
         self._rematch.set()
-
-
-    def run(self) -> None:
         self._client.start()
 
     
@@ -49,8 +46,8 @@ class EnvGameExecutor(GameExecutor):
 
     def get_state(self) -> np.ndarray:
         self._state_has_updated.wait(timeout)
-        state = self._state
         self._state_has_updated.clear()
+        state = self._state.copy()
         return state
 
 
@@ -67,7 +64,13 @@ class EnvGameExecutor(GameExecutor):
         with self._reward_lock:
             reward = self._reward
         return reward
-    
+
+
+    def _block_until_execute_called(self) -> None:
+        self._state_has_updated.set()
+        self._should_execute_has_updated.wait(timeout)
+        self._should_execute_has_updated.clear()
+
     
     def _select(self, choices: List[Choice]) -> Choice:
         if not self._rematch.is_set():
@@ -75,9 +78,7 @@ class EnvGameExecutor(GameExecutor):
         
         for choice in choices:
             self._state = create_state(choice.action, choice.card_id, choice.option, self._duel, self._usedflag, self._deck_list)
-            self._state_has_updated.set()
-            self._should_execute_has_updated.clear()
-            self._should_execute_has_updated.wait(timeout)
+            self._block_until_execute_called()
             if self._should_execute:
                 return choice
         return choices[-1]
