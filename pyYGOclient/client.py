@@ -57,7 +57,7 @@ class GameClient(threading.Thread):
     def run(self) -> None:
         if self._executor is None:
             raise Exception('GameExecutor not set. Call .set_executor() before start.')
-        asyncio.run(self._main())
+        asyncio.run(_main(self))
 
     
     def surrender(self) -> None:
@@ -71,29 +71,6 @@ class GameClient(threading.Thread):
     def send(self, packet: Packet) -> None:
         self._connection.send(packet)
 
-    
-
-
-    async def _main(self) -> Coroutine[None, None, None]:
-        await self._connection.connect()
-        if self._connection.is_connected():
-            self._on_connected()
-        # concurrent tasks
-        response_task: asyncio.Task = asyncio.create_task(self._response())
-        listen_task: asyncio.Task = asyncio.create_task(self._connection.listen())
-
-        await response_task
-        await listen_task
-
-
-    async def _response(self) -> Coroutine[None, None, None]:
-        while self._connection.is_connected():
-            packet: Packet = await self._connection.receive_pending_packet()
-            self._on_received(packet)
-            await self._connection.drain()
-
-        print('Connection closed')
-    
 
     def chat(self, content: str) -> None:
         reply: Packet = Packet(CtosMessage.CHAT)
@@ -102,173 +79,196 @@ class GameClient(threading.Thread):
         self.send(reply)
 
 
-    def _on_connected(self) -> None:          
-        packet: Packet = Packet(CtosMessage.PLAYER_INFO)
-        packet.write(self._name, byte_size=40)
-        self._connection.send(packet)
 
-        junc = bytes([0xcc, 0xcc, 0x00, 0x00, 0x00, 0x00])
-        packet = Packet(CtosMessage.JOIN_GAME)
-        packet.write(self._version & 0xffff, byte_size=2)
-        packet.write(junc)
-        packet.write('', byte_size=40) # host_room_info here
-        packet.write(self._version)
-        self.send(packet)
+async def _main(client: GameClient) -> Coroutine[None, None, None]:
+    await client._connection.connect()
+    if client._connection.is_connected():
+        _on_connected(client)
+    # concurrent tasks
+    response_task: asyncio.Task = asyncio.create_task(_response(client))
+    listen_task: asyncio.Task = asyncio.create_task(client._connection.listen())
+
+    await response_task
+    await listen_task
 
 
-    def _on_received(self, packet: Packet) -> None:
-        msg_id: int = packet.msg_id
-        if  msg_id == StocMessage.GAME_MSG:
-            id: int = packet.read_int(1)
-            if id == GameMessage.RETRY:
-                on_retry(self, packet, self._executor)
-            elif id == GameMessage.HINT:
-                on_hint(self, packet, self._executor)
-            elif id == GameMessage.START:
-                on_start(self, packet, self._executor)
-            elif id == GameMessage.WIN:
-                on_win(self, packet, self._executor)
-            elif id == GameMessage.NEW_TURN:
-                on_new_turn(self, packet, self._executor)
-            elif id == GameMessage.NEW_PHASE:
-                on_new_phase(self, packet, self._executor)
-            elif id == GameMessage.SELECT_IDLE_CMD:
-                on_select_idle_cmd(self, packet, self._executor)
-            elif id == GameMessage.SELECT_BATTLE_CMD:
-                on_select_battle_cmd(self, packet, self._executor)
-            elif id == GameMessage.SELECT_EFFECT_YN:
-                on_select_effect_yn(self, packet, self._executor)
-            elif id == GameMessage.SELECT_YESNO:
-                on_select_yesno(self, packet, self._executor)
-            elif id == GameMessage.SELECT_OPTION: 
-                on_select_option(self, packet, self._executor)
-            elif id == GameMessage.SELECT_CARD:
-                on_select_card(self, packet, self._executor)
-            elif id == GameMessage.SELECT_CHAIN:
-                on_select_chain(self, packet, self._executor)
-            elif id == GameMessage.SELECT_PLACE:
-                on_select_place(self, packet, self._executor)
-            elif id == GameMessage.SELECT_POSITION:
-                on_select_position(self, packet, self._executor)
-            elif id == GameMessage.SELECT_TRIBUTE:
-                on_select_tribute(self, packet, self._executor)
-            elif id == GameMessage.SELECT_COUNTER:
-                on_select_counter(self, packet, self._executor)
-            elif id == GameMessage.SELECT_SUM:
-                on_select_sum(self, packet, self._executor)
-            elif id == GameMessage.SELECT_DISFIELD:
-                on_select_place(self, packet, self._executor)
-            elif id == GameMessage.SELECT_UNSELECT:
-                on_select_unselect(self, packet, self._executor)
-            elif id == GameMessage.ANNOUNCE_RACE:
-                on_announce_race(self, packet, self._executor)
-            elif id == GameMessage.ANNOUNCE_ATTRIB:
-                on_announce_attr(self, packet, self._executor)
-            elif id == GameMessage.ANNOUNCE_CARD:
-                on_announce_card(self, packet, self._executor)
-            elif id == GameMessage.ANNOUNCE_NUNBER:
-                on_announce_number(self, packet, self._executor)
-            elif id == GameMessage.UPDATE_DATA:
-                on_update_data(self, packet, self._executor)
-            elif id == GameMessage.UPDATE_CARD:
-                on_update_card(self, packet, self._executor)
-            elif id == GameMessage.SHUFFLE_DECK:
-                on_shuffle_deck(self, packet, self._executor)
-            elif id == GameMessage.SHUFFLE_HAND:
-                on_shuffle_hand(self, packet, self._executor)
-            elif id == GameMessage.SHUFFLE_EXTRA:
-                on_shuffle_extra(self, packet, self._executor)
-            elif id == GameMessage.SHUFFLE_SETCARD:
-                on_shuffle_setcard(self, packet, self._executor)
-            elif id == GameMessage.SORT_CARD:
-                on_sort_card(self, packet, self._executor)
-            elif id == GameMessage.SORT_CHAIN:
-                on_sort_chain(self, packet, self._executor)
-            elif id == GameMessage.MOVE:
-                on_move(self, packet, self._executor)
-            elif id == GameMessage.POSCHANGE:
-                on_poschange(self, packet, self._executor)
-            elif id == GameMessage.SET:
-                on_set(self, packet, self._executor)
-            elif id == GameMessage.SWAP:
-                on_swap(self, packet, self._executor)
-            elif id == GameMessage.SUMMONING:
-                on_summoning(self, packet, self._executor)
-            elif id == GameMessage.SUMMONED:
-                on_summoned(self, packet, self._executor)
-            elif id == GameMessage.SPSUMMONING:
-                on_spsummoning(self, packet, self._executor)
-            elif id == GameMessage.SPSUMMONED:
-                on_spsummoned(self, packet, self._executor)
-            elif id == GameMessage.FLIPSUMMONING:
-                on_summoning(self, packet, self._executor)
-            elif id == GameMessage.FLIPSUMMONED:
-                on_summoned(self, packet, self._executor)
-            elif id == GameMessage.CHAINING:
-                on_chaining(self, packet, self._executor)
-            elif id == GameMessage.CHAIN_END:
-                on_chain_end(self, packet, self._executor)
-            elif id == GameMessage.BECOME_TARGET:
-                on_become_target(self, packet, self._executor)
-            elif id == GameMessage.DRAW:
-                on_draw(self, packet, self._executor)
-            elif id == GameMessage.DAMAGE:
-                on_damage(self, packet, self._executor)
-            elif id == GameMessage.RECOVER:
-                on_recover(self, packet, self._executor)
-            elif id == GameMessage.EQUIP:
-                on_equip(self, packet, self._executor)
-            elif id == GameMessage.UNEQUIP:
-                on_unequip(self, packet, self._executor)
-            elif id == GameMessage.LP_UPDATE:
-                on_lp_update(self, packet, self._executor)
-            elif id == GameMessage.CARD_TARGET:
-                on_card_target(self, packet, self._executor)
-            elif id == GameMessage.CANCEL_TARGET:
-                on_cancel_target(self, packet, self._executor)
-            elif id == GameMessage.PAY_LPCOST:
-                on_damage(self, packet, self._executor)
-            elif id == GameMessage.ATTACK:
-                on_attack(self, packet, self._executor)
-            elif id == GameMessage.BATTLE:
-                on_battle(self, packet, self._executor)
-            elif id == GameMessage.ATTACK_DISABLED:
-                on_attack_disabled(self, packet, self._executor)
-            elif id == GameMessage.ROCK_PAPER_SCISSORS:
-                on_rock_paper_scissors(self, packet, self._executor)
-            elif id == GameMessage.TAG_SWAP:
-                on_tag_swap(self, packet, self._executor)
+async def _response(client: GameClient) -> Coroutine[None, None, None]:
+    while client._connection.is_connected():
+        packet: Packet = await client._connection.receive_pending_packet()
+        _on_received(client, packet)
+        await client._connection.drain()
 
-        elif msg_id == StocMessage.ERROR_MSG:
-            on_error_msg(self, packet, self._executor)
-        elif msg_id == StocMessage.SELECT_HAND:
-            on_select_hand(self, packet, self._executor)
-        elif msg_id == StocMessage.SELECT_TP:
-            on_select_tp(self, packet, self._executor)
-        elif msg_id == StocMessage.CHANGE_SIDE:
-            on_change_side(self, packet, self._executor)
-        elif msg_id == StocMessage.JOIN_GAME:
-            on_joined_game(self, packet, self._executor)
-        elif msg_id == StocMessage.TYPE_CHANGE:
-            on_type_changed(self, packet, self._executor)
-        elif msg_id == StocMessage.DUEL_START:
-            on_duel_start(self, packet, self._executor)
-        elif msg_id == StocMessage.DUEL_END:
-            on_duel_end(self, packet, self._executor)
-        elif msg_id == StocMessage.REPLAY:
-            on_replay(self, packet, self._executor)
-        elif msg_id == StocMessage.TIMELIMIT:
-            on_timelimit(self, packet, self._executor)
-        elif msg_id == StocMessage.CHAT:
-            on_chat(self, packet, self._executor)
-        elif msg_id == StocMessage.PLAYER_ENTER:
-            on_player_enter(self, packet, self._executor)
-        elif msg_id == StocMessage.PLAYER_CHANGE:
-            on_player_change(self, packet, self._executor)
-        elif msg_id == StocMessage.WATCH_CHANGE:
-            on_watch_change(self, packet, self._executor)
-        elif msg_id == StocMessage.REMATCH:
-            on_rematch(self, packet, self._executor)
+    print('Connection closed')
+    
+
+
+def _on_connected(client: GameClient) -> None:          
+    packet: Packet = Packet(CtosMessage.PLAYER_INFO)
+    packet.write(client._name, byte_size=40)
+    client._connection.send(packet)
+
+    junc = bytes([0xcc, 0xcc, 0x00, 0x00, 0x00, 0x00])
+    packet = Packet(CtosMessage.JOIN_GAME)
+    packet.write(client._version & 0xffff, byte_size=2)
+    packet.write(junc)
+    packet.write('', byte_size=40) # host_room_info here
+    packet.write(client._version)
+    client.send(packet)
+
+
+def _on_received(client: GameClient, packet: Packet) -> None:
+    msg_id: int = packet.msg_id
+    if  msg_id == StocMessage.GAME_MSG:
+        id: int = packet.read_int(1)
+        if id == GameMessage.RETRY:
+            on_retry(client, packet, client._executor)
+        elif id == GameMessage.HINT:
+            on_hint(client, packet, client._executor)
+        elif id == GameMessage.START:
+            on_start(client, packet, client._executor)
+        elif id == GameMessage.WIN:
+            on_win(client, packet, client._executor)
+        elif id == GameMessage.NEW_TURN:
+            on_new_turn(client, packet, client._executor)
+        elif id == GameMessage.NEW_PHASE:
+            on_new_phase(client, packet, client._executor)
+        elif id == GameMessage.SELECT_IDLE_CMD:
+            on_select_idle_cmd(client, packet, client._executor)
+        elif id == GameMessage.SELECT_BATTLE_CMD:
+            on_select_battle_cmd(client, packet, client._executor)
+        elif id == GameMessage.SELECT_EFFECT_YN:
+            on_select_effect_yn(client, packet, client._executor)
+        elif id == GameMessage.SELECT_YESNO:
+            on_select_yesno(client, packet, client._executor)
+        elif id == GameMessage.SELECT_OPTION: 
+            on_select_option(client, packet, client._executor)
+        elif id == GameMessage.SELECT_CARD:
+            on_select_card(client, packet, client._executor)
+        elif id == GameMessage.SELECT_CHAIN:
+            on_select_chain(client, packet, client._executor)
+        elif id == GameMessage.SELECT_PLACE:
+            on_select_place(client, packet, client._executor)
+        elif id == GameMessage.SELECT_POSITION:
+            on_select_position(client, packet, client._executor)
+        elif id == GameMessage.SELECT_TRIBUTE:
+            on_select_tribute(client, packet, client._executor)
+        elif id == GameMessage.SELECT_COUNTER:
+            on_select_counter(client, packet, client._executor)
+        elif id == GameMessage.SELECT_SUM:
+            on_select_sum(client, packet, client._executor)
+        elif id == GameMessage.SELECT_DISFIELD:
+            on_select_place(client, packet, client._executor)
+        elif id == GameMessage.SELECT_UNSELECT:
+            on_select_unselect(client, packet, client._executor)
+        elif id == GameMessage.ANNOUNCE_RACE:
+            on_announce_race(client, packet, client._executor)
+        elif id == GameMessage.ANNOUNCE_ATTRIB:
+            on_announce_attr(client, packet, client._executor)
+        elif id == GameMessage.ANNOUNCE_CARD:
+            on_announce_card(client, packet, client._executor)
+        elif id == GameMessage.ANNOUNCE_NUNBER:
+            on_announce_number(client, packet, client._executor)
+        elif id == GameMessage.UPDATE_DATA:
+            on_update_data(client, packet, client._executor)
+        elif id == GameMessage.UPDATE_CARD:
+            on_update_card(client, packet, client._executor)
+        elif id == GameMessage.SHUFFLE_DECK:
+            on_shuffle_deck(client, packet, client._executor)
+        elif id == GameMessage.SHUFFLE_HAND:
+            on_shuffle_hand(client, packet, client._executor)
+        elif id == GameMessage.SHUFFLE_EXTRA:
+            on_shuffle_extra(client, packet, client._executor)
+        elif id == GameMessage.SHUFFLE_SETCARD:
+            on_shuffle_setcard(client, packet, client._executor)
+        elif id == GameMessage.SORT_CARD:
+            on_sort_card(client, packet, client._executor)
+        elif id == GameMessage.SORT_CHAIN:
+            on_sort_chain(client, packet, client._executor)
+        elif id == GameMessage.MOVE:
+            on_move(client, packet, client._executor)
+        elif id == GameMessage.POSCHANGE:
+            on_poschange(client, packet, client._executor)
+        elif id == GameMessage.SET:
+            on_set(client, packet, client._executor)
+        elif id == GameMessage.SWAP:
+            on_swap(client, packet, client._executor)
+        elif id == GameMessage.SUMMONING:
+            on_summoning(client, packet, client._executor)
+        elif id == GameMessage.SUMMONED:
+            on_summoned(client, packet, client._executor)
+        elif id == GameMessage.SPSUMMONING:
+            on_spsummoning(client, packet, client._executor)
+        elif id == GameMessage.SPSUMMONED:
+            on_spsummoned(client, packet, client._executor)
+        elif id == GameMessage.FLIPSUMMONING:
+            on_summoning(client, packet, client._executor)
+        elif id == GameMessage.FLIPSUMMONED:
+            on_summoned(client, packet, client._executor)
+        elif id == GameMessage.CHAINING:
+            on_chaining(client, packet, client._executor)
+        elif id == GameMessage.CHAIN_END:
+            on_chain_end(client, packet, client._executor)
+        elif id == GameMessage.BECOME_TARGET:
+            on_become_target(client, packet, client._executor)
+        elif id == GameMessage.DRAW:
+            on_draw(client, packet, client._executor)
+        elif id == GameMessage.DAMAGE:
+            on_damage(client, packet, client._executor)
+        elif id == GameMessage.RECOVER:
+            on_recover(client, packet, client._executor)
+        elif id == GameMessage.EQUIP:
+            on_equip(client, packet, client._executor)
+        elif id == GameMessage.UNEQUIP:
+            on_unequip(client, packet, client._executor)
+        elif id == GameMessage.LP_UPDATE:
+            on_lp_update(client, packet, client._executor)
+        elif id == GameMessage.CARD_TARGET:
+            on_card_target(client, packet, client._executor)
+        elif id == GameMessage.CANCEL_TARGET:
+            on_cancel_target(client, packet, client._executor)
+        elif id == GameMessage.PAY_LPCOST:
+            on_damage(client, packet, client._executor)
+        elif id == GameMessage.ATTACK:
+            on_attack(client, packet, client._executor)
+        elif id == GameMessage.BATTLE:
+            on_battle(client, packet, client._executor)
+        elif id == GameMessage.ATTACK_DISABLED:
+            on_attack_disabled(client, packet, client._executor)
+        elif id == GameMessage.ROCK_PAPER_SCISSORS:
+            on_rock_paper_scissors(client, packet, client._executor)
+        elif id == GameMessage.TAG_SWAP:
+            on_tag_swap(client, packet, client._executor)
+
+    elif msg_id == StocMessage.ERROR_MSG:
+        on_error_msg(client, packet, client._executor)
+    elif msg_id == StocMessage.SELECT_HAND:
+        on_select_hand(client, packet, client._executor)
+    elif msg_id == StocMessage.SELECT_TP:
+        on_select_tp(client, packet, client._executor)
+    elif msg_id == StocMessage.CHANGE_SIDE:
+        on_change_side(client, packet, client._executor)
+    elif msg_id == StocMessage.JOIN_GAME:
+        on_joined_game(client, packet, client._executor)
+    elif msg_id == StocMessage.TYPE_CHANGE:
+        on_type_changed(client, packet, client._executor)
+    elif msg_id == StocMessage.DUEL_START:
+        on_duel_start(client, packet, client._executor)
+    elif msg_id == StocMessage.DUEL_END:
+        on_duel_end(client, packet, client._executor)
+    elif msg_id == StocMessage.REPLAY:
+        on_replay(client, packet, client._executor)
+    elif msg_id == StocMessage.TIMELIMIT:
+        on_timelimit(client, packet, client._executor)
+    elif msg_id == StocMessage.CHAT:
+        on_chat(client, packet, client._executor)
+    elif msg_id == StocMessage.PLAYER_ENTER:
+        on_player_enter(client, packet, client._executor)
+    elif msg_id == StocMessage.PLAYER_CHANGE:
+        on_player_change(client, packet, client._executor)
+    elif msg_id == StocMessage.WATCH_CHANGE:
+        on_watch_change(client, packet, client._executor)
+    elif msg_id == StocMessage.REMATCH:
+        on_rematch(client, packet, client._executor)
 
 
 

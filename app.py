@@ -1,6 +1,6 @@
 from util import LaunchInfo, load_args
 from pyYGOenv import YGOEnv
-from pyYGOagent.agent import DuelAgent
+from pyYGOagent import DuelAgent
 
 
 def main():

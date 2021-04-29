@@ -33,7 +33,6 @@ class ClientInterface:
     def __init__(self, deck_name: str, host: str, port: int, version: int, name: str) -> None:
         client: GameClient = GameClient(deck_name, host, port, version, name)
         self._executor: EnvGameExecutor = EnvGameExecutor(client)
-        self._executor.run()
 
 
     @property
