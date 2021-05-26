@@ -1,4 +1,4 @@
-from util import LaunchInfo, load_args
+from .util import LaunchInfo, load_args
 from .environment import YGOEnvironment
 from .agent import DuelAgent
 

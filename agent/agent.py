@@ -159,7 +159,7 @@ def _create_rb_observer(reverb_replay_buffer: ReverbReplayBuffer, table_name: st
     )
 
 
-def _create_collect_actor(collect_env: YGOEnv, collect_policy: PyTFEagerPolicy, train_step, rb_observer: ReverbAddTrajectoryObserver) -> actor.Actor:
+def _create_collect_actor(collect_env: YGOEnvironment, collect_policy: PyTFEagerPolicy, train_step, rb_observer: ReverbAddTrajectoryObserver) -> actor.Actor:
 
     initial_collect_actor = actor.Actor(
         collect_env,
@@ -182,7 +182,7 @@ def _create_collect_actor(collect_env: YGOEnv, collect_policy: PyTFEagerPolicy, 
     )
 
 
-def _create_eval_actor(eval_env: YGOEnv, eval_policy: PyTFEagerPolicy, train_step) -> actor.Actor:
+def _create_eval_actor(eval_env: YGOEnvironment, eval_policy: PyTFEagerPolicy, train_step) -> actor.Actor:
     return actor.Actor(
         eval_env,
         eval_policy,
