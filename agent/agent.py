@@ -18,7 +18,7 @@ from tf_agents.replay_buffers.reverb_utils import ReverbAddTrajectoryObserver
 from tf_agents.train import actor, learner, triggers
 from tf_agents.train.utils import train_utils, spec_utils
 
-from pyYGOenv import YGOEnv
+from ..environment import YGOEnvironment
 
 tempdir: str = tempfile.gettempdir()
 
@@ -37,9 +37,9 @@ _policy_save_interval = 5000 # @param {type:"integer"}
 
 class DuelAgent:
     """ Duel agent with SAC algorithm """
-    def __init__(self, collect_env: YGOEnv, eval_env: YGOEnv) -> None:
-        self._collect_env: YGOEnv = collect_env
-        self._eval_env: YGOEnv = eval_env
+    def __init__(self, collect_env: YGOEnvironment, eval_env: YGOEnvironment) -> None:
+        self._collect_env: YGOEnvironment = collect_env
+        self._eval_env: YGOEnvironment = eval_env
         
         # hyper parameters
         self._actor_fc_layer_params: List[int] = [256, 256]

@@ -6,11 +6,11 @@ from tf_agents.specs import array_spec
 from tf_agents.trajectories import time_step as ts
 
 
-from pyYGOenv.executor import EnvGameExecutor
-from pyYGOclient.client import GameClient
+from .executor import EnvGameExecutor
+from pyygoclient import GameClient
 
 
-class YGOEnv(py_environment.PyEnvironment):
+class YGOEnvironment(py_environment.PyEnvironment):
     def __init__(self, deck_name: str, host: str, port: int, version: int, name: str) -> None:
         client: GameClient = GameClient(deck_name, host, port, version, name)
         self._executor: EnvGameExecutor = EnvGameExecutor(client)

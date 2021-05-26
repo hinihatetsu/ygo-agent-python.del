@@ -4,10 +4,10 @@ import numpy as np
 
 from .action import Action
 from .flags import UsedFlag
-from pyYGO import Duel
-from pyYGO.field import HalfField
-from pyYGO.cardstatus import Position
-from pyYGO.enums import Player
+from pyygocore import Duel
+from pyygocore.field import HalfField
+from pyygocore.card import Position
+from pyygocore.enums import Player
 
 
 def create_state(action: Action, card_id: int, option: int, duel: Duel, usedflag: UsedFlag, deck_list: List[int]) -> np.ndarray:

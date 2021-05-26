@@ -7,10 +7,10 @@ import numpy as np
 from .action import Choice, Action, Action_to_int
 from .flags import UsedFlag
 from .preprocess import create_state
-from pyYGO import Deck, Duel, Card
-from pyYGO.phase import MainPhase, BattlePhase
-from pyYGO.enums import Player
-from pyYGOclient import GameExecutor, GameClient
+from pyygocore import Deck, Duel, Card
+from pyygocore.phase import MainPhase, BattlePhase
+from pyygocore.enums import Player
+from pyygoclient import GameExecutor, GameClient
 
 timeout = 10
 
